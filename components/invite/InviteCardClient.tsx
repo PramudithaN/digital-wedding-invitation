@@ -659,79 +659,80 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
 
 
         {/* --- SECTION 1 - HERO SCREEN (FULLSCREEN) --- */}
-        <section className="min-h-[80vh] flex flex-col justify-between items-center text-center p-6 md:p-10 relative">
-        <div className="pt-12">
-          {/* Accent flourish line */}
-          <div className="flex items-center justify-center gap-2 mb-4 text-[#C8A882]">
-            <div className="h-[1px] w-8 bg-[#C8A882]" />
-            <span className="text-[10px] uppercase tracking-widest font-semibold">The Wedding Invitation</span>
-            <div className="h-[1px] w-8 bg-[#C8A882]" />
-          </div>
-        </div>
-
-        {/* Couples Names & Monogram */}
-        <div className="my-auto space-y-3">
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif tracking-tight text-gray-900 font-light">
-            {weddingDetails.bride_name}
-          </h1>
-          <div className="font-script text-4xl sm:text-5xl text-[#C8A882] py-2">
-            &
-          </div>
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif tracking-tight text-gray-900 font-light">
-            {weddingDetails.groom_name}
-          </h1>
-
-          <div className="pt-10 max-w-sm mx-auto space-y-3">
-            <p className="text-sm font-serif italic text-[#6B6B6B]">
-              Dear {guest.name},
-            </p>
-            <p className="text-xs text-[#6B6B6B] leading-relaxed max-w-xs mx-auto">
-              You are cordially invited to join us in celebrating our wedding ceremony and reception.
-            </p>
-          </div>
-        </div>
-
-        {/* Schedule & Scroll cue */}
-        <div className="pb-8 space-y-8 flex flex-col items-center">
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-widest text-[#6B6B6B] font-semibold">{weddingDetails.date}</p>
-            <p className="text-xs text-[#6B6B6B]">{weddingDetails.time} • {weddingDetails.venue}</p>
+        <section className="min-h-[75vh] flex flex-col justify-between items-center text-center p-6 md:p-10 relative">
+          <div className="pt-6 sm:pt-8">
+            {/* Accent flourish line */}
+            <div className="flex items-center justify-center gap-2 mb-2 text-[#C8A882]">
+              <div className="h-[1px] w-8 bg-[#C8A882]" />
+              <span className="text-[11px] sm:text-xs uppercase tracking-widest font-semibold">The Wedding Invitation</span>
+              <div className="h-[1px] w-8 bg-[#C8A882]" />
+            </div>
           </div>
 
-          <button 
-            onClick={scrollToNext}
-            className="flex flex-col items-center gap-1 text-[10px] uppercase tracking-widest text-[#C8A882] font-semibold hover:text-[#B69670] cursor-pointer transition-colors animate-pulse-soft"
-          >
-            <span>Explore Invitation</span>
-            <ChevronDown className="w-4 h-4 mt-1" />
-          </button>
-        </div>
-      </section>
+          {/* Couples Names & Monogram */}
+          <div className="my-auto space-y-4 pt-4 pb-6">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif tracking-tight text-gray-900 font-light leading-none">
+              {weddingDetails.bride_name}
+            </h1>
+            <div className="font-script text-5xl sm:text-6xl text-[#C8A882] py-1">
+              &
+            </div>
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif tracking-tight text-gray-900 font-light leading-none">
+              {weddingDetails.groom_name}
+            </h1>
+
+            <div className="pt-6 sm:pt-8 max-w-sm mx-auto space-y-3">
+              <p className="text-base sm:text-lg font-serif italic text-[#6B6B6B]">
+                Dear {guest.name},
+              </p>
+              <p className="text-sm sm:text-base text-[#6B6B6B] leading-relaxed max-w-xs mx-auto">
+                You are cordially invited to join us in celebrating our wedding ceremony and reception.
+              </p>
+            </div>
+          </div>
+
+          {/* Schedule & Scroll cue */}
+          <div className="pb-4 space-y-6 flex flex-col items-center">
+            <div className="space-y-1">
+              <p className="text-sm sm:text-base uppercase tracking-widest text-[#6B6B6B] font-semibold">{weddingDetails.date}</p>
+              <p className="text-xs sm:text-sm text-[#6B6B6B]">{weddingDetails.time} • {weddingDetails.venue}</p>
+            </div>
+
+            <button 
+              onClick={scrollToNext}
+              className="flex flex-col items-center gap-1 text-[11px] sm:text-xs uppercase tracking-widest text-[#C8A882] font-semibold hover:text-[#B69670] cursor-pointer transition-colors animate-pulse-soft"
+            >
+              <span>Explore Invitation</span>
+              <ChevronDown className="w-4 h-4 mt-1" />
+            </button>
+          </div>
+        </section>
+
 
       {/* --- SECTION 2 - COUNTDOWN TIMER --- */}
       <section ref={timelineRef} className="max-w-3xl mx-auto px-6 py-12 w-full text-center">
         <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-8 shadow-sm max-w-lg mx-auto space-y-6">
-          <span className="text-[10px] uppercase tracking-widest text-[#6B6B6B] font-semibold">Counting down the moments</span>
+          <span className="text-xs sm:text-sm uppercase tracking-widest text-[#6B6B6B] font-semibold">Counting down the moments</span>
           
           {isExpired ? (
-            <p className="font-serif italic text-[#C8A882] text-lg">Today is the day! 🎉</p>
+            <p className="font-serif italic text-[#C8A882] text-xl">Today is the day! 🎉</p>
           ) : (
             <div className="grid grid-cols-4 gap-2 text-center divide-x divide-[#E8E4DE]">
               <div className="px-1">
-                <span className="block text-3xl font-light text-gray-900 font-serif">{timeLeft.days}</span>
-                <span className="block text-[8px] uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Days</span>
+                <span className="block text-4xl sm:text-5xl font-light text-gray-900 font-serif">{timeLeft.days}</span>
+                <span className="block text-[10px] sm:text-xs uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Days</span>
               </div>
               <div className="px-1">
-                <span className="block text-3xl font-light text-gray-900 font-serif">{timeLeft.hours}</span>
-                <span className="block text-[8px] uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Hrs</span>
+                <span className="block text-4xl sm:text-5xl font-light text-gray-900 font-serif">{timeLeft.hours}</span>
+                <span className="block text-[10px] sm:text-xs uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Hrs</span>
               </div>
               <div className="px-1">
-                <span className="block text-3xl font-light text-gray-900 font-serif">{timeLeft.minutes}</span>
-                <span className="block text-[8px] uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Min</span>
+                <span className="block text-4xl sm:text-5xl font-light text-gray-900 font-serif">{timeLeft.minutes}</span>
+                <span className="block text-[10px] sm:text-xs uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Min</span>
               </div>
               <div className="px-1">
-                <span className="block text-3xl font-light text-gray-900 font-serif">{timeLeft.seconds}</span>
-                <span className="block text-[8px] uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Sec</span>
+                <span className="block text-4xl sm:text-5xl font-light text-gray-900 font-serif">{timeLeft.seconds}</span>
+                <span className="block text-[10px] sm:text-xs uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Sec</span>
               </div>
             </div>
           )}

@@ -10,7 +10,8 @@ import {
   Heart,
   MapPin,
   Calendar,
-  Gift
+  Gift,
+  X
 } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -306,14 +307,26 @@ export default function SettingsPage() {
               <label htmlFor="set-maps" className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
                 Google Maps Navigation URL
               </label>
-              <input
-                id="set-maps"
-                type="url"
-                value={googleMapsUrl}
-                onChange={(e) => setGoogleMapsUrl(e.target.value)}
-                placeholder="https://maps.google.com/?q=..."
-                className="w-full bg-white border border-gray-250 rounded-md py-2 px-3 text-xs font-mono text-blue-600 focus:outline-none focus:border-blue-500"
-              />
+              <div className="relative">
+                <input
+                  id="set-maps"
+                  type="text"
+                  value={googleMapsUrl}
+                  onChange={(e) => setGoogleMapsUrl(e.target.value)}
+                  placeholder="https://maps.google.com/?q=..."
+                  className="w-full bg-white border border-gray-250 rounded-md py-2 pl-3 pr-8 text-xs font-mono text-blue-600 focus:outline-none focus:border-blue-500"
+                />
+                {googleMapsUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setGoogleMapsUrl('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                    title="Clear field"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -325,14 +338,26 @@ export default function SettingsPage() {
               <label htmlFor="set-registry" className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
                 Registry Link URL
               </label>
-              <input
-                id="set-registry"
-                type="url"
-                value={registryUrl}
-                onChange={(e) => setRegistryUrl(e.target.value)}
-                placeholder="https://weddingregistry.com/..."
-                className="w-full bg-white border border-gray-250 rounded-md py-2 px-3 text-xs font-mono text-blue-600 focus:outline-none focus:border-blue-500"
-              />
+              <div className="relative">
+                <input
+                  id="set-registry"
+                  type="text"
+                  value={registryUrl}
+                  onChange={(e) => setRegistryUrl(e.target.value)}
+                  placeholder="https://weddingregistry.com/..."
+                  className="w-full bg-white border border-gray-250 rounded-md py-2 pl-3 pr-8 text-xs font-mono text-blue-600 focus:outline-none focus:border-blue-500"
+                />
+                {registryUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setRegistryUrl('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                    title="Clear field"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

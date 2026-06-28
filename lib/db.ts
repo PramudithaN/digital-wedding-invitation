@@ -597,6 +597,34 @@ export async function getWeddingDetails(): Promise<{
   google_maps_url: string;
   registry_url: string;
 }> {
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase!
+        .from('wedding_details')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
+      
+      if (error) throw error;
+      if (data) {
+        return {
+          bride_name: data.bride_name,
+          groom_name: data.groom_name,
+          date: data.date,
+          time: data.time,
+          iso_date: data.iso_date,
+          venue: data.venue,
+          city: data.city,
+          address: data.address,
+          google_maps_url: data.google_maps_url || '',
+          registry_url: data.registry_url || '',
+        };
+      }
+    } catch (e) {
+      console.error('Error fetching settings from Supabase:', e);
+    }
+  }
+
   if (!fs.existsSync(CONFIG_PATH)) {
     const defaultDetails = {
       bride_name: 'Oshidhie',
@@ -610,7 +638,11 @@ export async function getWeddingDetails(): Promise<{
       google_maps_url: 'https://maps.google.com',
       registry_url: 'https://weddingregistry.com',
     };
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify(defaultDetails, null, 2), 'utf-8');
+    try {
+      fs.writeFileSync(CONFIG_PATH, JSON.stringify(defaultDetails, null, 2), 'utf-8');
+    } catch (e) {
+      // Ignore write errors in read-only setups
+    }
     return defaultDetails;
   }
   try {
@@ -634,10 +666,37 @@ export async function getWeddingDetails(): Promise<{
 }
 
 export async function saveWeddingDetails(details: any): Promise<void> {
+  if (isSupabaseConfigured) {
+    try {
+      const { error } = await supabase!
+        .from('wedding_details')
+        .upsert({
+          id: 1,
+          bride_name: details.bride_name,
+          groom_name: details.groom_name,
+          date: details.date,
+          time: details.time,
+          iso_date: details.iso_date,
+          venue: details.venue,
+          city: details.city,
+          address: details.address,
+          google_maps_url: details.google_maps_url || '',
+          registry_url: details.registry_url || '',
+        });
+      if (error) throw error;
+    } catch (e) {
+      console.error('Error saving settings to Supabase:', e);
+      throw e;
+    }
+  }
+
   try {
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(details, null, 2), 'utf-8');
   } catch (e) {
-    console.error('Error saving wedding config:', e);
+    console.error('Error saving wedding config to filesystem:', e);
+    if (!isSupabaseConfigured) {
+      throw e;
+    }
   }
 }
 

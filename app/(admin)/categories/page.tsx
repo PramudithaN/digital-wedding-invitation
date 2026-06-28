@@ -5,13 +5,13 @@ import { Plus, Trash2, Loader2, Tag, AlertCircle, CheckCircle2 } from 'lucide-re
 import { Category } from '@/lib/types';
 
 const COLOR_PRESETS = [
-  { name: 'Dusty Rose', value: '#E0A899' },
-  { name: 'Sage Green', value: '#9CAF88' },
-  { name: 'Champagne Gold', value: '#DFBA73' },
-  { name: 'Navy Blue', value: '#3B5998' },
-  { name: 'Terracotta', value: '#C67A5C' },
-  { name: 'Plum Purple', value: '#6E4555' },
-  { name: 'Classic Slate', value: '#475569' },
+  { name: 'Peach Blossom', value: '#E9967A' },
+  { name: 'Rose Quartz', value: '#DE7A90' },
+  { name: 'Warm Champagne', value: '#DFB15B' },
+  { name: 'Soft Pistachio', value: '#85C1A1' },
+  { name: 'Lavender Mist', value: '#9B72F7' },
+  { name: 'Sky Azure', value: '#5C85D6' },
+  { name: 'Lemon Custard', value: '#DFAB33' },
 ];
 
 export default function CategoriesPage() {

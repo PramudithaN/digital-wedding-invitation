@@ -47,7 +47,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
   const [message, setMessage] = useState(guest.rsvp?.message || '');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(!!(guest.rsvp && guest.rsvp.status && guest.rsvp.status !== 'pending'));
   const [error, setError] = useState('');
 
   // Countdown timer state
@@ -332,12 +332,23 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                   We're sorry you can't make it, but we appreciate your response.
                 </div>
               )}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsSuccess(false)}
+                  className="text-xs font-semibold text-blue-500 hover:text-blue-600 border border-blue-200 bg-blue-50/50 hover:bg-blue-50 rounded px-4 py-2 cursor-pointer transition-colors"
+                >
+                  Edit Response
+                </button>
+              </div>
             </div>
           ) : (
             /* RSVP Form Content */
             <div className="space-y-6">
               <div className="text-center space-y-1.5">
-                <h2 className="text-2xl font-serif text-gray-950 font-light">Will you join us?</h2>
+                <h2 className="text-2xl font-serif text-gray-950 font-light">
+                  {guest.rsvp ? 'Edit your response' : 'Will you join us?'}
+                </h2>
                 <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Please reply by September 01, 2026</p>
               </div>
 
@@ -493,7 +504,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                       Sending...
                     </>
                   ) : (
-                    'Confirm RSVP'
+                    guest.rsvp ? 'Update RSVP' : 'Confirm RSVP'
                   )}
                 </button>
               </form>

@@ -14,7 +14,8 @@ import {
   Loader2, 
   AlertCircle, 
   X,
-  CheckCircle2
+  CheckCircle2,
+  Copy
 } from 'lucide-react';
 import { GuestWithDetails, Category } from '@/lib/types';
 
@@ -28,6 +29,12 @@ export default function GuestsPage() {
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleCopyLink = (guest: GuestWithDetails) => {
+    const inviteUrl = `${window.location.origin}/invite/${guest.invite_token}`;
+    navigator.clipboard.writeText(inviteUrl);
+    showToast(`${guest.name}'s invite link copied!`, 'success');
   };
 
   // Search & Filter state
@@ -361,6 +368,13 @@ export default function GuestsPage() {
                             )}
                           </button>
                         )}
+                        <button
+                          onClick={() => handleCopyLink(guest)}
+                          className="p-1.5 text-gray-550 hover:bg-gray-100 hover:text-gray-905 rounded-md transition-all cursor-pointer"
+                          title="Copy Invitation Link"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
                         <Link
                           href={`/guests/${guest.id}`}
                           className="p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-all"
@@ -455,6 +469,13 @@ export default function GuestsPage() {
                       )}
                     </button>
                   )}
+                  <button
+                    onClick={() => handleCopyLink(guest)}
+                    className="text-gray-600 hover:text-gray-900 flex items-center gap-1 cursor-pointer"
+                  >
+                    <Copy className="w-3.5 h-3.5 text-gray-400" />
+                    Copy
+                  </button>
                   <Link
                     href={`/guests/${guest.id}`}
                     className="text-gray-600 hover:text-gray-900 flex items-center gap-1"

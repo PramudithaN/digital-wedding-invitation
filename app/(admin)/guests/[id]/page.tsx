@@ -14,7 +14,8 @@ import {
   MessageSquare,
   UtensilsCrossed,
   UserPlus,
-  CheckCircle2
+  CheckCircle2,
+  Copy
 } from 'lucide-react';
 import { GuestWithDetails, Category } from '@/lib/types';
 
@@ -351,14 +352,28 @@ export default function EditGuestPage() {
                 <span className="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-1">
                   Access Invite URL
                 </span>
-                <input
-                  type="text"
-                  readOnly
-                  value={`${window.location.origin}/invite/${guest?.invite_token}`}
-                  onClick={(e) => (e.target as HTMLInputElement).select()}
-                  className="w-full bg-gray-50 border border-gray-250 rounded py-2 px-3 text-[10px] text-blue-605 font-mono focus:outline-none cursor-pointer"
-                  title="Click to copy invite link"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={`${window.location.origin}/invite/${guest?.invite_token}`}
+                    onClick={(e) => (e.target as HTMLInputElement).select()}
+                    className="flex-1 bg-gray-50 border border-gray-250 rounded py-2 px-3 text-[10px] text-blue-605 font-mono focus:outline-none cursor-pointer"
+                    title="Click to copy invite link"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const inviteUrl = `${window.location.origin}/invite/${guest?.invite_token}`;
+                      navigator.clipboard.writeText(inviteUrl);
+                      showToast("Invitation URL copied to clipboard!", "success");
+                    }}
+                    className="bg-blue-50 border border-blue-200 text-blue-600 rounded px-3 py-2 text-xs font-semibold hover:bg-blue-100 transition-colors flex items-center justify-center cursor-pointer"
+                    title="Copy Link"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               {/* Status Timestamps */}

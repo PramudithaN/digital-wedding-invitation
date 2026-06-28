@@ -1,10 +1,10 @@
 export const WEDDING_DETAILS = {
-  bride_name: 'Aria',
-  groom_name: 'Ethan',
+  bride_name: 'Oshidhie',
+  groom_name: 'Kaveen',
   date: 'Saturday, September 19, 2026',
   time: '4:00 PM',
   iso_date: '2026-09-19T16:00:00', // For countdown timer
-  venue: 'The Grand Pavilion',
+  venue: 'Grand Monarch',
   city: 'Colombo, Sri Lanka',
   address: '123 Galle Road, Colombo 03',
   google_maps_url: 'https://maps.google.com',

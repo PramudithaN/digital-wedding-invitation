@@ -50,6 +50,33 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
   const [isSuccess, setIsSuccess] = useState(!!(guest.rsvp && guest.rsvp.status && guest.rsvp.status !== 'pending'));
   const [error, setError] = useState('');
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [envelopeState, setEnvelopeState] = useState<'closed' | 'opening' | 'exiting' | 'open'>('closed');
+
+  // Disable scroll when envelope is closed/opening
+  useEffect(() => {
+    if (envelopeState !== 'open') {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [envelopeState]);
+
+  const handleOpenEnvelope = () => {
+    if (envelopeState !== 'closed') return;
+    setEnvelopeState('opening');
+    
+    setTimeout(() => {
+      setEnvelopeState('exiting');
+    }, 1600);
+
+    setTimeout(() => {
+      setEnvelopeState('open');
+    }, 2400);
+  };
+
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -218,6 +245,255 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] text-[#1A1A1A] flex flex-col font-sans relative overflow-x-hidden selection:bg-amber-100 selection:text-gray-900">
+      
+      {/* 3D Envelope Overlay */}
+      {envelopeState !== 'open' && (
+        <div 
+          className={`fixed inset-0 z-[100] flex items-center justify-center bg-[#060810]/96 backdrop-blur-md transition-all duration-1000 ${
+            envelopeState === 'exiting' ? 'opacity-0 scale-105 pointer-events-none' : 'opacity-100'
+          }`}
+        >
+          {/* Envelope Wrapper */}
+          <div className="relative flex flex-col items-center justify-center p-4 w-full max-w-lg">
+            {/* Invitation Header Label */}
+            <div 
+              className={`mb-6 text-center transition-all duration-1000 ${
+                envelopeState !== 'closed' ? 'opacity-0 -translate-y-4' : 'opacity-100'
+              }`}
+            >
+              <span className="text-[#C8A882] text-[10px] uppercase tracking-[0.25em] font-semibold block mb-2">You are Invited</span>
+              <h2 className="font-serif text-white text-2xl font-light tracking-wide">
+                {weddingDetails.bride_name} & {weddingDetails.groom_name}
+              </h2>
+              <div className="h-[1px] w-12 bg-[#C8A882]/40 mx-auto mt-3" />
+            </div>
+
+            {/* Envelope Container (uses perspective) */}
+            <div 
+              className={`relative w-[310px] h-[220px] sm:w-[420px] sm:h-[290px] md:w-[480px] md:h-[330px] perspective-1200 transition-transform duration-1000 ${
+                envelopeState === 'opening' ? 'scale-105' : ''
+              }`}
+            >
+              {/* Soft Drop Shadow under the envelope */}
+              <div className="absolute inset-4 bg-black/60 rounded-lg blur-2xl transform translate-y-6" />
+
+              {/* Envelope Body (no overflow-hidden to allow card slide-out) */}
+              <div className="relative w-full h-full rounded-lg border border-white/10 shadow-2xl bg-[#0d1424] preserve-3d">
+                
+                {/* 1. Envelope Inside Gold Liner (revealed as top flap rotates open) */}
+                <div className="absolute inset-0 bg-[#C8A882] z-5 overflow-hidden rounded-lg">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#E9D7C2] via-[#C8A882] to-[#9c7d57]" />
+                  {/* Liner details */}
+                  <div className="absolute inset-3 border border-white/15 rounded-md" />
+                  <div className="absolute inset-0 opacity-[0.08] bg-repeat" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+                </div>
+
+                {/* 2. Invitation Card (slides out of envelope) */}
+                <div 
+                  className={`absolute left-4 right-4 h-[86%] bg-[#FAFAF8] rounded-md shadow-2xl border border-[#C8A882]/30 p-6 flex flex-col justify-between items-center text-center origin-bottom z-10 envelope-card`}
+                  style={{
+                    bottom: '6%',
+                    transform: envelopeState !== 'closed' ? 'translate3d(0, -50%, 0) scale(1.02)' : 'translate3d(0, 8px, 0) scale(0.96)',
+                    opacity: envelopeState !== 'closed' ? 1 : 0,
+                    boxShadow: envelopeState !== 'closed' ? '0 25px 50px -12px rgba(0, 0, 0, 0.4)' : 'none'
+                  }}
+                >
+                  <div className="my-auto space-y-2">
+                    <div className="w-10 h-10 text-[#C8A882] opacity-80 mx-auto mb-1">
+                      {renderMotifSVG('nelum')}
+                    </div>
+                    <span className="text-[8px] uppercase tracking-widest text-[#C8A882] font-semibold block">The Wedding of</span>
+                    <h3 className="font-serif text-xl sm:text-2xl text-gray-900 leading-tight font-light">
+                      {weddingDetails.bride_name}
+                      <span className="font-script block text-[#C8A882] text-xl py-0.5">&</span>
+                      {weddingDetails.groom_name}
+                    </h3>
+                    <div className="w-8 h-[1px] bg-[#C8A882]/40 mx-auto my-1.5" />
+                    <div className="space-y-1">
+                      <p className="text-[9px] text-gray-400 uppercase tracking-wider">Honorary Guest</p>
+                      <p className="font-serif italic text-gray-800 text-sm font-semibold">{guest.name}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Front Left Flap with lighting gradient and realistic drop-shadow */}
+                <div 
+                  className="absolute inset-0 bg-gradient-to-br from-[#162035] to-[#0e1422] border-l border-white/5" 
+                  style={{ 
+                    clipPath: 'polygon(0% 0%, 53% 50%, 0% 100%)', 
+                    zIndex: 22,
+                    filter: 'drop-shadow(5px 2px 6px rgba(0,0,0,0.35))'
+                  }}
+                />
+                
+                {/* 4. Front Right Flap with lighting gradient and realistic drop-shadow */}
+                <div 
+                  className="absolute inset-0 bg-gradient-to-bl from-[#162035] to-[#0e1422] border-r border-white/5" 
+                  style={{ 
+                    clipPath: 'polygon(100% 0%, 47% 50%, 100% 100%)', 
+                    zIndex: 22,
+                    filter: 'drop-shadow(-5px 2px 6px rgba(0,0,0,0.35))'
+                  }}
+                />
+
+                {/* 5. Front Bottom Flap with lighting gradient and realistic drop-shadow */}
+                <div 
+                  className="absolute inset-0 bg-gradient-to-t from-[#0b0f1a] to-[#121a2c] border-b border-white/5" 
+                  style={{ 
+                    clipPath: 'polygon(0% 100%, 100% 100%, 50% 46%)', 
+                    zIndex: 20,
+                    filter: 'drop-shadow(0px -4px 10px rgba(0,0,0,0.4))'
+                  }}
+                />
+
+                {/* Calligraphy Guest Badge on the Front Flaps (visible only when closed) */}
+                <div 
+                  className={`absolute bottom-8 left-0 right-0 text-center transition-opacity duration-700 z-25 flex flex-col items-center ${
+                    envelopeState !== 'closed' ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                  }`}
+                >
+                  <div className="px-5 py-2 rounded-md border border-[#C8A882]/20 bg-[#070b14]/90 backdrop-blur-xs shadow-lg max-w-[80%]">
+                    <span className="text-[7px] text-[#C8A882]/60 uppercase tracking-[0.2em] block mb-0.5">Invited Guest</span>
+                    <p className="font-script text-[#C8A882] text-lg sm:text-xl leading-none px-2">{guest.name}</p>
+                  </div>
+                </div>
+
+                {/* 6. Front Top Flap (double-sided 3D folding flap) */}
+                <div 
+                  className="absolute inset-0 envelope-top-flap"
+                  style={{ 
+                    transform: envelopeState !== 'closed' ? 'rotateX(180deg)' : 'rotateX(0deg)',
+                    zIndex: envelopeState !== 'closed' ? 8 : 24,
+                    filter: envelopeState === 'closed' ? 'drop-shadow(0px 8px 16px rgba(0,0,0,0.45))' : 'drop-shadow(0px 0px 0px rgba(0,0,0,0))'
+                  }}
+                >
+                  {/* Outer side (Navy Blue with Gold border) */}
+                  <div 
+                    className="absolute inset-0 bg-[#C8A882] backface-hidden"
+                    style={{ clipPath: 'polygon(0% 0%, 100% 0%, 50% 54%)' }}
+                  >
+                    <div 
+                      className="absolute inset-0 bg-gradient-to-b from-[#1c2a47] to-[#121c33]"
+                      style={{ clipPath: 'polygon(2px 2px, calc(100% - 2px) 2px, 50% 50%)' }}
+                    />
+                  </div>
+
+                  {/* Inner side (Liner Gold texture) */}
+                  <div 
+                    className="absolute inset-0 bg-[#C8A882] backface-hidden"
+                    style={{ 
+                      clipPath: 'polygon(0% 0%, 100% 0%, 50% 54%)',
+                      transform: 'rotateX(180deg)'
+                    }}
+                  >
+                    <div 
+                      className="absolute inset-0 bg-gradient-to-b from-[#E7D6BE] via-[#C8A882] to-[#B2926C]"
+                      style={{ clipPath: 'polygon(2px 2px, calc(100% - 2px) 2px, 50% 50%)' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Wax Seal (button placed on top flap tip, centered) */}
+                <button 
+                  onClick={handleOpenEnvelope}
+                  disabled={envelopeState !== 'closed'}
+                  className={`absolute top-1/2 left-1/2 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-radial from-[#aa2025] via-[#851014] to-[#500508] border-2 border-[#C8A882]/50 shadow-[0_6px_18px_rgba(0,0,0,0.55)] cursor-pointer flex items-center justify-center group z-30 envelope-seal ${
+                    envelopeState !== 'closed' ? 'opacity-0' : 'animate-pulse-slow'
+                  }`}
+                  style={{
+                    transform: envelopeState !== 'closed' ? 'translate3d(-50%, -50%, 0) scale(0) rotate(-45deg)' : 'translate3d(-50%, -50%, 0) scale(1) rotate(0deg)'
+                  }}
+                >
+                  {/* Decorative dashed gold circle */}
+                  <div className="absolute inset-1 rounded-full border border-dashed border-[#C8A882]/30 group-hover:border-[#C8A882]/60 transition-colors" />
+                  
+                  {/* Hearts monogram or text */}
+                  <Heart className="w-5 h-5 text-[#C8A882] fill-current group-hover:text-white transition-colors" />
+                </button>
+              </div>
+            </div>
+
+            {/* Hint label */}
+            <button
+              onClick={handleOpenEnvelope}
+              disabled={envelopeState !== 'closed'}
+              className={`mt-6 text-[9px] text-[#C8A882]/60 uppercase tracking-[0.25em] font-semibold hover:text-[#C8A882] cursor-pointer transition-all duration-700 ${
+                envelopeState !== 'closed' ? 'opacity-0 translate-y-4' : 'opacity-100 animate-pulse-soft'
+              }`}
+            >
+              Click Seal to Open
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Animated Floating Flowers & Petals around the page (starts falling once envelope is opened) */}
+      {envelopeState !== 'closed' && (
+        <>
+
+          {/* Corner Blooming Flowers */}
+          {/* Top Left Corner */}
+          <div 
+            className="fixed top-0 left-0 z-30 pointer-events-none overflow-hidden w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52 origin-top-left transition-all duration-1000 animate-bloom" 
+            style={{ '--flower-rotate': '0deg', '--flower-opacity': '0.7' } as React.CSSProperties}
+          >
+            <div className="w-full h-full relative animate-sway-gentle">
+              <div className="absolute inset-0 text-[#C8A882] opacity-[0.35]">
+                {renderMotifSVG('vine')}
+              </div>
+              <div className="absolute top-2 left-2 w-12 h-12 sm:w-20 sm:h-20 md:w-24 md:h-24 text-[#C8A882] opacity-[0.55] rotate-12">
+                {renderMotifSVG('nelum')}
+              </div>
+            </div>
+          </div>
+
+          {/* Top Right Corner */}
+          <div 
+            className="fixed top-0 right-0 z-30 pointer-events-none overflow-hidden w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52 origin-top-right transition-all duration-1000 animate-bloom" 
+            style={{ '--flower-rotate': '90deg', '--flower-opacity': '0.7' } as React.CSSProperties}
+          >
+            <div className="w-full h-full relative animate-sway-gentle">
+              <div className="absolute inset-0 text-[#C8A882] opacity-[0.35] rotate-90 scale-x-[-1]">
+                {renderMotifSVG('vine')}
+              </div>
+              <div className="absolute top-2 right-2 w-12 h-12 sm:w-20 sm:h-20 md:w-24 md:h-24 text-[#C8A882] opacity-[0.55] rotate-45">
+                {renderMotifSVG('nelum')}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Left Corner */}
+          <div 
+            className="fixed bottom-0 left-0 z-30 pointer-events-none overflow-hidden w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52 origin-bottom-left transition-all duration-1000 animate-bloom" 
+            style={{ '--flower-rotate': '-90deg', '--flower-opacity': '0.7' } as React.CSSProperties}
+          >
+            <div className="w-full h-full relative animate-sway-gentle">
+              <div className="absolute inset-0 text-[#C8A882] opacity-[0.35] -rotate-90">
+                {renderMotifSVG('vine')}
+              </div>
+              <div className="absolute bottom-2 left-2 w-12 h-12 sm:w-20 sm:h-20 md:w-24 md:h-24 text-[#C8A882] opacity-[0.55] -rotate-45">
+                {renderMotifSVG('nelum')}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Right Corner */}
+          <div 
+            className="fixed bottom-0 right-0 z-30 pointer-events-none overflow-hidden w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52 origin-bottom-right transition-all duration-1000 animate-bloom" 
+            style={{ '--flower-rotate': '180deg', '--flower-opacity': '0.7' } as React.CSSProperties}
+          >
+            <div className="w-full h-full relative animate-sway-gentle">
+              <div className="absolute inset-0 text-[#C8A882] opacity-[0.35] rotate-180">
+                {renderMotifSVG('vine')}
+              </div>
+              <div className="absolute bottom-2 right-2 w-12 h-12 sm:w-20 sm:h-20 md:w-24 md:h-24 text-[#C8A882] opacity-[0.55] rotate-[135deg]">
+                {renderMotifSVG('nelum')}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
       
       {/* Fixed Background Texture - Mandala Pattern with extremely low opacity */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none">

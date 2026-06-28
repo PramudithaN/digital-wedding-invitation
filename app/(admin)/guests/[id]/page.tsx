@@ -219,7 +219,7 @@ export default function EditGuestPage() {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+94771234567"
+                placeholder="0771234567 or +94771234567"
                 className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
               />
             </div>

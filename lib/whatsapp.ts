@@ -1,8 +1,56 @@
 import { DEFAULT_WHATSAPP_TEMPLATE } from './constants';
 
+const DEFAULT_COUNTRY_CODE = '94';
+
+function resolveBaseUrl(runtimeBaseUrl?: string): string {
+  const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '';
+  const candidates = [
+    runtimeBaseUrl,
+    process.env.NEXT_PUBLIC_BASE_URL,
+    process.env.NEXT_PUBLIC_SITE_URL,
+    process.env.NEXTAUTH_URL,
+    vercelUrl,
+    'http://localhost:3000'
+  ];
+
+  const selected = candidates.find((item) => !!item && item.trim() !== '');
+  return (selected || 'http://localhost:3000').replace(/\/$/, '');
+}
+
+// Normalize numbers into E.164-like format (e.g. "0771234567" -> "+94771234567").
+export function normalizePhoneNumber(phone: string, defaultCountryCode: string = DEFAULT_COUNTRY_CODE): string {
+  const trimmedPhone = phone.trim();
+  if (!trimmedPhone) {
+    return '';
+  }
+
+  if (trimmedPhone.startsWith('+')) {
+    return `+${trimmedPhone.replace(/[^\d]/g, '')}`;
+  }
+
+  const digitsOnly = trimmedPhone.replace(/[^\d]/g, '');
+  if (!digitsOnly) {
+    return '';
+  }
+
+  if (digitsOnly.startsWith('00')) {
+    return `+${digitsOnly.slice(2)}`;
+  }
+
+  if (digitsOnly.startsWith('0')) {
+    return `+${defaultCountryCode}${digitsOnly.slice(1)}`;
+  }
+
+  if (digitsOnly.startsWith(defaultCountryCode)) {
+    return `+${digitsOnly}`;
+  }
+
+  return `+${defaultCountryCode}${digitsOnly}`;
+}
+
 // Clean phone numbers for wa.me deep links (e.g. "+94 77 123 4567" -> "94771234567")
 export function formatPhoneNumber(phone: string): string {
-  return phone.replace(/[^\d]/g, '');
+  return normalizePhoneNumber(phone).replace(/[^\d]/g, '');
 }
 
 export function buildWhatsAppLink(
@@ -15,9 +63,10 @@ export function buildWhatsAppLink(
     date: string;
     venue: string;
     city: string;
-  }
+  },
+  runtimeBaseUrl?: string
 ): string {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const baseUrl = resolveBaseUrl(runtimeBaseUrl);
   const inviteUrl = `${baseUrl}/invite/${inviteToken}`;
   
   const message = DEFAULT_WHATSAPP_TEMPLATE
@@ -43,7 +92,8 @@ export async function sendWhatsAppInviteViaTwilio(
     date: string;
     venue: string;
     city: string;
-  }
+  },
+  runtimeBaseUrl?: string
 ): Promise<{ success: boolean; sid?: string; error?: string }> {
   const sid = process.env.TWILIO_ACCOUNT_SID;
   const token = process.env.TWILIO_AUTH_TOKEN;
@@ -53,7 +103,7 @@ export async function sendWhatsAppInviteViaTwilio(
     return { success: false, error: 'Twilio accounts credentials are not configured in environment variables.' };
   }
   
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const baseUrl = resolveBaseUrl(runtimeBaseUrl);
   const inviteUrl = `${baseUrl}/invite/${inviteToken}`;
   
   const message = DEFAULT_WHATSAPP_TEMPLATE
@@ -66,10 +116,9 @@ export async function sendWhatsAppInviteViaTwilio(
     .replace('{url}', inviteUrl);
 
   try {
-    // Twilio phones require '+' prefix and country code
-    let formattedTo = phone.trim();
-    if (!formattedTo.startsWith('+')) {
-      formattedTo = '+' + formattedTo;
+    const formattedTo = normalizePhoneNumber(phone);
+    if (!formattedTo) {
+      return { success: false, error: 'Invalid phone number' };
     }
     
     const recipient = `whatsapp:${formattedTo}`;

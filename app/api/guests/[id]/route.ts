@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getGuest, updateGuest, deleteGuest } from '@/lib/db';
+import { normalizePhoneNumber } from '@/lib/whatsapp';
 
 export async function GET(
   request: Request,
@@ -24,7 +25,10 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const guest = await updateGuest(id, body);
+    const guest = await updateGuest(id, {
+      ...body,
+      phone: body.phone ? normalizePhoneNumber(String(body.phone)) : ''
+    });
     return NextResponse.json(guest);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

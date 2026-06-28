@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { 
   Plus, 
   Search, 
-  Filter, 
   Mail, 
   Phone, 
   Edit2, 
@@ -15,7 +14,8 @@ import {
   AlertCircle, 
   X,
   CheckCircle2,
-  Copy
+  Copy,
+  ExternalLink
 } from 'lucide-react';
 import { GuestWithDetails, Category } from '@/lib/types';
 
@@ -31,8 +31,17 @@ export default function GuestsPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
+  const getInviteUrl = (guest: GuestWithDetails) => {
+    const origin = globalThis.location?.origin || '';
+    return `${origin}/invite/${guest.invite_token}`;
+  };
+
+  const openInviteLink = (guest: GuestWithDetails) => {
+    globalThis.open(getInviteUrl(guest), '_blank', 'noopener,noreferrer');
+  };
+
   const handleCopyLink = (guest: GuestWithDetails) => {
-    const inviteUrl = `${window.location.origin}/invite/${guest.invite_token}`;
+    const inviteUrl = getInviteUrl(guest);
     navigator.clipboard.writeText(inviteUrl);
     showToast(`${guest.name}'s invite link copied!`, 'success');
   };
@@ -51,6 +60,7 @@ export default function GuestsPage() {
   const [categoryId, setCategoryId] = useState('');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedGuest, setSelectedGuest] = useState<GuestWithDetails | null>(null);
   
   // Actions loading state
   const [sendingId, setSendingId] = useState<string | null>(null);
@@ -306,7 +316,11 @@ export default function GuestsPage() {
               </thead>
               <tbody className="divide-y divide-gray-150">
                 {filteredGuests.map((guest) => (
-                  <tr key={guest.id} className="hover:bg-gray-50/50 transition-colors duration-150 group h-14">
+                  <tr
+                    key={guest.id}
+                    className="hover:bg-gray-50/50 transition-colors duration-150 group h-14 cursor-pointer"
+                    onClick={() => setSelectedGuest(guest)}
+                  >
                     <td className="px-6">
                       <div className="text-sm font-medium text-gray-900">{guest.name}</div>
                       {guest.notes && (
@@ -356,7 +370,10 @@ export default function GuestsPage() {
                       <div className="flex items-center justify-end gap-1">
                         {guest.phone && (
                           <button
-                            onClick={() => handleSendWhatsApp(guest)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSendWhatsApp(guest);
+                            }}
                             disabled={sendingId !== null}
                             className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-md transition-all cursor-pointer"
                             title="Send Invite via WhatsApp"
@@ -369,21 +386,38 @@ export default function GuestsPage() {
                           </button>
                         )}
                         <button
-                          onClick={() => handleCopyLink(guest)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopyLink(guest);
+                          }}
                           className="p-1.5 text-gray-550 hover:bg-gray-100 hover:text-gray-905 rounded-md transition-all cursor-pointer"
                           title="Copy Invitation Link"
                         >
                           <Copy className="w-4 h-4" />
                         </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openInviteLink(guest);
+                          }}
+                          className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-md transition-all cursor-pointer"
+                          title="Open Invitation Link"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </button>
                         <Link
                           href={`/guests/${guest.id}`}
+                          onClick={(e) => e.stopPropagation()}
                           className="p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-all"
                           title="Edit Guest"
                         >
                           <Edit2 className="w-4 h-4" />
                         </Link>
                         <button
-                          onClick={() => handleDeleteGuest(guest.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteGuest(guest.id);
+                          }}
                           disabled={deletingId !== null}
                           className="p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-md transition-all cursor-pointer"
                           title="Delete Guest"
@@ -407,7 +441,8 @@ export default function GuestsPage() {
             {filteredGuests.map((guest) => (
               <div 
                 key={guest.id} 
-                className="bg-white border border-gray-200 rounded-md p-4 space-y-3 shadow-sm hover:border-gray-350 transition-colors"
+                className="bg-white border border-gray-200 rounded-md p-4 space-y-3 shadow-sm hover:border-gray-350 transition-colors cursor-pointer"
+                onClick={() => setSelectedGuest(guest)}
               >
                 {/* Header */}
                 <div className="flex justify-between items-start">
@@ -455,7 +490,10 @@ export default function GuestsPage() {
                 <div className="flex justify-end gap-4 border-t border-gray-100 pt-2 text-xs font-semibold">
                   {guest.phone && (
                     <button
-                      onClick={() => handleSendWhatsApp(guest)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSendWhatsApp(guest);
+                      }}
                       disabled={sendingId !== null}
                       className="text-blue-500 hover:text-blue-600 flex items-center gap-1 cursor-pointer"
                     >
@@ -470,21 +508,38 @@ export default function GuestsPage() {
                     </button>
                   )}
                   <button
-                    onClick={() => handleCopyLink(guest)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCopyLink(guest);
+                    }}
                     className="text-gray-600 hover:text-gray-900 flex items-center gap-1 cursor-pointer"
                   >
                     <Copy className="w-3.5 h-3.5 text-gray-400" />
                     Copy
                   </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openInviteLink(guest);
+                    }}
+                    className="text-emerald-600 hover:text-emerald-700 flex items-center gap-1 cursor-pointer"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Open
+                  </button>
                   <Link
                     href={`/guests/${guest.id}`}
+                    onClick={(e) => e.stopPropagation()}
                     className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
                   >
                     <Edit2 className="w-3.5 h-3.5 text-gray-400" />
                     Edit
                   </Link>
                   <button
-                    onClick={() => handleDeleteGuest(guest.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteGuest(guest.id);
+                    }}
                     disabled={deletingId !== null}
                     className="text-gray-400 hover:text-red-600 flex items-center gap-1 cursor-pointer"
                   >
@@ -502,6 +557,83 @@ export default function GuestsPage() {
             ))}
           </div>
         </>
+      )}
+
+      {/* Guest Quick View Modal */}
+      {selectedGuest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Close guest details"
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setSelectedGuest(null)}
+          />
+          <div className="relative w-full max-w-lg bg-white rounded-lg border border-gray-200 shadow-xl p-6 space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">{selectedGuest.name}</h3>
+                <p className="text-xs text-gray-500 mt-1">Guest details</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedGuest(null)}
+                className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="rounded-md border border-gray-200 p-3">
+                <p className="text-gray-400 uppercase tracking-wider mb-1">Side</p>
+                <p className="text-gray-800 font-medium">{selectedGuest.side || '-'}</p>
+              </div>
+              <div className="rounded-md border border-gray-200 p-3">
+                <p className="text-gray-400 uppercase tracking-wider mb-1">Category</p>
+                <p className="text-gray-800 font-medium">{selectedGuest.category?.name || '-'}</p>
+              </div>
+              <div className="rounded-md border border-gray-200 p-3">
+                <p className="text-gray-400 uppercase tracking-wider mb-1">Phone</p>
+                <p className="text-gray-800 font-medium">{selectedGuest.phone || '-'}</p>
+              </div>
+              <div className="rounded-md border border-gray-200 p-3">
+                <p className="text-gray-400 uppercase tracking-wider mb-1">Email</p>
+                <p className="text-gray-800 font-medium break-all">{selectedGuest.email || '-'}</p>
+              </div>
+            </div>
+
+            <div className="rounded-md border border-gray-200 p-3 text-xs">
+              <p className="text-gray-400 uppercase tracking-wider mb-1">Notes</p>
+              <p className="text-gray-700">{selectedGuest.notes || '-'}</p>
+            </div>
+
+            <div className="flex flex-wrap gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => openInviteLink(selectedGuest)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                Open Invitation
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCopyLink(selectedGuest)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-semibold"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                Copy Link
+              </button>
+              <Link
+                href={`/guests/${selectedGuest.id}`}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-semibold"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+                Edit Guest
+              </Link>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Add Guest Slide-over Drawer / Modal */}
@@ -547,17 +679,17 @@ export default function GuestsPage() {
                 {/* Phone */}
                 <div>
                   <label htmlFor="guest-phone" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
-                    Phone (with Country Code)
+                    Phone Number
                   </label>
                   <input
                     id="guest-phone"
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="e.g. +94771234567"
+                    placeholder="e.g. 0771234567 or +94771234567"
                     className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500"
                   />
-                  <p className="text-[10px] text-gray-400 mt-1">Needed for manual wa.me links or automated Twilio messages.</p>
+                  <p className="text-[10px] text-gray-400 mt-1">Local numbers are saved with +94 automatically. Needed for manual wa.me links or automated Twilio messages.</p>
                 </div>
 
                 {/* Email */}

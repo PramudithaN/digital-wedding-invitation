@@ -14,6 +14,27 @@ import {
   X
 } from 'lucide-react';
 
+function formatHumanDate(dateStr: string): string {
+  if (!dateStr) return '';
+  const dateObj = new Date(dateStr + 'T00:00:00');
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  };
+  return dateObj.toLocaleDateString('en-US', options);
+}
+
+function formatHumanTime(timeStr: string): string {
+  if (!timeStr) return '';
+  const [hoursStr, minutesStr] = timeStr.split(':');
+  const hours = parseInt(hoursStr, 10);
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const formattedHours = hours % 12 || 12;
+  return `${formattedHours}:${minutesStr} ${ampm}`;
+}
+
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,6 +47,11 @@ export default function SettingsPage() {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [isoDate, setIsoDate] = useState('');
+  
+  // Picker specific state
+  const [pickerDate, setPickerDate] = useState('');
+  const [pickerTime, setPickerTime] = useState('');
+  
   const [venue, setVenue] = useState('');
   const [city, setCity] = useState('');
   const [address, setAddress] = useState('');
@@ -36,6 +62,18 @@ export default function SettingsPage() {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
+
+  useEffect(() => {
+    if (pickerDate) {
+      setDate(formatHumanDate(pickerDate));
+    }
+    if (pickerTime) {
+      setTime(formatHumanTime(pickerTime));
+    }
+    if (pickerDate && pickerTime) {
+      setIsoDate(`${pickerDate}T${pickerTime}:00`);
+    }
+  }, [pickerDate, pickerTime]);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -55,6 +93,15 @@ export default function SettingsPage() {
         setAddress(data.address);
         setGoogleMapsUrl(data.google_maps_url || '');
         setRegistryUrl(data.registry_url || '');
+
+        // Pre-fill date and time pickers from iso_date
+        if (data.iso_date) {
+          const parts = data.iso_date.split('T');
+          if (parts.length === 2) {
+            setPickerDate(parts[0]);
+            setPickerTime(parts[1].substring(0, 5));
+          }
+        }
       } catch (err: any) {
         setError(err.message || 'Error loading configurations.');
       } finally {
@@ -111,7 +158,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in font-sans">
+    <>
+      <div className="space-y-6 animate-fade-in font-sans">
       {/* Header */}
       <div className="border-b border-gray-200 pb-5">
         <h1 className="text-2xl font-sans tracking-tight font-semibold text-gray-900 flex items-center gap-2">
@@ -129,22 +177,6 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {toast && (
-        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] w-[90%] sm:w-auto max-w-sm animate-fade-in select-none">
-          <div className={`flex items-center justify-center md:justify-start gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
-            toast.type === 'success'
-              ? 'bg-green-50 text-green-700 border-green-200'
-              : 'bg-red-50 text-red-755 border-red-200'
-          }`}>
-            {toast.type === 'success' ? (
-              <Check className="w-4 h-4 text-green-600" />
-            ) : (
-              <AlertCircle className="w-4 h-4 text-red-500" />
-            )}
-            <span>{toast.message}</span>
-          </div>
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -196,16 +228,15 @@ export default function SettingsPage() {
             <div className="space-y-4">
               <div>
                 <label htmlFor="set-date" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-                  Wedding Date (Human Readable)
+                  Wedding Date
                 </label>
                 <input
                   id="set-date"
-                  type="text"
+                  type="date"
                   required
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  placeholder="e.g. Saturday, September 19, 2026"
-                  className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
+                  value={pickerDate}
+                  onChange={(e) => setPickerDate(e.target.value)}
+                  className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500 cursor-pointer"
                 />
               </div>
 
@@ -215,12 +246,11 @@ export default function SettingsPage() {
                 </label>
                 <input
                   id="set-time"
-                  type="text"
+                  type="time"
                   required
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  placeholder="e.g. 4:00 PM"
-                  className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
+                  value={pickerTime}
+                  onChange={(e) => setPickerTime(e.target.value)}
+                  className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500 cursor-pointer"
                 />
               </div>
 
@@ -231,13 +261,11 @@ export default function SettingsPage() {
                 <input
                   id="set-iso"
                   type="text"
-                  required
+                  readOnly
                   value={isoDate}
-                  onChange={(e) => setIsoDate(e.target.value)}
-                  placeholder="2026-09-19T16:00:00"
-                  className="w-full bg-white border border-gray-250 rounded-md py-2 px-3 text-xs font-mono text-blue-600 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-md py-2 px-3 text-xs font-mono text-gray-500 focus:outline-none cursor-default select-none"
                 />
-                <p className="text-[9px] text-gray-400 mt-1">Must follow `YYYY-MM-DDTHH:MM:SS` standard format.</p>
+                <p className="text-[9px] text-gray-400 mt-1">Automatically computed from the date and time selected above.</p>
               </div>
             </div>
           </div>
@@ -384,5 +412,22 @@ export default function SettingsPage() {
         </div>
       </form>
     </div>
+    {toast && (
+      <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] w-[90%] sm:w-auto max-w-sm animate-fade-in select-none">
+        <div className={`flex items-center justify-center md:justify-start gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
+          toast.type === 'success'
+            ? 'bg-green-50 text-green-700 border-green-200'
+            : 'bg-red-50 text-red-755 border-red-200'
+        }`}>
+          {toast.type === 'success' ? (
+            <Check className="w-4 h-4 text-green-600" />
+          ) : (
+            <AlertCircle className="w-4 h-4 text-red-500" />
+          )}
+          <span>{toast.message}</span>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

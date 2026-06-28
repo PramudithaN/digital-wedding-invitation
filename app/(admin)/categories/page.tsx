@@ -105,7 +105,8 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <>
+      <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="border-b border-gray-200 pb-5">
         <h1 className="text-2xl font-sans tracking-tight font-semibold text-gray-900">Guest Categories</h1>
@@ -243,7 +244,8 @@ export default function CategoriesPage() {
               ))}
             </div>
           )}
-        </div>
+      </div>
+      </div>
       </div>
       {toast && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] w-[90%] sm:w-auto max-w-sm animate-fade-in select-none">
@@ -261,6 +263,6 @@ export default function CategoriesPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

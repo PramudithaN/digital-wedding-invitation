@@ -168,7 +168,8 @@ export default function EditGuestPage() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <>
+      <div className="space-y-6 animate-fade-in">
       {/* Back navigation */}
       <Link href="/guests" className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-950 font-semibold uppercase tracking-wider w-fit">
         <ArrowLeft className="w-4 h-4" /> Back to Guests
@@ -496,7 +497,7 @@ export default function EditGuestPage() {
           </div>
         </div>
       </div>
-
+      </div>
       {toast && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] w-[90%] sm:w-auto max-w-sm animate-fade-in select-none">
           <div className={`flex items-center justify-center md:justify-start gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
@@ -513,6 +514,6 @@ export default function EditGuestPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

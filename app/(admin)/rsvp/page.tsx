@@ -156,7 +156,8 @@ export default function RSVPTrackerPage() {
   });
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Header */}
       <Box sx={{ pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
         <Typography variant="h5" sx={{ fontWeight: 700 }} color="text.primary">RSVP Registry</Typography>
@@ -457,6 +458,7 @@ export default function RSVPTrackerPage() {
         </>
       )}
 
+      </Box>
       {toast && (
         <Box sx={{
           position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 9999,
@@ -467,6 +469,6 @@ export default function RSVPTrackerPage() {
           </Alert>
         </Box>
       )}
-    </Box>
+    </>
   );
 }

@@ -95,6 +95,19 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
 
   const timelineRef = useRef<HTMLDivElement>(null);
   const rsvpRef = useRef<HTMLDivElement>(null);
+  const parallaxBgRef = useRef<HTMLDivElement>(null);
+
+  // Passive scroll listener for smooth parallax background shifting
+  useEffect(() => {
+    const handleScroll = () => {
+      if (parallaxBgRef.current) {
+        parallaxBgRef.current.style.backgroundPositionY = `calc(50% - ${window.scrollY * 0.08}px)`;
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
 
   // Initialize countdown
   useEffect(() => {
@@ -243,8 +256,97 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
     }
   };
 
+  const renderBackgroundMandala = () => {
+    return (
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] sm:w-[750px] sm:h-[750px] md:w-[950px] md:h-[950px] text-[#C8A882]/8 opacity-[0.06] select-none pointer-events-none z-0">
+        {/* Outer Ring: rotates clockwise */}
+        <svg viewBox="0 0 200 200" className="w-full h-full absolute top-0 left-0 animate-spin-slow">
+          <circle cx="100" cy="100" r="95" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3, 3" />
+          <circle cx="100" cy="100" r="88" fill="none" stroke="currentColor" strokeWidth="0.5" />
+          {Array.from({ length: 24 }).map((_, i) => {
+            const angle = (i * 360) / 24;
+            return (
+              <path
+                key={`outer-${i}`}
+                d="M100,12 C96,16 94,22 100,26 C106,22 104,16 100,12"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.5"
+                transform={`rotate(${angle} 100 100)`}
+              />
+            );
+          })}
+          {Array.from({ length: 48 }).map((_, i) => {
+            const angle = (i * 360) / 48;
+            return (
+              <circle
+                key={`dot-${i}`}
+                cx="100"
+                cy="16"
+                r="0.8"
+                fill="currentColor"
+                transform={`rotate(${angle} 100 100)`}
+              />
+            );
+          })}
+        </svg>
+
+        {/* Inner Ring: rotates counter-clockwise */}
+        <svg viewBox="0 0 200 200" className="w-full h-full absolute top-0 left-0 scale-[0.75] animate-spin-reverse-slow">
+          <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" strokeWidth="0.5" />
+          <circle cx="100" cy="100" r="70" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="4, 2" />
+          {Array.from({ length: 16 }).map((_, i) => {
+            const angle = (i * 360) / 16;
+            return (
+              <path
+                key={`inner-${i}`}
+                d="M100,25 C92,35 90,45 100,55 C110,45 108,35 100,25"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.5"
+                transform={`rotate(${angle} 100 100)`}
+              />
+            );
+          })}
+          {Array.from({ length: 32 }).map((_, i) => {
+            const angle = (i * 360) / 32;
+            return (
+              <path
+                key={`spoke-${i}`}
+                d="M100,10 L100,30"
+                stroke="currentColor"
+                strokeWidth="0.3"
+                transform={`rotate(${angle} 100 100)`}
+              />
+            );
+          })}
+        </svg>
+        
+        {/* Center Core: slow breathe */}
+        <svg viewBox="0 0 200 200" className="w-full h-full absolute top-0 left-0 scale-[0.4] text-[#C8A882]/12 animate-pulse-soft">
+          <circle cx="100" cy="100" r="45" fill="none" stroke="currentColor" strokeWidth="0.8" />
+          {Array.from({ length: 8 }).map((_, i) => {
+            const angle = (i * 360) / 8;
+            return (
+              <path
+                key={`core-${i}`}
+                d="M100,55 C85,75 85,85 100,100 C115,85 115,75 100,55"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.8"
+                transform={`rotate(${angle} 100 100)`}
+              />
+            );
+          })}
+          <circle cx="100" cy="100" r="8" className="fill-current" />
+        </svg>
+      </div>
+    );
+  };
+
+
   return (
-    <div className="min-h-screen bg-[#FAFAF8] text-[#1A1A1A] flex flex-col font-sans relative overflow-x-hidden selection:bg-amber-100 selection:text-gray-900">
+    <div className="min-h-screen bg-[#F2F1EB] text-[#1A1A1A] flex flex-col font-sans relative overflow-x-hidden selection:bg-amber-100 selection:text-gray-900 px-4 py-4 sm:py-8">
       
       {/* 3D Envelope Overlay */}
       {envelopeState !== 'open' && (
@@ -495,54 +597,69 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
       )}
 
       
-      {/* Fixed Background Texture - Mandala Pattern with extremely low opacity */}
+      {/* Background Rotating Mandala Art */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none">
-        <img 
-          src="/islamic-style-mandala-pattern-wedding-invitation-backdrop-design-vector_1017-46608.avif" 
-          alt="Mandala Background"
-          className="w-full h-full object-cover opacity-[0.05]" 
+        {renderBackgroundMandala()}
+      </div>
+
+      {/* The Invitation Card Container */}
+      <div className="relative z-10 w-full max-w-[650px] mx-auto bg-[#FAFAF8] shadow-[0_20px_50px_rgba(0,0,0,0.06)] border border-[#E3DEC9] rounded-2xl overflow-hidden my-4 sm:my-6 md:my-8 flex flex-col">
+        {/* Background Mandala inside Card (Fixed attachment with scroll parallax listener) */}
+        <div 
+          ref={parallaxBgRef}
+          className="absolute inset-0 z-0 pointer-events-none select-none rounded-2xl"
+          style={{
+            backgroundImage: 'url("/islamic-style-mandala-pattern-wedding-invitation-backdrop-design-vector_1017-46608.avif")',
+            backgroundAttachment: 'fixed',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 50%',
+            opacity: 0.05
+          }}
         />
-      </div>
 
-      {/* Dynamic Background Motifs spanning the entire page */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        {bgMotifs.map((motif, idx) => {
-          const style: React.CSSProperties = {
-            top: motif.top,
-            left: motif.left || undefined,
-            right: motif.right || undefined,
-            width: `${motif.size}px`,
-            height: `${motif.size}px`,
-            transform: `translate3d(${mousePos.x * motif.parallax}px, ${mousePos.y * motif.parallax}px, 0) rotate(${motif.rotate}deg)`,
-          };
-          return (
-            <div
-              key={idx}
-              style={style}
-              className="absolute select-none pointer-events-none transition-transform duration-300 ease-out"
-            >
-              {renderMotifSVG(motif.type)}
-            </div>
-          );
-        })}
-      </div>
+        {/* Background Motifs inside Card */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 rounded-2xl">
+          {bgMotifs.map((motif, idx) => {
+            const style: React.CSSProperties = {
+              top: motif.top,
+              left: motif.left || undefined,
+              right: motif.right || undefined,
+              width: `${motif.size}px`,
+              height: `${motif.size}px`,
+              transform: `translate3d(${mousePos.x * motif.parallax}px, ${mousePos.y * motif.parallax}px, 0) rotate(${motif.rotate}deg)`,
+            };
+            return (
+              <div
+                key={idx}
+                style={style}
+                className="absolute select-none pointer-events-none transition-transform duration-300 ease-out"
+              >
+                {renderMotifSVG(motif.type)}
+              </div>
+            );
+          })}
+        </div>
 
-      {/* Decorative Elegant Gold Corner Flourishes */}
-      <div className="absolute top-4 left-4 text-[#C8A882]/20 pointer-events-none md:top-8 md:left-8">
-        <svg width="60" height="60" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M10,10 L30,10 A20,20 0 0,1 50,30 L50,50" />
-          <path d="M10,10 L10,30 A20,20 0 0,0 30,50 L50,50" />
-        </svg>
-      </div>
-      <div className="absolute top-4 right-4 text-[#C8A882]/20 pointer-events-none md:top-8 md:right-8 rotate-90">
-        <svg width="60" height="60" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M10,10 L30,10 A20,20 0 0,1 50,30 L50,50" />
-          <path d="M10,10 L10,30 A20,20 0 0,0 30,50 L50,50" />
-        </svg>
-      </div>
+        {/* Elegant Gold Corner Flourishes inside Card */}
+        <div className="absolute top-4 left-4 text-[#C8A882]/20 pointer-events-none md:top-6 md:left-6">
+          <svg width="45" height="45" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M10,10 L30,10 A20,20 0 0,1 50,30 L50,50" />
+            <path d="M10,10 L10,30 A20,20 0 0,0 30,50 L50,50" />
+          </svg>
+        </div>
+        <div className="absolute top-4 right-4 text-[#C8A882]/20 pointer-events-none md:top-6 md:right-6 rotate-90">
+          <svg width="45" height="45" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M10,10 L30,10 A20,20 0 0,1 50,30 L50,50" />
+            <path d="M10,10 L10,30 A20,20 0 0,0 30,50 L50,50" />
+          </svg>
+        </div>
 
-      {/* --- SECTION 1 - HERO SCREEN (FULLSCREEN) --- */}
-      <section className="min-h-screen flex flex-col justify-between items-center text-center p-6 md:p-12 relative">
+        {/* Content Wrapper to raise content above z-0 backgrounds */}
+        <div className="relative z-10 w-full flex flex-col">
+
+
+        {/* --- SECTION 1 - HERO SCREEN (FULLSCREEN) --- */}
+        <section className="min-h-[80vh] flex flex-col justify-between items-center text-center p-6 md:p-10 relative">
         <div className="pt-12">
           {/* Accent flourish line */}
           <div className="flex items-center justify-center gap-2 mb-4 text-[#C8A882]">
@@ -1001,8 +1118,10 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
           <Heart className="w-5 h-5 fill-current" />
         </div>
         <p className="text-[9px] text-gray-500">Made with love for our special day.</p>
-        <p className="text-[8px] text-gray-650">Digital Invite created by Pramuditha Nadun.</p>
+        {/* <p className="text-[8px] text-gray-650">Digital Invite created by Pramuditha Nadun.</p> */}
       </footer>
+      </div> {/* <-- Closes Content Wrapper */}
+      </div> {/* <-- Closes Card Container */}
     </div>
   );
 }

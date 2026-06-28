@@ -5,15 +5,18 @@ import { Category, Guest, RSVP, InviteLink, GuestWithDetails } from './types';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export const isSupabaseConfigured = !!(
   supabaseUrl && 
-  supabaseAnonKey && 
+  (supabaseAnonKey || supabaseServiceKey) && 
   supabaseUrl !== 'https://your-project-id.supabase.co' &&
   supabaseUrl.trim() !== ''
 );
 
-const supabase = isSupabaseConfigured ? createClient(supabaseUrl!, supabaseAnonKey!) : null;
+const supabase = isSupabaseConfigured 
+  ? createClient(supabaseUrl!, supabaseServiceKey || supabaseAnonKey!) 
+  : null;
 
 const MOCK_DB_PATH = path.join(process.cwd(), 'mock-db.json');
 

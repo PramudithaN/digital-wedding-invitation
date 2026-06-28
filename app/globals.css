@@ -115,3 +115,44 @@ body {
 .animate-pulse-soft {
   animation: pulseSoft 2s ease-in-out infinite;
 }
+
+/* Custom Sri Lankan Art Floating Animations */
+@keyframes floatGentle1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(12px, -8px) rotate(3deg); }
+  66% { transform: translate(-8px, 10px) rotate(-2deg); }
+}
+
+@keyframes floatGentle2 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-10px, 12px) rotate(-4deg); }
+  66% { transform: translate(8px, -6px) rotate(3deg); }
+}
+
+@keyframes floatGentle3 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(6px, -12px) rotate(5deg); }
+}
+
+.animate-float-1 {
+  animation: floatGentle1 25s ease-in-out infinite;
+}
+
+.animate-float-2 {
+  animation: floatGentle2 30s ease-in-out infinite;
+}
+
+.animate-float-3 {
+  animation: floatGentle3 22s ease-in-out infinite;
+}
+
+/* Shifting background mandala texture breathing animation */
+@keyframes bgPulseScale {
+  0%, 100% { transform: scale(1.02) rotate(0deg); opacity: 0.02; }
+  50% { transform: scale(1.08) rotate(0.6deg); opacity: 0.035; }
+}
+
+.animate-bg-mandala {
+  animation: bgPulseScale 50s ease-in-out infinite;
+  transform-origin: center;
+}

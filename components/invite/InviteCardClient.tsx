@@ -49,6 +49,18 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(!!(guest.rsvp && guest.rsvp.status && guest.rsvp.status !== 'pending'));
   const [error, setError] = useState('');
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({
+        x: (e.clientX / window.innerWidth - 0.5) * 16,
+        y: (e.clientY / window.innerHeight - 0.5) * 16,
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   // Countdown timer state
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -147,10 +159,99 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
     return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsContent);
   };
 
+  const bgMotifs = [
+    { type: 'nelum', top: '3%', left: '4%', size: 140, rotate: 10, anim: 'animate-float-1', parallax: 0.3 },
+    { type: 'vine', top: '10%', right: '5%', size: 180, rotate: 0, anim: 'animate-float-2', parallax: -0.4 },
+    { type: 'bud', top: '18%', left: '12%', size: 110, rotate: -15, anim: 'animate-float-3', parallax: 0.5 },
+    { type: 'nelum', top: '26%', right: '10%', size: 130, rotate: 45, anim: 'animate-float-1', parallax: -0.3 },
+    { type: 'vine_rev', top: '34%', left: '3%', size: 160, rotate: 90, anim: 'animate-float-2', parallax: 0.6 },
+    { type: 'bud', top: '42%', right: '14%', size: 100, rotate: 30, anim: 'animate-float-3', parallax: -0.5 },
+    { type: 'nelum', top: '50%', left: '8%', size: 140, rotate: -20, anim: 'animate-float-1', parallax: 0.4 },
+    { type: 'vine', top: '58%', right: '6%', size: 190, rotate: 180, anim: 'animate-float-2', parallax: -0.6 },
+    { type: 'bud', top: '67%', left: '10%', size: 110, rotate: 15, anim: 'animate-float-3', parallax: 0.7 },
+    { type: 'nelum', top: '75%', right: '12%', size: 150, rotate: -45, anim: 'animate-float-1', parallax: -0.4 },
+    { type: 'vine_rev', top: '83%', left: '4%', size: 170, rotate: -90, anim: 'animate-float-2', parallax: 0.5 },
+    { type: 'bud', top: '90%', right: '8%', size: 120, rotate: 60, anim: 'animate-float-3', parallax: -0.3 },
+    { type: 'nelum', top: '96%', left: '6%', size: 130, rotate: 120, anim: 'animate-float-1', parallax: 0.4 }
+  ];
+
+  const renderMotifSVG = (type: string) => {
+    switch (type) {
+      case 'nelum':
+        return (
+          <svg width="100%" height="100%" viewBox="0 0 100 100" className="text-[#C8A882] opacity-[0.16] fill-current">
+            <path d="M50,15 C58,35 58,55 50,65 C42,55 42,35 50,15 Z" />
+            <path d="M50,30 C30,25 35,50 50,65 C38,55 32,45 50,30 Z" />
+            <path d="M50,30 C70,25 65,50 50,65 C62,55 68,45 50,30 Z" />
+            <path d="M50,40 C15,45 25,65 50,65 C28,65 25,55 50,40 Z" />
+            <path d="M50,40 C85,45 75,65 50,65 C72,65 75,55 50,40 Z" />
+          </svg>
+        );
+      case 'vine':
+        return (
+          <svg width="100%" height="100%" viewBox="0 0 120 120" className="text-[#C8A882] opacity-[0.18] fill-none stroke-current stroke-[1.5]">
+            <path d="M10,110 C30,90 40,60 30,30 C20,10 50,5 60,25 C70,45 40,60 60,80 C80,100 110,90 110,60 C110,30 90,20 80,40 C70,60 90,80 110,110" />
+            <path d="M30,30 C15,25 10,40 30,50 C40,40 35,35 30,30 Z" className="fill-current opacity-10" />
+            <path d="M60,25 C75,10 90,20 75,35 C65,30 65,25 60,25 Z" className="fill-current opacity-10" />
+            <path d="M80,40 C95,25 105,40 90,55 C80,45 85,45 80,40 Z" className="fill-current opacity-10" />
+          </svg>
+        );
+      case 'vine_rev':
+        return (
+          <svg width="100%" height="100%" viewBox="0 0 120 120" className="text-[#C8A882] opacity-[0.16] fill-none stroke-current stroke-[1.5] rotate-180">
+            <path d="M10,110 C30,90 40,60 30,30 C20,10 50,5 60,25 C70,45 40,60 60,80 C80,100 110,90 110,60 C110,30 90,20 80,40 C70,60 90,80 110,110" />
+            <path d="M30,30 C15,25 10,40 30,50 C40,40 35,35 30,30 Z" className="fill-current opacity-10" />
+            <path d="M60,25 C75,10 90,20 75,35 C65,30 65,25 60,25 Z" className="fill-current opacity-10" />
+          </svg>
+        );
+      case 'bud':
+      default:
+        return (
+          <svg width="100%" height="100%" viewBox="0 0 80 80" className="text-[#C8A882] opacity-[0.16] fill-current">
+            <path d="M40,10 C55,30 55,50 40,70 C25,50 25,30 40,10 Z" />
+            <path d="M40,25 C48,35 48,45 40,55 C32,45 32,35 40,25 Z" className="opacity-40" />
+            <circle cx="40" cy="40" r="3" className="fill-white" />
+          </svg>
+        );
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFAF8] text-[#1A1A1A] flex flex-col font-sans relative overflow-x-hidden selection:bg-amber-100 selection:text-gray-900">
       
-      {/* Decorative Elegant Gold Flourishes */}
+      {/* Fixed Background Texture - Mandala Pattern with extremely low opacity */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none">
+        <img 
+          src="/islamic-style-mandala-pattern-wedding-invitation-backdrop-design-vector_1017-46608.avif" 
+          alt="Mandala Background"
+          className="w-full h-full object-cover opacity-[0.02] animate-bg-mandala" 
+        />
+      </div>
+
+      {/* Dynamic Background Motifs spanning the entire page */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        {bgMotifs.map((motif, idx) => {
+          const style: React.CSSProperties = {
+            top: motif.top,
+            left: motif.left || undefined,
+            right: motif.right || undefined,
+            width: `${motif.size}px`,
+            height: `${motif.size}px`,
+            transform: `translate3d(${mousePos.x * motif.parallax}px, ${mousePos.y * motif.parallax}px, 0) rotate(${motif.rotate}deg)`,
+          };
+          return (
+            <div
+              key={idx}
+              style={style}
+              className={`absolute select-none pointer-events-none transition-transform duration-300 ease-out ${motif.anim}`}
+            >
+              {renderMotifSVG(motif.type)}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Decorative Elegant Gold Corner Flourishes */}
       <div className="absolute top-4 left-4 text-[#C8A882]/20 pointer-events-none md:top-8 md:left-8">
         <svg width="60" height="60" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M10,10 L30,10 A20,20 0 0,1 50,30 L50,50" />
@@ -216,7 +317,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
 
       {/* --- SECTION 2 - COUNTDOWN TIMER --- */}
       <section ref={timelineRef} className="max-w-3xl mx-auto px-6 py-12 w-full text-center">
-        <div className="bg-white border border-[#E8E4DE] rounded-xl p-8 shadow-sm max-w-lg mx-auto space-y-6">
+        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-8 shadow-sm max-w-lg mx-auto space-y-6">
           <span className="text-[10px] uppercase tracking-widest text-[#6B6B6B] font-semibold">Counting down the moments</span>
           
           {isExpired ? (
@@ -258,7 +359,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
             <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
             <div className="absolute top-3 w-[1px] h-20 bg-[#E8E4DE]" />
           </div>
-          <div className="md:col-span-3 bg-white border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
+          <div className="md:col-span-3 bg-white/75 backdrop-blur-xs border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
             <h4 className="font-semibold text-xs text-gray-900">Guest Arrival</h4>
             <p className="text-[11px] text-[#6B6B6B] mt-0.5">Grand Monarch Foyer</p>
           </div>
@@ -269,7 +370,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
             <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
             <div className="absolute top-3 w-[1px] h-20 bg-[#E8E4DE]" />
           </div>
-          <div className="md:col-span-3 bg-white border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
+          <div className="md:col-span-3 bg-white/75 backdrop-blur-xs border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
             <h4 className="font-semibold text-xs text-gray-900">Wedding Ceremony</h4>
             <p className="text-[11px] text-[#6B6B6B] mt-0.5">Main Ceremonial Hall</p>
           </div>
@@ -280,7 +381,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
             <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
             <div className="absolute top-3 w-[1px] h-20 bg-[#E8E4DE]" />
           </div>
-          <div className="md:col-span-3 bg-white border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
+          <div className="md:col-span-3 bg-white/75 backdrop-blur-xs border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
             <h4 className="font-semibold text-xs text-gray-900">Cocktails & Couple Photos</h4>
             <p className="text-[11px] text-[#6B6B6B] mt-0.5">Garden Terrace</p>
           </div>
@@ -291,7 +392,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
             <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
             <div className="absolute top-3 w-[1px] h-20 bg-[#E8E4DE]" />
           </div>
-          <div className="md:col-span-3 bg-white border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
+          <div className="md:col-span-3 bg-white/75 backdrop-blur-xs border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
             <h4 className="font-semibold text-xs text-gray-900">Reception Dinner</h4>
             <p className="text-[11px] text-[#6B6B6B] mt-0.5">Main Banquet Hall</p>
           </div>
@@ -301,7 +402,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
           <div className="hidden md:flex md:col-span-1 justify-center relative">
             <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
           </div>
-          <div className="md:col-span-3 bg-white border border-[#E8E4DE] p-4 rounded-lg shadow-xs">
+          <div className="md:col-span-3 bg-white/75 backdrop-blur-xs border border-[#E8E4DE] p-4 rounded-lg shadow-xs">
             <h4 className="font-semibold text-xs text-gray-900">Dancing & Farewell</h4>
             <p className="text-[11px] text-[#6B6B6B] mt-0.5">Dance Floor / Hall</p>
           </div>
@@ -310,7 +411,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
 
       {/* --- SECTION 4 - RSVP FORM --- */}
       <section id="rsvp-section" ref={rsvpRef} className="max-w-lg mx-auto px-6 py-12 w-full relative z-10">
-        <div className="bg-white border border-[#E8E4DE] rounded-xl p-8 shadow-sm space-y-6">
+        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-8 shadow-sm space-y-6">
           {isSuccess ? (
             /* Success screen */
             <div className="text-center py-8 space-y-5 animate-scale-up">
@@ -515,7 +616,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
 
       {/* --- SECTION 5 - ADD TO CALENDAR --- */}
       <section className="max-w-md mx-auto px-6 py-6 w-full text-center">
-        <div className="bg-white border border-[#E8E4DE] rounded-xl p-8 shadow-xs space-y-5">
+        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-8 shadow-xs space-y-5">
           <h3 className="text-lg font-serif text-gray-900 font-light">Save the Date</h3>
           <div className="flex flex-wrap justify-center gap-3 pt-1">
             <a
@@ -571,7 +672,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
       {/* --- SECTION 7 - VENUE DETAILS & MAP --- */}
       <section className="max-w-3xl mx-auto px-6 py-16 w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
         {/* Left Venue Information */}
-        <div className="bg-white border border-[#E8E4DE] rounded-xl p-8 space-y-6 shadow-xs h-full flex flex-col justify-between">
+        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-8 space-y-6 shadow-xs h-full flex flex-col justify-between">
           <div className="space-y-4">
             <h3 className="text-2xl font-serif text-gray-950 font-light">{weddingDetails.venue}</h3>
             <p className="text-xs text-[#6B6B6B]">{weddingDetails.city}</p>
@@ -600,7 +701,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
         </div>
 
         {/* Right Iframe Map Embed */}
-        <div className="bg-white border border-[#E8E4DE] rounded-xl overflow-hidden shadow-xs h-80 relative">
+        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl overflow-hidden shadow-xs h-80 relative">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3961.2678685121404!2d79.91978257500913!3d6.858485293140026!2m3!1f0!2f0!3f0!2m2!1i1024!2i768!4f13.1!3m3!1m2!1m1!2sGrand+Monarch!5e0!3m2!1sen!2slk!4v1700000000000!5m2!1sen!2slk"
             width="100%"

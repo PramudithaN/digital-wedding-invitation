@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Mail, Phone, Edit2, Trash2, MessageCircle, Loader2, AlertCircle, X, CheckCircle2, Copy, ExternalLink } from 'lucide-react';
+import { Plus, Search, Mail, Phone, Edit2, Trash2, MessageCircle, Loader2, AlertCircle, X, CheckCircle2, Copy, ExternalLink, Upload } from 'lucide-react';
 import { GuestWithDetails, Category } from '@/lib/types';
 import { normalizePhoneNumber } from '@/lib/whatsapp';
 
@@ -61,6 +61,42 @@ function SideChip({ side }: { side: string }) {
       }}
     />
   );
+}
+
+function parseCSV(text: string) {
+  const lines = text.split(/\r?\n/);
+  if (lines.length === 0) return [];
+  
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, '').toLowerCase());
+  
+  const parsedRows: Record<string, string>[] = [];
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    
+    const values: string[] = [];
+    let currentVal = '';
+    let inQuotes = false;
+    for (let j = 0; j < line.length; j++) {
+      const char = line[j];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        values.push(currentVal.trim().replace(/^["']|["']$/g, ''));
+        currentVal = '';
+      } else {
+        currentVal += char;
+      }
+    }
+    values.push(currentVal.trim().replace(/^["']|["']$/g, ''));
+    
+    const row: Record<string, string> = {};
+    headers.forEach((header, index) => {
+      row[header] = values[index] || '';
+    });
+    parsedRows.push(row);
+  }
+  return parsedRows;
 }
 
 export default function GuestsPage() {
@@ -125,6 +161,77 @@ export default function GuestsPage() {
     finally { setIsSubmitting(false); }
   };
 
+  const handleCSVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const text = event.target?.result as string;
+      try {
+        const rows = parseCSV(text);
+        if (rows.length === 0) throw new Error('No data found in file');
+        
+        const guestsToUpload = rows.map(row => {
+          const getVal = (keys: string[]) => {
+            const matchedKey = Object.keys(row).find(k => keys.includes(k.toLowerCase().trim()));
+            return matchedKey ? row[matchedKey] : '';
+          };
+          
+          const rawName = getVal(['name', 'guest name', 'guest']);
+          const rawPhone = getVal(['phone', 'phone number', 'mobile', 'contact']);
+          const rawEmail = getVal(['email', 'email address']);
+          const rawSide = getVal(['side', 'wedding side', 'bride/groom']).toLowerCase();
+          const rawCategory = getVal(['category', 'group']);
+          const rawNotes = getVal(['notes', 'note', 'private notes']);
+          
+          let side = 'bride';
+          if (rawSide.includes('groom') || rawSide === 'g') side = 'groom';
+          
+          let matchedCategoryId: string | null = null;
+          if (rawCategory) {
+            const matchedCat = categories.find(c => c.name.toLowerCase().trim() === rawCategory.toLowerCase().trim());
+            if (matchedCat) matchedCategoryId = matchedCat.id;
+          }
+          
+          return {
+            name: rawName.trim(),
+            phone: rawPhone ? normalizePhoneNumber(rawPhone.trim()) : '',
+            email: rawEmail.trim(),
+            side,
+            category_id: matchedCategoryId,
+            notes: rawNotes.trim()
+          };
+        }).filter(g => g.name);
+        
+        if (guestsToUpload.length === 0) {
+          throw new Error('Could not find any guest rows with valid names. Make sure your CSV has a "Name" header.');
+        }
+        
+        setIsSubmitting(true);
+        const res = await fetch('/api/guests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(guestsToUpload)
+        });
+        
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Failed to upload guests');
+        }
+        
+        await fetchData(true);
+        showToast(`Successfully uploaded ${guestsToUpload.length} guests!`, 'success');
+      } catch (err: any) {
+        showToast(err.message || 'Error parsing CSV file', 'error');
+      } finally {
+        setIsSubmitting(false);
+        e.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const handleDeleteGuest = async (id: string) => {
     try {
       setDeletingId(id);
@@ -168,9 +275,15 @@ export default function GuestsPage() {
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Guests</Typography>
           <Typography variant="caption" color="text.secondary">Track invited guests, RSVP states and send invitations.</Typography>
         </Box>
-        <Button variant="contained" startIcon={<Plus size={16} />} onClick={() => setIsAddOpen(true)} sx={{ whiteSpace: 'nowrap' }}>
-          Add Guest
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button variant="outlined" component="label" startIcon={<Upload size={16} />} sx={{ whiteSpace: 'nowrap' }}>
+            Upload CSV
+            <input type="file" accept=".csv" onChange={handleCSVUpload} hidden />
+          </Button>
+          <Button variant="contained" startIcon={<Plus size={16} />} onClick={() => setIsAddOpen(true)} sx={{ whiteSpace: 'nowrap' }}>
+            Add Guest
+          </Button>
+        </Box>
       </Box>
 
       {error && <Alert severity="error" onClose={() => setError('')}>{error}</Alert>}
@@ -292,7 +405,7 @@ export default function GuestsPage() {
                 }}
               >
                 <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                     <Box>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>{g.name}</Typography>
                       <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
@@ -303,7 +416,12 @@ export default function GuestsPage() {
                         )}
                       </Box>
                     </Box>
-                    <StatusChip guest={g} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }} onClick={e => e.stopPropagation()}>
+                      <StatusChip guest={g} />
+                      <IconButton size="small" color="success" onClick={() => openInviteLink(g)} sx={{ bgcolor: 'rgba(22,163,74,0.06)', width: 28, height: 28 }}>
+                        <ExternalLink size={14} />
+                      </IconButton>
+                    </Box>
                   </Box>
                   {(g.phone || g.email) && (
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3, mt: 1 }}>
@@ -311,24 +429,54 @@ export default function GuestsPage() {
                       {g.email && <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}><Mail size={12} style={{ color: '#9CA3AF' }} /><Typography variant="caption">{g.email}</Typography></Box>}
                     </Box>
                   )}
-                  <Box sx={{ display: 'flex', gap: 1.5, mt: 1.5, pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }} onClick={e => e.stopPropagation()}>
-                    {g.phone && (
-                      <IconButton size="medium" color="primary" onClick={() => handleSendWhatsApp(g)} disabled={sendingId !== null} sx={{ bgcolor: 'rgba(37,99,235,0.06)' }}>
-                        {sendingId === g.id ? <CircularProgress size={18} /> : <MessageCircle size={18} />}
-                      </IconButton>
-                    )}
-                    <IconButton size="medium" onClick={() => handleCopyLink(g)} sx={{ bgcolor: 'rgba(0,0,0,0.04)' }}>
-                      <Copy size={18} />
-                    </IconButton>
-                    <IconButton size="medium" color="success" onClick={() => openInviteLink(g)} sx={{ bgcolor: 'rgba(22,163,74,0.06)' }}>
-                      <ExternalLink size={18} />
-                    </IconButton>
-                    <IconButton size="medium" component={Link} href={`/guests/${g.id}`} sx={{ bgcolor: 'rgba(0,0,0,0.04)' }}>
-                      <Edit2 size={18} />
-                    </IconButton>
-                    <IconButton size="medium" color="error" onClick={() => handleDeleteGuest(g.id)} disabled={deletingId !== null} sx={{ bgcolor: 'rgba(220,38,38,0.06)' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5, pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }} onClick={e => e.stopPropagation()}>
+                    <IconButton size="medium" color="error" onClick={() => handleDeleteGuest(g.id)} disabled={deletingId !== null} sx={{ bgcolor: 'rgba(220,38,38,0.06)', width: 40, height: 40 }}>
                       {deletingId === g.id ? <CircularProgress size={18} /> : <Trash2 size={18} />}
                     </IconButton>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Button 
+                        size="small" 
+                        component={Link} 
+                        href={`/guests/${g.id}`} 
+                        variant="outlined" 
+                        color="inherit" 
+                        startIcon={<Edit2 size={16} />} 
+                        sx={{ 
+                          fontSize: '0.7rem', 
+                          fontWeight: 700, 
+                          textTransform: 'none', 
+                          px: 1.5, 
+                          height: 40, 
+                          borderRadius: 10,
+                          borderColor: 'rgba(0,0,0,0.12)',
+                          bgcolor: 'rgba(0,0,0,0.02)'
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      {g.phone && (
+                        <Button 
+                          size="small" 
+                          variant="outlined" 
+                          color="primary" 
+                          onClick={() => handleSendWhatsApp(g)} 
+                          disabled={sendingId !== null} 
+                          startIcon={sendingId === g.id ? <CircularProgress size={16} /> : <MessageCircle size={16} />} 
+                          sx={{ 
+                            fontSize: '0.7rem', 
+                            fontWeight: 700, 
+                            textTransform: 'none', 
+                            px: 1.5, 
+                            height: 40, 
+                            borderRadius: 10,
+                            bgcolor: 'rgba(37,99,235,0.04)',
+                            borderColor: 'rgba(37,99,235,0.2)'
+                          }}
+                        >
+                          WhatsApp
+                        </Button>
+                      )}
+                    </Box>
                   </Box>
                 </CardContent>
               </Card>

@@ -224,7 +224,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
         <img 
           src="/islamic-style-mandala-pattern-wedding-invitation-backdrop-design-vector_1017-46608.avif" 
           alt="Mandala Background"
-          className="w-full h-full object-cover opacity-[0.02] animate-bg-mandala" 
+          className="w-full h-full object-cover opacity-[0.05]" 
         />
       </div>
 
@@ -243,7 +243,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
             <div
               key={idx}
               style={style}
-              className={`absolute select-none pointer-events-none transition-transform duration-300 ease-out ${motif.anim}`}
+              className="absolute select-none pointer-events-none transition-transform duration-300 ease-out"
             >
               {renderMotifSVG(motif.type)}
             </div>

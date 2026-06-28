@@ -1,0 +1,108 @@
+{
+  "categories": [
+    {
+      "id": "cat-1",
+      "name": "Family",
+      "colour": "#4F46E5",
+      "created_at": "2026-06-28T05:32:07.273Z"
+    },
+    {
+      "id": "cat-2",
+      "name": "Friends",
+      "colour": "#10B981",
+      "created_at": "2026-06-28T05:32:07.273Z"
+    },
+    {
+      "id": "cat-3",
+      "name": "Work",
+      "colour": "#F59E0B",
+      "created_at": "2026-06-28T05:32:07.273Z"
+    }
+  ],
+  "guests": [
+    {
+      "id": "guest-1",
+      "name": "Sarah Karunaratne",
+      "phone": "+94771234567",
+      "email": "sarah@example.com",
+      "side": "bride",
+      "category_id": "cat-1",
+      "invite_token": "sarah-token-777",
+      "notes": "Bride's sister, helper with flowers",
+      "created_at": "2026-06-28T05:32:07.273Z"
+    },
+    {
+      "id": "guest-2",
+      "name": "James Wijesinghe",
+      "phone": "+94777654321",
+      "email": "james@example.com",
+      "side": "groom",
+      "category_id": "cat-2",
+      "invite_token": "james-token-888",
+      "notes": "Groom's college roommate",
+      "created_at": "2026-06-28T05:32:07.273Z"
+    },
+    {
+      "id": "guest-3",
+      "name": "Maya Lee",
+      "phone": "+94772345678",
+      "email": "maya@example.com",
+      "side": "bride",
+      "category_id": "cat-3",
+      "invite_token": "maya-token-999",
+      "notes": "Work colleague",
+      "created_at": "2026-06-28T05:32:07.273Z"
+    },
+    {
+      "name": "Banchana",
+      "phone": "0713052556",
+      "email": "",
+      "side": "bride",
+      "category_id": "cat-2",
+      "notes": "",
+      "id": "guest-1782624785258",
+      "invite_token": "101cc308-5255-4f5e-9d28-8a80e1608462",
+      "created_at": "2026-06-28T05:33:05.258Z"
+    }
+  ],
+  "rsvps": [
+    {
+      "id": "rsvp-1",
+      "guest_id": "guest-1",
+      "status": "attending",
+      "plus_one": true,
+      "plus_one_name": "Rishara",
+      "meal_choice": "veg",
+      "dietary_notes": "Gluten free",
+      "message": "Super excited for the big day!",
+      "responded_at": "2026-06-28T05:38:09.365Z"
+    },
+    {
+      "id": "rsvp-2",
+      "guest_id": "guest-2",
+      "status": "declined",
+      "plus_one": false,
+      "meal_choice": "",
+      "dietary_notes": "",
+      "message": "Sorry I cannot make it, I will be out of the country. Wishing you the best!",
+      "responded_at": "2026-06-28T05:32:07.273Z"
+    }
+  ],
+  "invite_links": [
+    {
+      "id": "link-1",
+      "guest_id": "guest-1",
+      "short_code": "sarahk",
+      "channel": "whatsapp",
+      "sent_at": "2026-06-28T05:32:07.273Z",
+      "opened_at": "2026-06-28T05:32:07.273Z"
+    },
+    {
+      "id": "link-1782624842752",
+      "guest_id": "guest-1782624785258",
+      "short_code": "guest-",
+      "channel": "whatsapp",
+      "sent_at": "2026-06-28T05:39:42.783Z"
+    }
+  ]
+}

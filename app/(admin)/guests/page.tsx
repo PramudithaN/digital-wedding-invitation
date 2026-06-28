@@ -310,12 +310,24 @@ export default function GuestsPage() {
                       {g.email && <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}><Mail size={12} style={{ color: '#9CA3AF' }} /><Typography variant="caption">{g.email}</Typography></Box>}
                     </Box>
                   )}
-                  <Box sx={{ display: 'flex', gap: 0.5, mt: 1.5, pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }} onClick={e => e.stopPropagation()}>
-                    {g.phone && <IconButton size="small" color="primary" onClick={() => handleSendWhatsApp(g)} disabled={sendingId !== null}><MessageCircle size={15} /></IconButton>}
-                    <IconButton size="small" onClick={() => handleCopyLink(g)}><Copy size={15} /></IconButton>
-                    <IconButton size="small" color="success" onClick={() => openInviteLink(g)}><ExternalLink size={15} /></IconButton>
-                    <IconButton size="small" component={Link} href={`/guests/${g.id}`}><Edit2 size={15} /></IconButton>
-                    <IconButton size="small" color="error" onClick={() => handleDeleteGuest(g.id)} disabled={deletingId !== null}><Trash2 size={15} /></IconButton>
+                  <Box sx={{ display: 'flex', gap: 1.5, mt: 1.5, pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }} onClick={e => e.stopPropagation()}>
+                    {g.phone && (
+                      <IconButton size="medium" color="primary" onClick={() => handleSendWhatsApp(g)} disabled={sendingId !== null} sx={{ bgcolor: 'rgba(37,99,235,0.06)' }}>
+                        {sendingId === g.id ? <CircularProgress size={18} /> : <MessageCircle size={18} />}
+                      </IconButton>
+                    )}
+                    <IconButton size="medium" onClick={() => handleCopyLink(g)} sx={{ bgcolor: 'rgba(0,0,0,0.04)' }}>
+                      <Copy size={18} />
+                    </IconButton>
+                    <IconButton size="medium" color="success" onClick={() => openInviteLink(g)} sx={{ bgcolor: 'rgba(22,163,74,0.06)' }}>
+                      <ExternalLink size={18} />
+                    </IconButton>
+                    <IconButton size="medium" component={Link} href={`/guests/${g.id}`} sx={{ bgcolor: 'rgba(0,0,0,0.04)' }}>
+                      <Edit2 size={18} />
+                    </IconButton>
+                    <IconButton size="medium" color="error" onClick={() => handleDeleteGuest(g.id)} disabled={deletingId !== null} sx={{ bgcolor: 'rgba(220,38,38,0.06)' }}>
+                      {deletingId === g.id ? <CircularProgress size={18} /> : <Trash2 size={18} />}
+                    </IconButton>
                   </Box>
                 </CardContent>
               </Card>
@@ -402,7 +414,7 @@ export default function GuestsPage() {
       </Drawer>
 
       {/* Toast */}
-      <Snackbar open={toast !== null} autoHideDuration={3000} onClose={() => setToast(null)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+      <Snackbar open={toast !== null} autoHideDuration={3000} onClose={() => setToast(null)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }} sx={{ zIndex: 9999 }}>
         <Alert severity={toast?.type || 'success'} onClose={() => setToast(null)} sx={{ width: '100%' }}>
           {toast?.message}
         </Alert>

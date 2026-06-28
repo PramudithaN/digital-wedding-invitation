@@ -498,7 +498,7 @@ export default function EditGuestPage() {
       </div>
 
       {toast && (
-        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-55 w-[90%] sm:w-auto max-w-sm animate-fade-in select-none">
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] w-[90%] sm:w-auto max-w-sm animate-fade-in select-none">
           <div className={`flex items-center justify-center md:justify-start gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
             toast.type === 'success'
               ? 'bg-green-50 text-green-700 border-green-200'

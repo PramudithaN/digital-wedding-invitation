@@ -456,7 +456,7 @@ export default function RSVPTrackerPage() {
 
       {toast && (
         <Box sx={{
-          position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 1400,
+          position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 9999,
           width: '90%', sm: 'auto', maxWidth: 360
         }}>
           <Alert severity={toast.type} sx={{ width: '100%', boxShadow: 3 }}>

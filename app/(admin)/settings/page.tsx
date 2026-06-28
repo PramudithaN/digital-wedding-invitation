@@ -130,11 +130,11 @@ export default function SettingsPage() {
       )}
 
       {toast && (
-        <div className="fixed top-5 right-5 z-55 animate-fade-in select-none">
-          <div className={`flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 md:bottom-auto md:top-5 md:left-auto md:right-5 md:translate-x-0 z-55 w-[90%] sm:w-auto max-w-sm md:max-w-none animate-fade-in select-none">
+          <div className={`flex items-center justify-center md:justify-start gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
             toast.type === 'success'
               ? 'bg-green-50 text-green-700 border-green-200'
-              : 'bg-red-50 text-red-750 border-red-200'
+              : 'bg-red-50 text-red-755 border-red-200'
           }`}>
             {toast.type === 'success' ? (
               <Check className="w-4 h-4 text-green-600" />
@@ -377,7 +377,7 @@ export default function SettingsPage() {
             ) : (
               <>
                 <Save className="w-4 h-4" />
-                Save Configurations
+                Save
               </>
             )}
           </button>

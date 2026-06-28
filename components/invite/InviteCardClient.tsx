@@ -543,14 +543,26 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
         <div className="h-[1px] w-12 bg-[#C8A882] mx-auto" />
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-          <div className="bg-[#E8E4DE]/30 border border-[#E8E4DE] rounded-xl aspect-[3/4] flex items-center justify-center text-[#C8A882]">
-            <Heart className="w-8 h-8 opacity-20 fill-current" />
+          <div className="overflow-hidden rounded-xl border border-[#E8E4DE] shadow-xs group bg-[#FAFAF8]">
+            <img 
+              src="/ok1.webp" 
+              alt="Oshidhie & Kaveen Moment 1" 
+              className="w-full h-full object-cover aspect-[3/4] transition-transform duration-500 group-hover:scale-105"
+            />
           </div>
-          <div className="bg-[#E8E4DE]/30 border border-[#E8E4DE] rounded-xl aspect-[3/4] flex items-center justify-center text-[#C8A882] sm:translate-y-4">
-            <Heart className="w-8 h-8 opacity-20 fill-current" />
+          <div className="overflow-hidden rounded-xl border border-[#E8E4DE] shadow-xs group bg-[#FAFAF8] sm:translate-y-4">
+            <img 
+              src="/ok2.webp" 
+              alt="Oshidhie & Kaveen Moment 2" 
+              className="w-full h-full object-cover aspect-[3/4] transition-transform duration-500 group-hover:scale-105"
+            />
           </div>
-          <div className="bg-[#E8E4DE]/30 border border-[#E8E4DE] rounded-xl aspect-[3/4] flex items-center justify-center text-[#C8A882]">
-            <Heart className="w-8 h-8 opacity-20 fill-current" />
+          <div className="overflow-hidden rounded-xl border border-[#E8E4DE] shadow-xs group bg-[#FAFAF8]">
+            <img 
+              src="/ok3.webp" 
+              alt="Oshidhie & Kaveen Moment 3" 
+              className="w-full h-full object-cover aspect-[3/4] transition-transform duration-500 group-hover:scale-105"
+            />
           </div>
         </div>
         <p className="text-[10px] text-gray-400 italic pt-6">"Our journey together"</p>

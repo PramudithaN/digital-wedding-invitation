@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   Search, 
-  Filter, 
   CheckCircle2, 
   XCircle, 
   Clock, 
@@ -16,6 +15,49 @@ import {
   Calendar
 } from 'lucide-react';
 import { GuestWithDetails } from '@/lib/types';
+
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import TableContainer from '@mui/material/TableContainer';
+import Table from '@mui/material/Table';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+import TableBody from '@mui/material/TableBody';
+import Chip from '@mui/material/Chip';
+
+function SideChip({ side }: { side: string }) {
+  return (
+    <Chip
+      label={side}
+      size="small"
+      sx={{
+        bgcolor: side === 'bride' ? '#FAF5FF' : '#EFF6FF',
+        color:   side === 'bride' ? '#9333EA'  : '#2563EB',
+        fontWeight: 700, fontSize: '0.7rem',
+      }}
+    />
+  );
+}
+
+function StatusChip({ status }: { status?: string }) {
+  if (status === 'attending') return <Chip label="Attending" size="small" sx={{ bgcolor: '#F0FDF4', color: '#16A34A', fontWeight: 700, fontSize: '0.7rem' }} />;
+  if (status === 'declined')  return <Chip label="Declined"  size="small" sx={{ bgcolor: '#FEF2F2', color: '#DC2626', fontWeight: 700, fontSize: '0.7rem' }} />;
+  return <Chip label="Pending" size="small" sx={{ bgcolor: '#F9FAFB', color: '#6B7280', fontWeight: 700, fontSize: '0.7rem' }} />;
+}
 
 export default function RSVPTrackerPage() {
   const [guests, setGuests] = useState<GuestWithDetails[]>([]);
@@ -111,204 +153,317 @@ export default function RSVPTrackerPage() {
   });
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Header */}
-      <div className="border-b border-gray-200 pb-5">
-        <h1 className="text-2xl font-sans tracking-tight font-semibold text-gray-900">RSVP Registry</h1>
-        <p className="text-xs text-gray-500 mt-1">
+      <Box sx={{ pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Typography variant="h5" sx={{ fontWeight: 700 }} color="text.primary">RSVP Registry</Typography>
+        <Typography variant="caption" color="text.secondary">
           Monitor response counts, filter dietary requirements, meal requests, and manually override attendance statuses.
-        </p>
-      </div>
+        </Typography>
+      </Box>
 
-      {error && (
-        <div className="bg-red-50 border border-red-100 text-red-655 text-xs px-4 py-3 rounded-md flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
-          <span>{error}</span>
-        </div>
-      )}
+      {error && <Alert severity="error" icon={<AlertCircle size={16} />}>{error}</Alert>}
 
       {/* Filter and Search Bar */}
-      <div className="bg-white border border-gray-200 rounded-md p-4 flex flex-col md:flex-row gap-4 items-center justify-between shadow-sm">
-        {/* Search */}
-        <div className="relative w-full md:max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search RSVPs..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white border border-gray-200 rounded-md py-2 pl-9 pr-4 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500"
-          />
-        </div>
-
-        {/* Filters */}
-        <div className="flex flex-wrap w-full md:w-auto gap-4 items-center justify-end">
-          {/* Status filter */}
-          <select
-            value={statusFilter}
-            onChange={(e: any) => setStatusFilter(e.target.value)}
-            className="bg-white border border-gray-200 text-gray-700 text-xs rounded-md py-2 px-3 focus:outline-none cursor-pointer"
-          >
-            <option value="all">All RSVP Statuses</option>
-            <option value="attending">Attending</option>
-            <option value="declined">Declined</option>
-            <option value="pending">Pending Response</option>
-          </select>
-
-          {/* Meal filter */}
-          <select
-            value={mealFilter}
-            onChange={(e) => setMealFilter(e.target.value)}
-            className="bg-white border border-gray-200 text-gray-700 text-xs rounded-md py-2 px-3 focus:outline-none cursor-pointer"
-          >
-            <option value="all">All Meal Selections</option>
-            <option value="veg">Vegetarian</option>
-            <option value="non-veg">Non-Vegetarian</option>
-            <option value="vegan">Vegan</option>
-            <option value="none">No Preference</option>
-          </select>
-        </div>
-      </div>
+      <Paper elevation={1} sx={{ p: 2 }}>
+        <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+          <Grid size={{ xs: 12, sm: 5 }}>
+            <TextField
+              size="small"
+              fullWidth
+              placeholder="Search RSVPs..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              slotProps={{ input: { startAdornment: <InputAdornment position="start"><Search size={16} /></InputAdornment> } }}
+            />
+          </Grid>
+          <Grid size={{ xs: 6, sm: 3.5 }}>
+            <FormControl size="small" fullWidth>
+              <InputLabel id="status-filter-label">RSVP Status</InputLabel>
+              <Select
+                labelId="status-filter-label"
+                value={statusFilter}
+                label="RSVP Status"
+                onChange={(e: any) => setStatusFilter(e.target.value)}
+              >
+                <MenuItem value="all">All RSVP Statuses</MenuItem>
+                <MenuItem value="attending">Attending</MenuItem>
+                <MenuItem value="declined">Declined</MenuItem>
+                <MenuItem value="pending">Pending Response</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 6, sm: 3.5 }}>
+            <FormControl size="small" fullWidth>
+              <InputLabel id="meal-filter-label">Meal Selection</InputLabel>
+              <Select
+                labelId="meal-filter-label"
+                value={mealFilter}
+                label="Meal Selection"
+                onChange={(e) => setMealFilter(e.target.value)}
+              >
+                <MenuItem value="all">All Meal Selections</MenuItem>
+                <MenuItem value="veg">Vegetarian</MenuItem>
+                <MenuItem value="non-veg">Non-Vegetarian</MenuItem>
+                <MenuItem value="vegan">Vegan</MenuItem>
+                <MenuItem value="none">No Preference</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+      </Paper>
 
       {/* Table view */}
       {isLoading ? (
-        <div className="py-24 flex flex-col items-center justify-center text-gray-400 gap-2">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-          <p className="text-sm">Loading RSVP logs...</p>
-        </div>
+        <Box sx={{ py: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+          <CircularProgress size={30} />
+          <Typography variant="body2" color="text.secondary">Loading RSVP logs...</Typography>
+        </Box>
       ) : filteredGuests.length === 0 ? (
-        <div className="py-20 text-center text-gray-450 text-xs border border-dashed border-gray-200 rounded bg-white">
-          No RSVP logs match current filter criteria.
-        </div>
+        <Box sx={{ py: 6, textAlign: 'center', border: '1px dashed', borderColor: 'divider', borderRadius: 2, bgcolor: 'background.paper' }}>
+          <Typography variant="caption" color="text.secondary">No RSVP logs match current filter criteria.</Typography>
+        </Box>
       ) : (
-        <div className="overflow-hidden bg-white border border-gray-200 rounded-md shadow-sm">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 h-10">
-                <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Guest</th>
-                <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Side</th>
-                <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">RSVP Status</th>
-                <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Meal Choice</th>
-                <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Plus One</th>
-                <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Responded</th>
-                <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-150">
-              {filteredGuests.map((guest) => {
-                const rsvpStatus = guest.rsvp?.status || 'pending';
-                const hasPlusOne = guest.rsvp?.plus_one;
-                const plusOneName = guest.rsvp?.plus_one_name;
-                const meal = guest.rsvp?.meal_choice;
-                const responded = guest.rsvp?.responded_at;
+        <>
+          {/* Desktop Table View */}
+          <TableContainer component={Paper} elevation={1} sx={{ display: { xs: 'none', md: 'block' } }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Guest</TableCell>
+                  <TableCell>Side</TableCell>
+                  <TableCell>RSVP Status</TableCell>
+                  <TableCell>Meal Choice</TableCell>
+                  <TableCell>Plus One</TableCell>
+                  <TableCell>Responded</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredGuests.map((guest) => {
+                  const rsvpStatus = guest.rsvp?.status || 'pending';
+                  const hasPlusOne = guest.rsvp?.plus_one;
+                  const plusOneName = guest.rsvp?.plus_one_name;
+                  const meal = guest.rsvp?.meal_choice;
+                  const responded = guest.rsvp?.responded_at;
 
-                return (
-                  <tr key={guest.id} className="hover:bg-gray-50/50 transition-colors h-14">
-                    <td className="px-6">
-                      <div className="text-sm font-medium text-gray-900">{guest.name}</div>
-                      {guest.category && (
-                        <span 
-                          style={{ color: guest.category.colour }} 
-                          className="text-[9px] font-bold tracking-wider uppercase mt-0.5 block"
+                  return (
+                    <TableRow key={guest.id} hover>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{guest.name}</Typography>
+                        {guest.category && (
+                          <Typography
+                            variant="caption"
+                            sx={{ color: guest.category.colour, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.6rem', display: 'block', mt: 0.25 }}
+                          >
+                            {guest.category.name}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <SideChip side={guest.side || 'bride'} />
+                      </TableCell>
+                      <TableCell>
+                        {updatingId === guest.id ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <CircularProgress size={12} />
+                            <Typography variant="caption" color="text.secondary">Updating...</Typography>
+                          </Box>
+                        ) : (
+                          <FormControl size="small" sx={{ minWidth: 110 }}>
+                            <Select
+                              value={rsvpStatus}
+                              onChange={(e: any) => handleStatusChange(guest.id, e.target.value)}
+                              size="small"
+                              sx={{
+                                fontSize: '0.75rem',
+                                height: 28,
+                                bgcolor: rsvpStatus === 'attending' ? '#F0FDF4' : rsvpStatus === 'declined' ? '#FEF2F2' : '#F9FAFB',
+                                color: rsvpStatus === 'attending' ? '#16A34A' : rsvpStatus === 'declined' ? '#DC2626' : '#4B5563',
+                                fontWeight: 600,
+                                '.MuiOutlinedInput-notchedOutline': {
+                                  borderColor: rsvpStatus === 'attending' ? '#BBF7D0' : rsvpStatus === 'declined' ? '#FCA5A5' : '#E5E7EB'
+                                }
+                              }}
+                            >
+                              <MenuItem value="pending">Pending</MenuItem>
+                              <MenuItem value="attending">Attending</MenuItem>
+                              <MenuItem value="declined">Declined</MenuItem>
+                            </Select>
+                          </FormControl>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {rsvpStatus === 'attending' && meal ? (
+                          <Chip
+                            icon={<UtensilsCrossed size={12} />}
+                            label={meal}
+                            size="small"
+                            variant="outlined"
+                            sx={{ textTransform: 'capitalize', fontSize: '0.7rem' }}
+                          />
+                        ) : (
+                          <Typography variant="caption" color="text.disabled">—</Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {rsvpStatus === 'attending' && hasPlusOne ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <UserPlus size={12} style={{ color: '#9CA3AF' }} />
+                              <Typography variant="caption" sx={{ fontWeight: 600 }}>Yes</Typography>
+                            </Box>
+                            {plusOneName && (
+                              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{plusOneName}</Typography>
+                            )}
+                          </Box>
+                        ) : (
+                          <Typography variant="caption" color="text.secondary">No</Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {responded ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Calendar size={12} style={{ color: '#9CA3AF' }} />
+                            <Typography variant="caption">{new Date(responded).toLocaleDateString()}</Typography>
+                          </Box>
+                        ) : (
+                          <Typography variant="caption" color="text.disabled" sx={{ fontStyle: 'italic' }}>Pending</Typography>
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Button
+                          size="small"
+                          component={Link}
+                          href={`/guests/${guest.id}`}
+                          variant="outlined"
+                          startIcon={<Edit2 size={12} />}
+                          sx={{ fontSize: '0.7rem' }}
                         >
-                          {guest.category.name}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6">
-                      <span className={`badge ${guest.side === 'bride' ? 'badge-bride' : 'badge-groom'}`}>
-                        {guest.side}
-                      </span>
-                    </td>
-                    <td className="px-6">
-                      {updatingId === guest.id ? (
-                        <div className="flex items-center gap-1 text-xs text-gray-400">
-                          <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
-                          <span>Updating...</span>
-                        </div>
-                      ) : (
-                        <select
+                          Details
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Mobile Card View */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 1.5 }}>
+            {filteredGuests.map((guest) => {
+              const rsvpStatus = guest.rsvp?.status || 'pending';
+              const hasPlusOne = guest.rsvp?.plus_one;
+              const plusOneName = guest.rsvp?.plus_one_name;
+              const meal = guest.rsvp?.meal_choice;
+              const responded = guest.rsvp?.responded_at;
+
+              return (
+                <Card 
+                  key={guest.id} 
+                  elevation={1} 
+                  sx={{ 
+                    borderTop: (guest.side || 'bride') === 'groom' ? '4px solid #2563EB' : '4px solid #9333EA' 
+                  }}
+                >
+                  <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>{guest.name}</Typography>
+                        <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
+                          <SideChip side={guest.side || 'bride'} />
+                          {guest.category && (
+                            <Chip
+                              size="small"
+                              label={guest.category.name}
+                              sx={{
+                                height: 18,
+                                fontSize: '0.65rem',
+                                bgcolor: guest.category.colour + '22',
+                                color: guest.category.colour,
+                                fontWeight: 700
+                              }}
+                            />
+                          )}
+                        </Box>
+                      </Box>
+                      <StatusChip status={rsvpStatus} />
+                    </Box>
+
+                    {/* Meal / Plus One details */}
+                    {(rsvpStatus === 'attending' && (meal || hasPlusOne)) && (
+                      <Box sx={{ display: 'flex', gap: 2, mt: 1.5, pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+                        {meal && (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <UtensilsCrossed size={12} style={{ color: '#9CA3AF' }} />
+                            <Typography variant="caption" sx={{ textTransform: 'capitalize' }}>{meal}</Typography>
+                          </Box>
+                        )}
+                        {hasPlusOne && (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <UserPlus size={12} style={{ color: '#9CA3AF' }} />
+                            <Typography variant="caption">
+                              Plus One {plusOneName ? `(${plusOneName})` : ''}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
+                    )}
+
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5, pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+                      <FormControl size="small" sx={{ minWidth: 110 }}>
+                        <Select
                           value={rsvpStatus}
                           onChange={(e: any) => handleStatusChange(guest.id, e.target.value)}
-                          className={`text-xs font-semibold rounded-md py-1 px-2 border cursor-pointer focus:outline-none ${
-                            rsvpStatus === 'attending'
-                              ? 'bg-green-50 text-green-700 border-green-200'
-                              : rsvpStatus === 'declined'
-                              ? 'bg-red-50 text-red-750 border-red-200'
-                              : 'bg-gray-50 text-gray-500 border-gray-200'
-                          }`}
+                          disabled={updatingId !== null}
+                          size="small"
+                          sx={{
+                            fontSize: '0.75rem',
+                            height: 28,
+                            bgcolor: rsvpStatus === 'attending' ? '#F0FDF4' : rsvpStatus === 'declined' ? '#FEF2F2' : '#F9FAFB',
+                            color: rsvpStatus === 'attending' ? '#16A34A' : rsvpStatus === 'declined' ? '#DC2626' : '#4B5563',
+                            fontWeight: 600,
+                            '.MuiOutlinedInput-notchedOutline': {
+                              borderColor: rsvpStatus === 'attending' ? '#BBF7D0' : rsvpStatus === 'declined' ? '#FCA5A5' : '#E5E7EB'
+                            }
+                          }}
                         >
-                          <option value="pending">Pending</option>
-                          <option value="attending">Attending</option>
-                          <option value="declined">Declined</option>
-                        </select>
-                      )}
-                    </td>
-                    <td className="px-6">
-                      {rsvpStatus === 'attending' && meal ? (
-                        <span className="inline-flex items-center gap-1 text-xs text-gray-600 bg-gray-50 px-2 py-0.5 rounded border border-gray-150 capitalize">
-                          <UtensilsCrossed className="w-3 h-3 text-gray-400" /> {meal}
-                        </span>
-                      ) : (
-                        <span className="text-gray-300 text-xs">-</span>
-                      )}
-                    </td>
-                    <td className="px-6">
-                      {rsvpStatus === 'attending' && hasPlusOne ? (
-                        <div className="flex flex-col text-xs">
-                          <span className="inline-flex items-center gap-1 text-gray-800 font-medium">
-                            <UserPlus className="w-3 h-3 text-gray-400" /> Yes
-                          </span>
-                          {plusOneName && (
-                            <span className="text-[10px] text-gray-400 mt-0.5">{plusOneName}</span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 text-xs">No</span>
-                      )}
-                    </td>
-                    <td className="px-6 text-xs text-gray-500">
-                      {responded ? (
-                        <div className="flex items-center gap-1.5 font-mono">
-                          <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                          <span>{new Date(responded).toLocaleDateString()}</span>
-                        </div>
-                      ) : (
-                        <span className="text-gray-300 italic">Pending</span>
-                      )}
-                    </td>
-                    <td className="px-6 text-right">
-                      <Link
+                          <MenuItem value="pending">Pending</MenuItem>
+                          <MenuItem value="attending">Attending</MenuItem>
+                          <MenuItem value="declined">Declined</MenuItem>
+                        </Select>
+                      </FormControl>
+                      
+                      <Button
+                        size="small"
+                        component={Link}
                         href={`/guests/${guest.id}`}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-blue-500 hover:text-blue-650 hover:bg-blue-50 px-2.5 py-1.5 rounded-md transition-colors border border-blue-200"
+                        variant="outlined"
+                        startIcon={<Edit2 size={12} />}
+                        sx={{ fontSize: '0.7rem', height: 28, py: 0 }}
                       >
-                        <Edit2 className="w-3 h-3" />
                         Details
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </Box>
+        </>
       )}
+
       {toast && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 md:bottom-auto md:top-5 md:left-auto md:right-5 md:translate-x-0 z-55 w-[90%] sm:w-auto max-w-sm md:max-w-none animate-fade-in select-none">
-          <div className={`flex items-center justify-center md:justify-start gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
-            toast.type === 'success'
-              ? 'bg-green-50 text-green-700 border-green-200'
-              : 'bg-red-50 text-red-755 border-red-200'
-          }`}>
-            {toast.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-            ) : (
-              <AlertCircle className="w-4 h-4 text-red-500" />
-            )}
-            <span>{toast.message}</span>
-          </div>
-        </div>
+        <Box sx={{
+          position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 1400,
+          width: '90%', sm: 'auto', maxWidth: 360
+        }}>
+          <Alert severity={toast.type} sx={{ width: '100%', boxShadow: 3 }}>
+            {toast.message}
+          </Alert>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }

@@ -2,22 +2,66 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { 
-  Plus, 
-  Search, 
-  Mail, 
-  Phone, 
-  Edit2, 
-  Trash2, 
-  MessageCircle, 
-  Loader2, 
-  AlertCircle, 
-  X,
-  CheckCircle2,
-  Copy,
-  ExternalLink
-} from 'lucide-react';
+import { Plus, Search, Mail, Phone, Edit2, Trash2, MessageCircle, Loader2, AlertCircle, X, CheckCircle2, Copy, ExternalLink } from 'lucide-react';
 import { GuestWithDetails, Category } from '@/lib/types';
+import { normalizePhoneNumber } from '@/lib/whatsapp';
+
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
+import Chip from '@mui/material/Chip';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Drawer from '@mui/material/Drawer';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Snackbar from '@mui/material/Snackbar';
+import Tooltip from '@mui/material/Tooltip';
+import Avatar from '@mui/material/Avatar';
+import Divider from '@mui/material/Divider';
+import InputAdornment from '@mui/material/InputAdornment';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+
+function StatusChip({ guest }: { guest: GuestWithDetails }) {
+  const status = guest.rsvp?.status;
+  if (status === 'attending') return <Chip label="Attending" size="small" sx={{ bgcolor: '#F0FDF4', color: '#16A34A', fontWeight: 700, fontSize: '0.7rem' }} />;
+  if (status === 'declined')  return <Chip label="Declined"  size="small" sx={{ bgcolor: '#FEF2F2', color: '#DC2626', fontWeight: 700, fontSize: '0.7rem' }} />;
+  if (guest.invite_link?.opened_at) return <Chip label="Opened" size="small" sx={{ bgcolor: '#FFFBEB', color: '#D97706', fontWeight: 700, fontSize: '0.7rem' }} />;
+  if (guest.invite_link?.sent_at)   return <Chip label="Sent"   size="small" sx={{ bgcolor: '#EFF6FF', color: '#2563EB', fontWeight: 700, fontSize: '0.7rem' }} />;
+  return <Chip label="Pending" size="small" sx={{ bgcolor: '#F9FAFB', color: '#6B7280', fontWeight: 700, fontSize: '0.7rem' }} />;
+}
+
+function SideChip({ side }: { side: string }) {
+  return (
+    <Chip
+      label={side}
+      size="small"
+      sx={{
+        bgcolor: side === 'bride' ? '#FAF5FF' : '#EFF6FF',
+        color:   side === 'bride' ? '#9333EA'  : '#2563EB',
+        fontWeight: 700, fontSize: '0.7rem',
+      }}
+    />
+  );
+}
 
 export default function GuestsPage() {
   const [guests, setGuests] = useState<GuestWithDetails[]>([]);
@@ -25,33 +69,22 @@ export default function GuestsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  
+
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  const getInviteUrl = (guest: GuestWithDetails) => {
-    const origin = globalThis.location?.origin || '';
-    return `${origin}/invite/${guest.invite_token}`;
+  const getInviteUrl = (guest: GuestWithDetails) => `${globalThis.location?.origin || ''}/invite/${guest.invite_token}`;
+  const openInviteLink = (g: GuestWithDetails) => globalThis.open(getInviteUrl(g), '_blank', 'noopener,noreferrer');
+  const handleCopyLink = (g: GuestWithDetails) => {
+    navigator.clipboard.writeText(getInviteUrl(g));
+    showToast(`${g.name}'s invite link copied!`, 'success');
   };
 
-  const openInviteLink = (guest: GuestWithDetails) => {
-    globalThis.open(getInviteUrl(guest), '_blank', 'noopener,noreferrer');
-  };
-
-  const handleCopyLink = (guest: GuestWithDetails) => {
-    const inviteUrl = getInviteUrl(guest);
-    navigator.clipboard.writeText(inviteUrl);
-    showToast(`${guest.name}'s invite link copied!`, 'success');
-  };
-
-  // Search & Filter state
   const [search, setSearch] = useState('');
-  const [sideFilter, setSideFilter] = useState<'all' | 'bride' | 'groom'>('all');
+  const [sideFilter, setSideFilter] = useState('all');
   const [catFilter, setCatFilter] = useState('all');
-
-  // Add Guest Modal state
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -61,97 +94,44 @@ export default function GuestsPage() {
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedGuest, setSelectedGuest] = useState<GuestWithDetails | null>(null);
-  
-  // Actions loading state
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [guestsRes, catsRes] = await Promise.all([
-        fetch('/api/guests'),
-        fetch('/api/categories')
-      ]);
-
-      if (!guestsRes.ok || !catsRes.ok) {
-        throw new Error('Failed to load data');
-      }
-
-      const guestsData = await guestsRes.json();
-      const catsData = await catsRes.json();
-
-      setGuests(guestsData);
-      setCategories(catsData);
-    } catch (err: any) {
-      setError(err.message || 'An error occurred while loading guests.');
-    } finally {
-      setIsLoading(false);
-    }
+      const [gR, cR] = await Promise.all([fetch('/api/guests'), fetch('/api/categories')]);
+      setGuests(await gR.json());
+      setCategories(await cR.json());
+    } catch (err: any) { setError(err.message || 'An error occurred.'); }
+    finally { setIsLoading(false); }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const handleAddGuest = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
-
     try {
       setIsSubmitting(true);
-      setError('');
       const res = await fetch('/api/guests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name.trim(),
-          phone: phone.trim(),
-          email: email.trim(),
-          side,
-          category_id: categoryId || null,
-          notes: notes.trim()
-        }),
+        body: JSON.stringify({ name: name.trim(), phone: normalizePhoneNumber(phone.trim()), email: email.trim(), side, category_id: categoryId || null, notes: notes.trim() }),
       });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || 'Failed to add guest');
-      }
-
       await fetchData();
-      showToast(`${name.trim()} added successfully!`, 'success');
-      
-      // Reset form
-      setName('');
-      setPhone('');
-      setEmail('');
-      setSide('bride');
-      setCategoryId('');
-      setNotes('');
-      setIsAddOpen(false);
-    } catch (err: any) {
-      setError(err.message || 'Could not add guest');
-      showToast(err.message || 'Could not add guest', 'error');
-    } finally {
-      setIsSubmitting(false);
-    }
+      setName(''); setPhone(''); setEmail(''); setSide('bride'); setCategoryId(''); setNotes(''); setIsAddOpen(false);
+    } catch (err: any) { showToast(err.message || 'Could not add', 'error'); }
+    finally { setIsSubmitting(false); }
   };
 
   const handleDeleteGuest = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this guest?')) return;
     try {
       setDeletingId(id);
       const res = await fetch(`/api/guests/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete guest');
-      setGuests((prev) => prev.filter((g) => g.id !== id));
-      showToast('Guest record deleted successfully!', 'success');
-    } catch (err: any) {
-      setError(err.message || 'Could not delete guest');
-      showToast(err.message || 'Could not delete guest', 'error');
-    } finally {
-      setDeletingId(null);
-    }
+      setGuests(p => p.filter(g => g.id !== id));
+      showToast('Guest deleted.', 'success');
+    } catch (err: any) { showToast(err.message || 'Could not delete', 'error'); }
+    finally { setDeletingId(null); }
   };
 
   const handleSendWhatsApp = async (guest: GuestWithDetails) => {
@@ -160,662 +140,273 @@ export default function GuestsPage() {
       const res = await fetch('/api/send-whatsapp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          guestId: guest.id,
-          method: 'manual'
-        }),
+        body: JSON.stringify({ guestId: guest.id, method: 'manual' }),
       });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || 'Failed to generate link');
-      }
-
       const data = await res.json();
-      
-      if (data.url) {
-        window.open(data.url, '_blank');
-      }
-      
+      if (data.url) window.open(data.url, '_blank');
       await fetchData();
-      showToast('WhatsApp link generated successfully!', 'success');
-    } catch (err: any) {
-      alert(err.message || 'Error generating link');
-      showToast(err.message || 'Error generating link', 'error');
-    } finally {
-      setSendingId(null);
-    }
+      showToast('WhatsApp link generated!', 'success');
+    } catch (err: any) { showToast(err.message || 'Error', 'error'); }
+    finally { setSendingId(null); }
   };
 
-  // Filter and search logic
-  const filteredGuests = guests.filter((guest) => {
-    const matchesSearch = guest.name.toLowerCase().includes(search.toLowerCase()) || 
-                          (guest.notes && guest.notes.toLowerCase().includes(search.toLowerCase())) ||
-                          (guest.phone && guest.phone.includes(search)) ||
-                          (guest.email && guest.email.toLowerCase().includes(search.toLowerCase()));
-    
-    const matchesSide = sideFilter === 'all' || guest.side === sideFilter;
-    const matchesCat = catFilter === 'all' || guest.category_id === catFilter;
-
-    return matchesSearch && matchesSide && matchesCat;
+  const filtered = guests.filter(g => {
+    const s = search.toLowerCase();
+    return (
+      (g.name.toLowerCase().includes(s) || (g.phone && g.phone.includes(s)) || (g.email && g.email.toLowerCase().includes(s))) &&
+      (sideFilter === 'all' || g.side === sideFilter) &&
+      (catFilter === 'all' || g.category_id === catFilter)
+    );
   });
 
-  // Helper to render invitation status
-  const renderStatusBadge = (guest: GuestWithDetails) => {
-    const rsvpStatus = guest.rsvp?.status;
-    const openedAt = guest.invite_link?.opened_at;
-    const sentAt = guest.invite_link?.sent_at;
-
-    if (rsvpStatus === 'attending') {
-      return <span className="badge badge-attending">Attending</span>;
-    }
-    if (rsvpStatus === 'declined') {
-      return <span className="badge badge-declined">Declined</span>;
-    }
-    if (openedAt) {
-      return <span className="badge badge-pending">Opened</span>;
-    }
-    if (sentAt) {
-      return <span className="badge badge-groom">Sent</span>;
-    }
-    return <span className="badge border-gray-200 text-gray-500 bg-gray-50">Pending</span>;
-  };
-
   return (
-    <div className="space-y-6 animate-fade-in relative min-h-screen">
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-5">
-        <div>
-          <h1 className="text-2xl font-sans tracking-tight font-semibold text-gray-900">Guests</h1>
-          <p className="text-xs text-gray-500 mt-1">
-            Track invited guests, wedding side representation, RSVP states, and send invites.
-          </p>
-        </div>
-        <button
-          onClick={() => setIsAddOpen(true)}
-          className="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-md py-2.5 px-4 text-xs font-semibold tracking-wide shadow-sm hover:shadow active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer w-full sm:w-auto"
-        >
-          <Plus className="w-4.5 h-4.5" /> Add Guest
-        </button>
-      </div>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'space-between', alignItems: 'flex-start', pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>Guests</Typography>
+          <Typography variant="caption" color="text.secondary">Track invited guests, RSVP states and send invitations.</Typography>
+        </Box>
+        <Button variant="contained" startIcon={<Plus size={16} />} onClick={() => setIsAddOpen(true)} sx={{ whiteSpace: 'nowrap' }}>
+          Add Guest
+        </Button>
+      </Box>
 
-      {error && (
-        <div className="bg-red-50 border border-red-100 text-red-655 text-xs px-4 py-3 rounded-md flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
-          <span>{error}</span>
-        </div>
-      )}
+      {error && <Alert severity="error" onClose={() => setError('')}>{error}</Alert>}
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white border border-gray-200 rounded-md p-4 flex flex-col md:flex-row gap-4 items-center justify-between shadow-sm">
-        {/* Search */}
-        <div className="relative w-full md:max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search guests..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white border border-gray-200 rounded-md py-2 pl-9 pr-4 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
-          />
-        </div>
+      {/* Filters */}
+      <Paper elevation={1} sx={{ p: 2 }}>
+        <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+          <Grid size={{ xs: 12, sm: 5 }}>
+            <TextField
+              size="small" fullWidth placeholder="Search guests..." value={search}
+              onChange={e => setSearch(e.target.value)}
+              slotProps={{ input: { startAdornment: <InputAdornment position="start"><Search size={16} /></InputAdornment> } }}
+            />
+          </Grid>
+          <Grid size={{ xs: 6, sm: 3.5 }}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Side</InputLabel>
+              <Select value={sideFilter} label="Side" onChange={e => setSideFilter(e.target.value)}>
+                <MenuItem value="all">All Sides</MenuItem>
+                <MenuItem value="bride">Bride&apos;s Side</MenuItem>
+                <MenuItem value="groom">Groom&apos;s Side</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 6, sm: 3.5 }}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Category</InputLabel>
+              <Select value={catFilter} label="Category" onChange={e => setCatFilter(e.target.value)}>
+                <MenuItem value="all">All Categories</MenuItem>
+                {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+      </Paper>
 
-        {/* Filters */}
-        <div className="flex flex-wrap w-full md:w-auto gap-4 items-center justify-end">
-          {/* Side filter */}
-          <select
-            value={sideFilter}
-            onChange={(e: any) => setSideFilter(e.target.value)}
-            className="bg-white border border-gray-200 text-gray-700 text-xs rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
-          >
-            <option value="all">All Sides</option>
-            <option value="bride">Bride's Side</option>
-            <option value="groom">Groom's Side</option>
-          </select>
-
-          {/* Category filter */}
-          <select
-            value={catFilter}
-            onChange={(e) => setCatFilter(e.target.value)}
-            className="bg-white border border-gray-200 text-gray-700 text-xs rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
-          >
-            <option value="all">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Guest Table (Desktop) / Cards (Mobile) */}
+      {/* Table */}
       {isLoading ? (
-        <div className="py-24 flex flex-col items-center justify-center text-gray-400 gap-2">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-          <p className="text-sm">Loading guest registry...</p>
-        </div>
-      ) : filteredGuests.length === 0 ? (
-        <div className="py-20 text-center text-gray-450 text-xs border border-dashed border-gray-200 rounded bg-white">
-          No guests found matching search criteria.
-        </div>
+        <Box sx={{ py: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+          <CircularProgress /><Typography variant="body2" color="text.secondary">Loading guests...</Typography>
+        </Box>
+      ) : filtered.length === 0 ? (
+        <Box sx={{ py: 8, textAlign: 'center', border: '1px dashed', borderColor: 'divider', borderRadius: 3 }}>
+          <Typography variant="body2" color="text.secondary">No guests found.</Typography>
+        </Box>
       ) : (
         <>
-          {/* Desktop Table View */}
-          <div className="hidden md:block overflow-hidden bg-white border border-gray-200 rounded-md shadow-sm">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50 h-10">
-                  <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Guest Name</th>
-                  <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Side</th>
-                  <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Category</th>
-                  <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Contact</th>
-                  <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Invite Status</th>
-                  <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-150">
-                {filteredGuests.map((guest) => (
-                  <tr
-                    key={guest.id}
-                    className="hover:bg-gray-50/50 transition-colors duration-150 group h-14 cursor-pointer"
-                    onClick={() => setSelectedGuest(guest)}
-                  >
-                    <td className="px-6">
-                      <div className="text-sm font-medium text-gray-900">{guest.name}</div>
-                      {guest.notes && (
-                        <div className="text-[10px] text-gray-400 mt-0.5 max-w-[220px] truncate" title={guest.notes}>
-                          {guest.notes}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6">
-                      <span className={`badge ${guest.side === 'bride' ? 'badge-bride' : 'badge-groom'}`}>
-                        {guest.side}
-                      </span>
-                    </td>
-                    <td className="px-6">
-                      {guest.category ? (
-                        <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                          <span 
-                            style={{ backgroundColor: guest.category.colour }} 
-                            className="w-2 h-2 rounded-full shrink-0" 
-                          />
-                          {guest.category.name}
-                        </div>
-                      ) : (
-                        <span className="text-gray-300 text-xs">-</span>
-                      )}
-                    </td>
-                    <td className="px-6 space-y-0.5">
-                      {guest.phone ? (
-                        <div className="flex items-center gap-1 text-[11px] text-gray-500">
-                          <Phone className="w-3.5 h-3.5 text-gray-400" />
-                          <span>{guest.phone}</span>
-                        </div>
-                      ) : null}
-                      {guest.email ? (
-                        <div className="flex items-center gap-1 text-[11px] text-gray-500">
-                          <Mail className="w-3.5 h-3.5 text-gray-400" />
-                          <span>{guest.email}</span>
-                        </div>
-                      ) : null}
-                      {!guest.phone && !guest.email ? (
-                        <span className="text-gray-300 text-xs">-</span>
-                      ) : null}
-                    </td>
-                    <td className="px-6">{renderStatusBadge(guest)}</td>
-                    <td className="px-6 text-right">
-                      {/* Show actions cleanly */}
-                      <div className="flex items-center justify-end gap-1">
-                        {guest.phone && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSendWhatsApp(guest);
-                            }}
-                            disabled={sendingId !== null}
-                            className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-md transition-all cursor-pointer"
-                            title="Send Invite via WhatsApp"
-                          >
-                            {sendingId === guest.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <MessageCircle className="w-4 h-4" />
-                            )}
-                          </button>
+          {/* Desktop Table */}
+          <TableContainer component={Paper} elevation={1} sx={{ display: { xs: 'none', md: 'block' } }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Guest Name</TableCell>
+                  <TableCell>Side</TableCell>
+                  <TableCell>Category</TableCell>
+                  <TableCell>Contact</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filtered.map(g => (
+                  <TableRow key={g.id} hover sx={{ cursor: 'pointer' }} onClick={() => setSelectedGuest(g)}>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{g.name}</Typography>
+                      {g.notes && <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 220, display: 'block' }}>{g.notes}</Typography>}
+                    </TableCell>
+                    <TableCell><SideChip side={g.side || 'bride'} /></TableCell>
+                    <TableCell>
+                      {g.category ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: g.category.colour }} />
+                          <Typography variant="caption">{g.category.name}</Typography>
+                        </Box>
+                      ) : <Typography variant="caption" color="text.disabled">–</Typography>}
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3 }}>
+                        {g.phone && <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}><Phone size={12} style={{ color: '#9CA3AF' }} /><Typography variant="caption">{g.phone}</Typography></Box>}
+                        {g.email && <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}><Mail size={12} style={{ color: '#9CA3AF' }} /><Typography variant="caption">{g.email}</Typography></Box>}
+                      </Box>
+                    </TableCell>
+                    <TableCell><StatusChip guest={g} /></TableCell>
+                    <TableCell align="right">
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }} onClick={e => e.stopPropagation()}>
+                        {g.phone && (
+                          <Tooltip title="Send WhatsApp">
+                            <IconButton size="small" color="primary" disabled={sendingId !== null} onClick={() => handleSendWhatsApp(g)}>
+                              {sendingId === g.id ? <CircularProgress size={14} /> : <MessageCircle size={16} />}
+                            </IconButton>
+                          </Tooltip>
                         )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCopyLink(guest);
-                          }}
-                          className="p-1.5 text-gray-550 hover:bg-gray-100 hover:text-gray-905 rounded-md transition-all cursor-pointer"
-                          title="Copy Invitation Link"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openInviteLink(guest);
-                          }}
-                          className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-md transition-all cursor-pointer"
-                          title="Open Invitation Link"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </button>
-                        <Link
-                          href={`/guests/${guest.id}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-all"
-                          title="Edit Guest"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Link>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteGuest(guest.id);
-                          }}
-                          disabled={deletingId !== null}
-                          className="p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-md transition-all cursor-pointer"
-                          title="Delete Guest"
-                        >
-                          {deletingId === guest.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="w-4 h-4" />
-                          )}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                        <Tooltip title="Copy Link"><IconButton size="small" onClick={() => handleCopyLink(g)}><Copy size={16} /></IconButton></Tooltip>
+                        <Tooltip title="Open Invite"><IconButton size="small" color="success" onClick={() => openInviteLink(g)}><ExternalLink size={16} /></IconButton></Tooltip>
+                        <Tooltip title="Edit"><IconButton size="small" component={Link} href={`/guests/${g.id}`}><Edit2 size={16} /></IconButton></Tooltip>
+                        <Tooltip title="Delete">
+                          <IconButton size="small" color="error" disabled={deletingId !== null} onClick={() => handleDeleteGuest(g.id)}>
+                            {deletingId === g.id ? <CircularProgress size={14} /> : <Trash2 size={16} />}
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-          {/* Mobile Card Grid View */}
-          <div className="grid grid-cols-1 gap-2.5 md:hidden">
-            {filteredGuests.map((guest) => (
-              <div 
-                key={guest.id} 
-                className="bg-white border border-gray-200 rounded-md p-4 space-y-3 shadow-sm hover:border-gray-350 transition-colors cursor-pointer"
-                onClick={() => setSelectedGuest(guest)}
+          {/* Mobile Cards */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 1.5 }}>
+            {filtered.map(g => (
+              <Card 
+                key={g.id} 
+                elevation={1} 
+                onClick={() => setSelectedGuest(g)} 
+                sx={{ 
+                  cursor: 'pointer',
+                  borderTop: (g.side || 'bride') === 'groom' ? '4px solid #2563EB' : '4px solid #9333EA'
+                }}
               >
-                {/* Header */}
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-medium text-gray-900 text-sm">{guest.name}</h3>
-                    <div className="flex gap-2 mt-1.5">
-                      <span className={`badge ${guest.side === 'bride' ? 'badge-bride' : 'badge-groom'}`}>
-                        {guest.side}
-                      </span>
-                      {guest.category && (
-                        <div className="flex items-center gap-1.5 text-[10px] text-gray-550">
-                          <span style={{ backgroundColor: guest.category.colour }} className="w-1.5 h-1.5 rounded-full" />
-                          <span>{guest.category.name}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div>{renderStatusBadge(guest)}</div>
-                </div>
-
-                {/* Contacts & Notes */}
-                {(guest.phone || guest.email || guest.notes) && (
-                  <div className="space-y-1.5 border-t border-gray-100 pt-2 text-[11px] text-gray-550">
-                    {guest.phone && (
-                      <div className="flex items-center gap-1.5">
-                        <Phone className="w-3.5 h-3.5 text-gray-400" />
-                        <span>{guest.phone}</span>
-                      </div>
-                    )}
-                    {guest.email && (
-                      <div className="flex items-center gap-1.5">
-                        <Mail className="w-3.5 h-3.5 text-gray-400" />
-                        <span className="truncate">{guest.email}</span>
-                      </div>
-                    )}
-                    {guest.notes && (
-                      <p className="text-xs text-gray-500 bg-gray-50 p-2 rounded mt-1 border border-gray-150">
-                        {guest.notes}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* Mobile Actions */}
-                <div className="flex justify-end gap-4 border-t border-gray-100 pt-2 text-xs font-semibold">
-                  {guest.phone && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSendWhatsApp(guest);
-                      }}
-                      disabled={sendingId !== null}
-                      className="text-blue-500 hover:text-blue-600 flex items-center gap-1 cursor-pointer"
-                    >
-                      {sendingId === guest.id ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <>
-                          <MessageCircle className="w-3.5 h-3.5" />
-                          Send WhatsApp
-                        </>
-                      )}
-                    </button>
+                <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>{g.name}</Typography>
+                      <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
+                        <SideChip side={g.side || 'bride'} />
+                        {g.category && (
+                          <Chip size="small" label={g.category.name} sx={{ height: 18, fontSize: '0.65rem',
+                            bgcolor: g.category.colour + '22', color: g.category.colour }} />
+                        )}
+                      </Box>
+                    </Box>
+                    <StatusChip guest={g} />
+                  </Box>
+                  {(g.phone || g.email) && (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3, mt: 1 }}>
+                      {g.phone && <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}><Phone size={12} style={{ color: '#9CA3AF' }} /><Typography variant="caption">{g.phone}</Typography></Box>}
+                      {g.email && <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}><Mail size={12} style={{ color: '#9CA3AF' }} /><Typography variant="caption">{g.email}</Typography></Box>}
+                    </Box>
                   )}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCopyLink(guest);
-                    }}
-                    className="text-gray-600 hover:text-gray-900 flex items-center gap-1 cursor-pointer"
-                  >
-                    <Copy className="w-3.5 h-3.5 text-gray-400" />
-                    Copy
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openInviteLink(guest);
-                    }}
-                    className="text-emerald-600 hover:text-emerald-700 flex items-center gap-1 cursor-pointer"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    Open
-                  </button>
-                  <Link
-                    href={`/guests/${guest.id}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
-                  >
-                    <Edit2 className="w-3.5 h-3.5 text-gray-400" />
-                    Edit
-                  </Link>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteGuest(guest.id);
-                    }}
-                    disabled={deletingId !== null}
-                    className="text-gray-400 hover:text-red-600 flex items-center gap-1 cursor-pointer"
-                  >
-                    {deletingId === guest.id ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <>
-                        <Trash2 className="w-3.5 h-3.5" />
-                        Delete
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
+                  <Box sx={{ display: 'flex', gap: 0.5, mt: 1.5, pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }} onClick={e => e.stopPropagation()}>
+                    {g.phone && <IconButton size="small" color="primary" onClick={() => handleSendWhatsApp(g)} disabled={sendingId !== null}><MessageCircle size={15} /></IconButton>}
+                    <IconButton size="small" onClick={() => handleCopyLink(g)}><Copy size={15} /></IconButton>
+                    <IconButton size="small" color="success" onClick={() => openInviteLink(g)}><ExternalLink size={15} /></IconButton>
+                    <IconButton size="small" component={Link} href={`/guests/${g.id}`}><Edit2 size={15} /></IconButton>
+                    <IconButton size="small" color="error" onClick={() => handleDeleteGuest(g.id)} disabled={deletingId !== null}><Trash2 size={15} /></IconButton>
+                  </Box>
+                </CardContent>
+              </Card>
             ))}
-          </div>
+          </Box>
         </>
       )}
 
-      {/* Guest Quick View Modal */}
-      {selectedGuest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <button
-            type="button"
-            aria-label="Close guest details"
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setSelectedGuest(null)}
-          />
-          <div className="relative w-full max-w-lg bg-white rounded-lg border border-gray-200 shadow-xl p-6 space-y-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">{selectedGuest.name}</h3>
-                <p className="text-xs text-gray-500 mt-1">Guest details</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedGuest(null)}
-                className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+      {/* Guest Detail Dialog */}
+      <Dialog open={selectedGuest !== null} onClose={() => setSelectedGuest(null)} maxWidth="sm" fullWidth>
+        {selectedGuest && (
+          <>
+            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>{selectedGuest.name}</Typography>
+                <Typography variant="caption" color="text.secondary">Guest details</Typography>
+              </Box>
+              <IconButton size="small" onClick={() => setSelectedGuest(null)}><X size={18} /></IconButton>
+            </DialogTitle>
+            <DialogContent dividers>
+              <Grid container spacing={1.5} sx={{ mb: 2 }}>
+                {[
+                  { label: 'Side', value: selectedGuest.side },
+                  { label: 'Category', value: selectedGuest.category?.name || '–' },
+                  { label: 'Phone', value: selectedGuest.phone || '–' },
+                  { label: 'Email', value: selectedGuest.email || '–' },
+                ].map(({ label, value }) => (
+                  <Grid size={{ xs: 6 }} key={label}>
+                    <Paper elevation={0} sx={{ p: 1.5, bgcolor: 'background.default', border: '1px solid', borderColor: 'divider' }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.06em' }}>{label}</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{value}</Typography>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+              {selectedGuest.notes && (
+                <Paper elevation={0} sx={{ p: 1.5, bgcolor: 'background.default', border: '1px solid', borderColor: 'divider', mb: 2 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.06em' }}>Notes</Typography>
+                  <Typography variant="body2">{selectedGuest.notes}</Typography>
+                </Paper>
+              )}
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                <Button size="small" variant="outlined" color="success" startIcon={<ExternalLink size={14} />} onClick={() => openInviteLink(selectedGuest)}>Open Invite</Button>
+                <Button size="small" variant="outlined" startIcon={<Copy size={14} />} onClick={() => handleCopyLink(selectedGuest)}>Copy Link</Button>
+                <Button size="small" variant="contained" startIcon={<Edit2 size={14} />} component={Link} href={`/guests/${selectedGuest.id}`}>Edit Guest</Button>
+              </Box>
+            </DialogContent>
+          </>
+        )}
+      </Dialog>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="rounded-md border border-gray-200 p-3">
-                <p className="text-gray-400 uppercase tracking-wider mb-1">Side</p>
-                <p className="text-gray-800 font-medium">{selectedGuest.side || '-'}</p>
-              </div>
-              <div className="rounded-md border border-gray-200 p-3">
-                <p className="text-gray-400 uppercase tracking-wider mb-1">Category</p>
-                <p className="text-gray-800 font-medium">{selectedGuest.category?.name || '-'}</p>
-              </div>
-              <div className="rounded-md border border-gray-200 p-3">
-                <p className="text-gray-400 uppercase tracking-wider mb-1">Phone</p>
-                <p className="text-gray-800 font-medium">{selectedGuest.phone || '-'}</p>
-              </div>
-              <div className="rounded-md border border-gray-200 p-3">
-                <p className="text-gray-400 uppercase tracking-wider mb-1">Email</p>
-                <p className="text-gray-800 font-medium break-all">{selectedGuest.email || '-'}</p>
-              </div>
-            </div>
+      {/* Add Guest Drawer */}
+      <Drawer anchor="right" open={isAddOpen} onClose={() => setIsAddOpen(false)} slotProps={{ paper: { sx: { width: { xs: '100%', sm: 440 } } } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>Add New Guest</Typography>
+          <IconButton size="small" onClick={() => setIsAddOpen(false)}><X size={18} /></IconButton>
+        </Box>
+        <Box component="form" onSubmit={handleAddGuest} sx={{ flex: 1, overflowY: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <TextField label="Guest Name *" value={name} onChange={e => setName(e.target.value)} size="small" fullWidth required />
+          <TextField label="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} size="small" fullWidth type="tel" helperText="Local numbers saved with +94 automatically." />
+          <TextField label="Email Address" value={email} onChange={e => setEmail(e.target.value)} size="small" fullWidth type="email" />
+          <Box>
+            <Typography variant="caption" sx={{ mb: 1, display: 'block', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', fontWeight: 700 }}>Wedding Side *</Typography>
+            <ToggleButtonGroup value={side} exclusive onChange={(_, v) => v && setSide(v)} fullWidth size="small">
+              <ToggleButton value="bride" sx={{ '&.Mui-selected': { bgcolor: '#FAF5FF', color: '#9333EA', borderColor: '#D8B4FE' } }}>Bride&apos;s Side</ToggleButton>
+              <ToggleButton value="groom" sx={{ '&.Mui-selected': { bgcolor: '#EFF6FF', color: '#2563EB', borderColor: '#BFDBFE' } }}>Groom&apos;s Side</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+          <FormControl size="small" fullWidth>
+            <InputLabel>Category</InputLabel>
+            <Select value={categoryId} label="Category" onChange={e => setCategoryId(e.target.value)}>
+              <MenuItem value="">No Category</MenuItem>
+              {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+            </Select>
+          </FormControl>
+          <TextField label="Private Notes" value={notes} onChange={e => setNotes(e.target.value)} size="small" fullWidth multiline rows={3} />
+          <Box sx={{ display: 'flex', gap: 1.5, pt: 1 }}>
+            <Button variant="outlined" fullWidth onClick={() => setIsAddOpen(false)}>Cancel</Button>
+            <Button type="submit" variant="contained" fullWidth disabled={isSubmitting}>
+              {isSubmitting ? <CircularProgress size={18} sx={{ color: 'white' }} /> : 'Save Guest'}
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
 
-            <div className="rounded-md border border-gray-200 p-3 text-xs">
-              <p className="text-gray-400 uppercase tracking-wider mb-1">Notes</p>
-              <p className="text-gray-700">{selectedGuest.notes || '-'}</p>
-            </div>
-
-            <div className="flex flex-wrap gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => openInviteLink(selectedGuest)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                Open Invitation
-              </button>
-              <button
-                type="button"
-                onClick={() => handleCopyLink(selectedGuest)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-semibold"
-              >
-                <Copy className="w-3.5 h-3.5" />
-                Copy Link
-              </button>
-              <Link
-                href={`/guests/${selectedGuest.id}`}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-semibold"
-              >
-                <Edit2 className="w-3.5 h-3.5" />
-                Edit Guest
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Guest Slide-over Drawer / Modal */}
-      {isAddOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden select-none">
-          {/* Overlay */}
-          <div 
-            className="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
-            onClick={() => setIsAddOpen(false)}
-          />
-
-          <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-            <div className="w-screen max-w-md bg-white border-l border-gray-200 text-gray-900 flex flex-col h-full shadow-lg animate-slide-in">
-              {/* Header */}
-              <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-lg font-medium text-gray-900">Add New Guest</h2>
-                <button 
-                  onClick={() => setIsAddOpen(false)}
-                  className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-all cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Form */}
-              <form onSubmit={handleAddGuest} className="flex-1 overflow-y-auto p-6 space-y-5">
-                {/* Name */}
-                <div>
-                  <label htmlFor="guest-name" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
-                    Guest Name *
-                  </label>
-                  <input
-                    id="guest-name"
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Sarah Karunaratne"
-                    className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Phone */}
-                <div>
-                  <label htmlFor="guest-phone" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
-                    Phone Number
-                  </label>
-                  <input
-                    id="guest-phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="e.g. 0771234567 or +94771234567"
-                    className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500"
-                  />
-                  <p className="text-[10px] text-gray-400 mt-1">Local numbers are saved with +94 automatically. Needed for manual wa.me links or automated Twilio messages.</p>
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label htmlFor="guest-email" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
-                    Email Address
-                  </label>
-                  <input
-                    id="guest-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="e.g. sarah@example.com"
-                    className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Side */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
-                    Wedding Side *
-                  </label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setSide('bride')}
-                      className={`py-2.5 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
-                        side === 'bride'
-                          ? 'bg-purple-50 text-purple-700 border-purple-300'
-                          : 'bg-white border-gray-200 text-gray-500'
-                      }`}
-                    >
-                      Bride's Side
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSide('groom')}
-                      className={`py-2.5 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
-                        side === 'groom'
-                          ? 'bg-blue-50 text-blue-700 border-blue-300'
-                          : 'bg-white border-gray-200 text-gray-500'
-                      }`}
-                    >
-                      Groom's Side
-                    </button>
-                  </div>
-                </div>
-
-                {/* Category Selection */}
-                <div>
-                  <label htmlFor="guest-cat" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
-                    Category Group
-                  </label>
-                  <select
-                    id="guest-cat"
-                    value={categoryId}
-                    onChange={(e) => setCategoryId(e.target.value)}
-                    className="w-full bg-white border border-gray-200 text-gray-700 text-xs rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 cursor-pointer"
-                  >
-                    <option value="">No Category</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Notes */}
-                <div>
-                  <label htmlFor="guest-notes" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
-                    Private Notes
-                  </label>
-                  <textarea
-                    id="guest-notes"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Seating preferences, restrictions, relationships..."
-                    rows={4}
-                    className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-none"
-                  />
-                </div>
-
-                {/* Actions */}
-                <div className="pt-4 border-t border-gray-100 flex gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setIsAddOpen(false)}
-                    className="w-1/2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-550 rounded-md py-2.5 text-xs font-semibold transition-all cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || !name.trim()}
-                    className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white rounded-md py-2.5 text-xs font-semibold tracking-wide shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-                  >
-                    {isSubmitting ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      'Save Guest'
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {toast && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 md:bottom-auto md:top-5 md:left-auto md:right-5 md:translate-x-0 z-55 w-[90%] sm:w-auto max-w-sm md:max-w-none animate-fade-in select-none">
-          <div className={`flex items-center justify-center md:justify-start gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
-            toast.type === 'success'
-              ? 'bg-green-50 text-green-700 border-green-200'
-              : 'bg-red-50 text-red-755 border-red-200'
-          }`}>
-            {toast.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-            ) : (
-              <AlertCircle className="w-4 h-4 text-red-500" />
-            )}
-            <span>{toast.message}</span>
-          </div>
-        </div>
-      )}
-    </div>
+      {/* Toast */}
+      <Snackbar open={toast !== null} autoHideDuration={3000} onClose={() => setToast(null)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+        <Alert severity={toast?.type || 'success'} onClose={() => setToast(null)} sx={{ width: '100%' }}>
+          {toast?.message}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 }

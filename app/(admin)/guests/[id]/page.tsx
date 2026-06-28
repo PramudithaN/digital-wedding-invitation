@@ -18,6 +18,7 @@ import {
   Copy
 } from 'lucide-react';
 import { GuestWithDetails, Category } from '@/lib/types';
+import { normalizePhoneNumber } from '@/lib/whatsapp';
 
 export default function EditGuestPage() {
   const router = useRouter();
@@ -99,7 +100,7 @@ export default function EditGuestPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name.trim(),
-          phone: phone.trim(),
+          phone: normalizePhoneNumber(phone.trim()),
           email: email.trim(),
           side,
           category_id: categoryId || null,
@@ -497,7 +498,7 @@ export default function EditGuestPage() {
       </div>
 
       {toast && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 md:bottom-auto md:top-5 md:left-auto md:right-5 md:translate-x-0 z-55 w-[90%] sm:w-auto max-w-sm md:max-w-none animate-fade-in select-none">
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-55 w-[90%] sm:w-auto max-w-sm animate-fade-in select-none">
           <div className={`flex items-center justify-center md:justify-start gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
             toast.type === 'success'
               ? 'bg-green-50 text-green-700 border-green-200'

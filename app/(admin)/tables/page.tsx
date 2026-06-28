@@ -92,7 +92,7 @@ export default function SideBySidePage() {
     return (
       <div className="space-y-4">
         {/* Side Header Block */}
-        <div className={`rounded-xl p-5 shadow-sm flex items-center justify-between bg-white border border-gray-200`}>
+        <div className={`rounded-xl p-5 shadow-sm flex items-center justify-between bg-white border border-gray-200 border-t-4 ${side === 'bride' ? 'border-t-purple-500' : 'border-t-blue-500'}`}>
           <div>
             <h2 className="text-lg font-semibold text-gray-900">{sideName}</h2>
             <p className="text-xs text-gray-450 mt-0.5">{sideGuests.length} guests invited</p>
@@ -135,7 +135,7 @@ export default function SideBySidePage() {
                       </span>
                     </div>
                     {/* Progress bar track */}
-                    <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden border border-gray-150">
+                    <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
                       <div 
                         style={{ width: `${(catAttending.length / catGuests.length) * 100}%` }}
                         className={`h-full ${sideProgressColor}`}
@@ -215,7 +215,7 @@ export default function SideBySidePage() {
                         ({catAttending.length} of {catGuests.length} attending)
                       </span>
                     </div>
-                    <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden border border-gray-150">
+                    <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
                       <div 
                         style={{ width: `${(catAttending.length / catGuests.length) * 100}%` }}
                         className={`h-full ${sideProgressColor}`}
@@ -298,7 +298,7 @@ export default function SideBySidePage() {
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-around gap-6 text-center">
           <div className="space-y-0.5">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Bride's Seats</span>
-            <div className="text-2xl font-sans text-purple-650 font-bold">{brideTotalSeats}</div>
+            <div className="text-2xl font-sans text-purple-600 font-bold">{brideTotalSeats}</div>
             <p className="text-[9px] text-gray-450">
               {brideAttending.length} guests + {bridePlusOnes} plus ones
             </p>

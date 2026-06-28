@@ -246,7 +246,7 @@ export default function CategoriesPage() {
         </div>
       </div>
       {toast && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 md:bottom-auto md:top-5 md:left-auto md:right-5 md:translate-x-0 z-55 w-[90%] sm:w-auto max-w-sm md:max-w-none animate-fade-in select-none">
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-55 w-[90%] sm:w-auto max-w-sm animate-fade-in select-none">
           <div className={`flex items-center justify-center md:justify-start gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
             toast.type === 'success'
               ? 'bg-green-50 text-green-700 border-green-200'

@@ -250,7 +250,7 @@ export default function RSVPTrackerPage() {
                           <UtensilsCrossed className="w-3 h-3 text-gray-400" /> {meal}
                         </span>
                       ) : (
-                        <span className="text-gray-300 text-xs">—</span>
+                        <span className="text-gray-300 text-xs">-</span>
                       )}
                     </td>
                     <td className="px-6">

@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: InvitePageProps) {
   }
 
   return {
-    title: `Wedding Invitation — ${weddingDetails.bride_name} & ${weddingDetails.groom_name}`,
+    title: `Wedding Invitation - ${weddingDetails.bride_name} & ${weddingDetails.groom_name}`,
     description: `Dear ${guest.name}, you are cordially invited to celebrate our wedding.`,
   };
 }

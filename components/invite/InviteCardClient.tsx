@@ -164,7 +164,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
         </svg>
       </div>
 
-      {/* --- SECTION 1 — HERO SCREEN (FULLSCREEN) --- */}
+      {/* --- SECTION 1 - HERO SCREEN (FULLSCREEN) --- */}
       <section className="min-h-screen flex flex-col justify-between items-center text-center p-6 md:p-12 relative">
         <div className="pt-12">
           {/* Accent flourish line */}
@@ -214,7 +214,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
         </div>
       </section>
 
-      {/* --- SECTION 2 — COUNTDOWN TIMER --- */}
+      {/* --- SECTION 2 - COUNTDOWN TIMER --- */}
       <section ref={timelineRef} className="max-w-3xl mx-auto px-6 py-12 w-full text-center">
         <div className="bg-white border border-[#E8E4DE] rounded-xl p-8 shadow-sm max-w-lg mx-auto space-y-6">
           <span className="text-[10px] uppercase tracking-widest text-[#6B6B6B] font-semibold">Counting down the moments</span>
@@ -244,7 +244,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
         </div>
       </section>
 
-      {/* --- SECTION 3 — EVENT TIMELINE --- */}
+      {/* --- SECTION 3 - EVENT TIMELINE --- */}
       <section className="max-w-xl mx-auto px-6 py-16 w-full space-y-12">
         <div className="text-center space-y-2">
           <h2 className="text-2xl font-serif tracking-tight text-gray-950 font-light">The Wedding Itinerary</h2>
@@ -308,7 +308,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
         </div>
       </section>
 
-      {/* --- SECTION 4 — RSVP FORM --- */}
+      {/* --- SECTION 4 - RSVP FORM --- */}
       <section id="rsvp-section" ref={rsvpRef} className="max-w-lg mx-auto px-6 py-12 w-full relative z-10">
         <div className="bg-white border border-[#E8E4DE] rounded-xl p-8 shadow-sm space-y-6">
           {isSuccess ? (
@@ -513,7 +513,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
         </div>
       </section>
 
-      {/* --- SECTION 5 — ADD TO CALENDAR --- */}
+      {/* --- SECTION 5 - ADD TO CALENDAR --- */}
       <section className="max-w-md mx-auto px-6 py-6 w-full text-center">
         <div className="bg-white border border-[#E8E4DE] rounded-xl p-8 shadow-xs space-y-5">
           <h3 className="text-lg font-serif text-gray-900 font-light">Save the Date</h3>
@@ -537,7 +537,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
         </div>
       </section>
 
-      {/* --- SECTION 6 — MOMENTS (IMAGE GALLERY PLACEHOLDER) --- */}
+      {/* --- SECTION 6 - MOMENTS (IMAGE GALLERY PLACEHOLDER) --- */}
       <section className="max-w-3xl mx-auto px-6 py-12 w-full text-center space-y-6">
         <h2 className="text-xl font-serif text-gray-900 font-light">Moments Gallery</h2>
         <div className="h-[1px] w-12 bg-[#C8A882] mx-auto" />
@@ -556,7 +556,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
         <p className="text-[10px] text-gray-400 italic pt-6">"Our journey together"</p>
       </section>
 
-      {/* --- SECTION 7 — VENUE DETAILS & MAP --- */}
+      {/* --- SECTION 7 - VENUE DETAILS & MAP --- */}
       <section className="max-w-3xl mx-auto px-6 py-16 w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
         {/* Left Venue Information */}
         <div className="bg-white border border-[#E8E4DE] rounded-xl p-8 space-y-6 shadow-xs h-full flex flex-col justify-between">
@@ -602,7 +602,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
         </div>
       </section>
 
-      {/* --- SECTION 8 — FOOTER --- */}
+      {/* --- SECTION 8 - FOOTER --- */}
       <footer className="mt-auto py-12 text-center text-xs text-white bg-neutral-900 px-6 space-y-4">
         <h2 className="text-2xl font-serif tracking-tight font-light italic">
           {weddingDetails.bride_name} & {weddingDetails.groom_name}

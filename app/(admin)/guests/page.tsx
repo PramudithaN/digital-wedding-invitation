@@ -330,7 +330,7 @@ export default function GuestsPage() {
                           {guest.category.name}
                         </div>
                       ) : (
-                        <span className="text-gray-300 text-xs">—</span>
+                        <span className="text-gray-300 text-xs">-</span>
                       )}
                     </td>
                     <td className="px-6 space-y-0.5">
@@ -347,7 +347,7 @@ export default function GuestsPage() {
                         </div>
                       ) : null}
                       {!guest.phone && !guest.email ? (
-                        <span className="text-gray-300 text-xs">—</span>
+                        <span className="text-gray-300 text-xs">-</span>
                       ) : null}
                     </td>
                     <td className="px-6">{renderStatusBadge(guest)}</td>

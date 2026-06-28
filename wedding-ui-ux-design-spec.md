@@ -1,4 +1,4 @@
-# Wedding Invitation Manager — UI/UX Design Specification
+# Wedding Invitation Manager - UI/UX Design Specification
 
 A precise design language guide for the admin dashboard and the public invitation page. Built around Apple-level minimalism: restrained colour, generous whitespace, purposeful motion.
 
@@ -8,7 +8,7 @@ A precise design language guide for the admin dashboard and the public invitatio
 
 > **Less colour. More space. Every element earns its place.**
 
-Inspired by Apple's Human Interface Guidelines and Linear's dashboard aesthetic. The design uses a single blue primary, neutral greys for everything structural, and white as the dominant surface. Motion is subtle and physics-based — it communicates depth, not decoration.
+Inspired by Apple's Human Interface Guidelines and Linear's dashboard aesthetic. The design uses a single blue primary, neutral greys for everything structural, and white as the dominant surface. Motion is subtle and physics-based - it communicates depth, not decoration.
 
 ---
 
@@ -25,7 +25,7 @@ Inspired by Apple's Human Interface Guidelines and Linear's dashboard aesthetic.
   --blue-600: #2563EB;   /* hover state */
   --blue-700: #1D4ED8;   /* pressed state */
 
-  /* Neutrals — the majority of the UI lives here */
+  /* Neutrals - the majority of the UI lives here */
   --grey-0:   #FFFFFF;
   --grey-50:  #F9FAFB;   /* page background */
   --grey-100: #F3F4F6;   /* card / sidebar background */
@@ -34,7 +34,7 @@ Inspired by Apple's Human Interface Guidelines and Linear's dashboard aesthetic.
   --grey-600: #4B5563;   /* secondary text */
   --grey-900: #111827;   /* primary text */
 
-  /* Semantic — used sparingly, only in status badges */
+  /* Semantic - used sparingly, only in status badges */
   --green-500: #22C55E;   /* attending */
   --red-400:   #F87171;   /* declined */
   --amber-400: #FBBF24;   /* pending */
@@ -57,18 +57,18 @@ Inspired by Apple's Human Interface Guidelines and Linear's dashboard aesthetic.
 ### Typography
 
 ```css
-/* System font stack — same as Apple.com */
+/* System font stack - same as Apple.com */
 font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display',
              'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
 /* Scale */
---text-xs:   0.75rem;   /* 12px — labels, captions */
---text-sm:   0.875rem;  /* 14px — table cells, helper text */
---text-base: 1rem;      /* 16px — body */
---text-lg:   1.125rem;  /* 18px — card titles */
---text-xl:   1.25rem;   /* 20px — section headings */
---text-2xl:  1.5rem;    /* 24px — page title */
---text-3xl:  1.875rem;  /* 30px — dashboard headline numbers */
+--text-xs:   0.75rem;   /* 12px - labels, captions */
+--text-sm:   0.875rem;  /* 14px - table cells, helper text */
+--text-base: 1rem;      /* 16px - body */
+--text-lg:   1.125rem;  /* 18px - card titles */
+--text-xl:   1.25rem;   /* 20px - section headings */
+--text-2xl:  1.5rem;    /* 24px - page title */
+--text-3xl:  1.875rem;  /* 30px - dashboard headline numbers */
 
 /* Weight */
 --font-normal:   400;
@@ -87,14 +87,14 @@ font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display',
 ### Spacing system (4px base)
 
 ```
-4px   xs   — icon padding, tight gaps
-8px   sm   — between label and input
-12px  md   — inner card padding (compact)
-16px  lg   — default inner card padding
-24px  xl   — between sections within a card
-32px  2xl  — between cards
-48px  3xl  — section vertical spacing
-64px  4xl  — page-level vertical breathing room
+4px   xs   - icon padding, tight gaps
+8px   sm   - between label and input
+12px  md   - inner card padding (compact)
+16px  lg   - default inner card padding
+24px  xl   - between sections within a card
+32px  2xl  - between cards
+48px  3xl  - section vertical spacing
+64px  4xl  - page-level vertical breathing room
 ```
 
 ---
@@ -135,7 +135,7 @@ Desktop (> 1024px): full sidebar (240px)
 ### Sidebar spec
 
 ```
-Background:    --grey-0  (white, not grey — keeps it airy)
+Background:    --grey-0  (white, not grey - keeps it airy)
 Border-right:  1px solid --grey-200
 Width:         240px desktop / 64px tablet / hidden mobile
 
@@ -172,18 +172,18 @@ Bottom of sidebar:
 Height:       56px
 Background:   --grey-0
 Border-bottom: 1px solid --grey-200
-Backdrop:     backdrop-filter: blur(12px) — sticky on scroll
+Backdrop:     backdrop-filter: blur(12px) - sticky on scroll
 
 Left:  Page title  --text-xl --font-semibold --grey-900
 Right: Action button (primary blue) + optional icon button(s)
 ```
 
-### Motion — Scroll in Motion (Admin)
+### Motion - Scroll in Motion (Admin)
 
-All scroll-triggered animations use `IntersectionObserver` with a threshold of `0.15`. No animation libraries needed — CSS only.
+All scroll-triggered animations use `IntersectionObserver` with a threshold of `0.15`. No animation libraries needed - CSS only.
 
 ```css
-/* Base state — elements start invisible and slightly low */
+/* Base state - elements start invisible and slightly low */
 .scroll-reveal {
   opacity: 0;
   transform: translateY(16px);
@@ -203,7 +203,7 @@ All scroll-triggered animations use `IntersectionObserver` with a threshold of `
 .scroll-reveal:nth-child(4) { transition-delay: 180ms; }
 ```
 
-> Easing `cubic-bezier(0.16, 1, 0.3, 1)` is Apple's spring curve — fast out, soft landing.
+> Easing `cubic-bezier(0.16, 1, 0.3, 1)` is Apple's spring curve - fast out, soft landing.
 
 ---
 
@@ -242,9 +242,9 @@ Background:   --grey-200
 Border-radius: --radius-full
 
 Fill segments (left to right, no gap):
-  Green  — attending %
-  Red    — declined %
-  Amber  — pending %
+  Green  - attending %
+  Red    - declined %
+  Amber  - pending %
 
 Labels below:  "87 attending · 14 declined · 19 pending"
                --text-sm, --grey-600
@@ -259,7 +259,7 @@ Each item:
   Left:   12px dot (green/red/amber, matching status)
   Center: "[Name] confirmed attendance"  --text-sm --grey-900
            "2 hours ago"  --text-xs --grey-400
-  Right:  Side badge (pill) — "Bride" or "Groom"
+  Right:  Side badge (pill) - "Bride" or "Groom"
            Background: --grey-100, text: --grey-600
 
 Dot connector: 1px dashed --grey-200 vertical line
@@ -285,13 +285,13 @@ Data row:
   Hover background:  --grey-50 (200ms ease)
 
 Columns:
-  Name         — --text-sm --font-medium --grey-900
-  Side         — pill badge (see badge spec below)
-  Category     — coloured dot (8px) + --text-sm --grey-600
-  Status       — pill badge
-  Meal         — --text-sm --grey-600
-  Sent         — --text-xs --grey-400
-  Actions      — 3 icon buttons (send, edit, delete) shown on row hover only
+  Name         - --text-sm --font-medium --grey-900
+  Side         - pill badge (see badge spec below)
+  Category     - coloured dot (8px) + --text-sm --grey-600
+  Status       - pill badge
+  Meal         - --text-sm --grey-600
+  Sent         - --text-xs --grey-400
+  Actions      - 3 icon buttons (send, edit, delete) shown on row hover only
 ```
 
 #### Badge / pill spec
@@ -377,14 +377,14 @@ Side column card:
 
 The invitation page is a completely separate visual world from the admin. Where the admin is functional and minimal, the invitation is warm, refined, and immersive.
 
-### Design language — invitation
+### Design language - invitation
 
 ```
 Palette:
   Background:  #FAFAF8   (warm off-white, not clinical white)
   Text primary:   #1A1A1A
   Text secondary: #6B6B6B
-  Accent:         #C8A882   (warm champagne gold — used only for decorative elements)
+  Accent:         #C8A882   (warm champagne gold - used only for decorative elements)
   Dividers:       #E8E4DE
 
 Typography:
@@ -400,9 +400,9 @@ Motion philosophy:
 
 ---
 
-### Invitation page — section by section
+### Invitation page - section by section
 
-#### Section 1 — Hero (full viewport)
+#### Section 1 - Hero (full viewport)
 
 ```
 Layout:     Full-screen, centered content
@@ -432,7 +432,7 @@ Animation:
 
 ---
 
-#### Section 2 — Countdown timer
+#### Section 2 - Countdown timer
 
 ```
 Background:  white card, max-width 560px, centred, --shadow-sm
@@ -455,7 +455,7 @@ Scroll-in animation: fade up as a whole card, threshold 0.3
 
 ---
 
-#### Section 3 — Event timeline
+#### Section 3 - Event timeline
 
 Vertical timeline. Each row is an event card.
 
@@ -485,7 +485,7 @@ Scroll animation: each event card fades in + slides in from its side
 
 ---
 
-#### Section 4 — RSVP form
+#### Section 4 - RSVP form
 
 ```
 Background:   #FAFAF8 (matches page)
@@ -493,16 +493,16 @@ Max-width:    480px, centred
 Card:         --grey-0, border 1px solid --grey-200, --radius-lg, padding 40px
 
 Header:
-  "Will you join us?"  — Playfair, --text-2xl, centred
-  "Please respond by 28 February 2026"  — --text-sm --grey-400, centred
+  "Will you join us?"  - Playfair, --text-2xl, centred
+  "Please respond by 28 February 2026"  - --text-sm --grey-400, centred
 
 Form fields:
-  [Attending? toggle — Yes / No  large pill buttons, full width]
+  [Attending? toggle - Yes / No  large pill buttons, full width]
   [+ 1?  checkbox + name text field, fades in if Yes selected]
   [Meal preference  radio: Veg · Non-veg · Vegan]
   [Dietary notes  textarea, optional]
   [Message to the couple  textarea, optional]
-  [Submit button — full width, --blue-500, --radius-sm, 48px height]
+  [Submit button - full width, --blue-500, --radius-sm, 48px height]
 
 Field style:
   Border:        1px solid --grey-200
@@ -522,7 +522,7 @@ Confirmation screen (replaces form on submit):
 
 ---
 
-#### Section 5 — Add to Calendar
+#### Section 5 - Add to Calendar
 
 ```
 Background:   white card, --shadow-sm, --radius-md
@@ -550,7 +550,7 @@ Links generate:
 
 ---
 
-#### Section 6 — Moments (Image Gallery)
+#### Section 6 - Moments (Image Gallery)
 
 A masonry-style photo gallery of engagement / pre-wedding moments.
 
@@ -568,7 +568,7 @@ Image container:
 Hover effect (desktop only):
   Image scales to 1.03 over 300ms ease
   Subtle dark vignette overlay at 20% opacity fades in
-  No text overlay — keep it clean
+  No text overlay - keep it clean
 
 Scroll animation:
   Each image fades up independently as it enters viewport
@@ -576,12 +576,12 @@ Scroll animation:
   No image loads until it's about to enter the viewport (lazy loading)
 
 Caption (optional, below gallery):
-  "Our journey together"  — --text-sm --grey-400, centred, italic
+  "Our journey together"  - --text-sm --grey-400, centred, italic
 ```
 
 ---
 
-#### Section 7 — Venue (Grand Pavilion)
+#### Section 7 - Venue (Grand Pavilion)
 
 ```
 Layout:
@@ -624,10 +624,10 @@ Scroll animation:
 
 ---
 
-#### Section 8 — Footer
+#### Section 8 - Footer
 
 ```
-Background:   --grey-900  (dark base — only dark element on the entire page)
+Background:   --grey-900  (dark base - only dark element on the entire page)
 Padding:      48px 24px
 Text colour:  white
 
@@ -640,10 +640,10 @@ Content:
 
 ---
 
-### Invitation page scroll animation — master config
+### Invitation page scroll animation - master config
 
 ```js
-// scrollReveal.js — attach to all .reveal elements
+// scrollReveal.js - attach to all .reveal elements
 const observer = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
@@ -784,30 +784,30 @@ export default {
 
 ### Admin dashboard components
 
-- [ ] `<Sidebar>` — collapsible, icon-only mode, mobile bottom bar
-- [ ] `<TopBar>` — sticky, blurred, page title + action slot
-- [ ] `<StatCard>` — icon + number + sub-label, hover elevation
-- [ ] `<RSVPProgressBar>` — segmented horizontal bar
-- [ ] `<ActivityFeed>` — dot timeline, relative timestamps
-- [ ] `<GuestTable>` — sortable, filterable, mobile card fallback
-- [ ] `<StatusBadge>` — attending / declined / pending pill
-- [ ] `<SideBadge>` — bride / groom pill
-- [ ] `<SendButton>` — WhatsApp deep-link, loading state
-- [ ] `<BatchActionBar>` — slide-up bar on multi-select
-- [ ] `<SideBySlideView>` — two-column confirmed breakdown
-- [ ] `<MealBreakdown>` — mini bar chart, text labels
-- [ ] `<GuestForm>` — add / edit guest modal / drawer
+- [ ] `<Sidebar>` - collapsible, icon-only mode, mobile bottom bar
+- [ ] `<TopBar>` - sticky, blurred, page title + action slot
+- [ ] `<StatCard>` - icon + number + sub-label, hover elevation
+- [ ] `<RSVPProgressBar>` - segmented horizontal bar
+- [ ] `<ActivityFeed>` - dot timeline, relative timestamps
+- [ ] `<GuestTable>` - sortable, filterable, mobile card fallback
+- [ ] `<StatusBadge>` - attending / declined / pending pill
+- [ ] `<SideBadge>` - bride / groom pill
+- [ ] `<SendButton>` - WhatsApp deep-link, loading state
+- [ ] `<BatchActionBar>` - slide-up bar on multi-select
+- [ ] `<SideBySlideView>` - two-column confirmed breakdown
+- [ ] `<MealBreakdown>` - mini bar chart, text labels
+- [ ] `<GuestForm>` - add / edit guest modal / drawer
 
 ### Invitation page components
 
-- [ ] `<HeroSection>` — full-viewport, names, tagline, scroll cue
-- [ ] `<CountdownTimer>` — live DD HH MM SS
-- [ ] `<EventTimeline>` — vertical timeline, alternating cards
-- [ ] `<RSVPForm>` — toggle, meal, +1, submit, confirmation screen
-- [ ] `<AddToCalendar>` — Google / Apple / Outlook buttons + .ics
-- [ ] `<MomentsGallery>` — masonry desktop, filmstrip mobile
-- [ ] `<VenueSection>` — info card + Google Maps embed
-- [ ] `<InviteFooter>` — dark footer, couple names
+- [ ] `<HeroSection>` - full-viewport, names, tagline, scroll cue
+- [ ] `<CountdownTimer>` - live DD HH MM SS
+- [ ] `<EventTimeline>` - vertical timeline, alternating cards
+- [ ] `<RSVPForm>` - toggle, meal, +1, submit, confirmation screen
+- [ ] `<AddToCalendar>` - Google / Apple / Outlook buttons + .ics
+- [ ] `<MomentsGallery>` - masonry desktop, filmstrip mobile
+- [ ] `<VenueSection>` - info card + Google Maps embed
+- [ ] `<InviteFooter>` - dark footer, couple names
 
 ---
 
@@ -815,7 +815,7 @@ export default {
 
 | Rule | Admin | Invitation |
 |---|---|---|
-| Primary colour | Blue (#3B82F6) — CTAs only | Champagne gold — decorative only |
+| Primary colour | Blue (#3B82F6) - CTAs only | Champagne gold - decorative only |
 | Background | Grey-50 page / white cards | Warm off-white #FAFAF8 |
 | Typography | System sans-serif | Playfair Display + Inter |
 | Motion trigger | IntersectionObserver, 0.15 threshold | IntersectionObserver, 0.15 threshold |

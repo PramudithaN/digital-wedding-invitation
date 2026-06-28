@@ -1,4 +1,4 @@
-# Wedding Invitation Manager — Implementation Plan
+# Wedding Invitation Manager - Implementation Plan
 
 A full-stack digital wedding invitation and RSVP management system with an admin dashboard, beautiful guest-facing invite cards, WhatsApp sending, and real-time headcount tracking.
 
@@ -127,12 +127,12 @@ CREATE TABLE invite_links (
 
 ## Implementation Phases
 
-### Phase 1 — Foundation `(Week 1–2)`
+### Phase 1 - Foundation `(Week 1–2)`
 
 **Goal:** Project skeleton + admin auth + basic guest management.
 
 - [ ] Initialise Next.js 14 project with Tailwind CSS and TypeScript
-- [ ] Set up Supabase project — run schema migrations
+- [ ] Set up Supabase project - run schema migrations
 - [ ] Admin login page (Supabase Auth)
 - [ ] Protected admin layout with responsive sidebar (collapses to bottom tab bar on mobile)
 - [ ] Guest add / edit / delete form
@@ -144,7 +144,7 @@ CREATE TABLE invite_links (
 
 ---
 
-### Phase 2 — Digital Invitation Card `(Week 2–3)`
+### Phase 2 - Digital Invitation Card `(Week 2–3)`
 
 **Goal:** A beautiful, shareable, mobile-first invite page for each guest.
 
@@ -156,17 +156,17 @@ Each guest gets a unique URL containing their `invite_token`. On load, the serve
 - Full-screen hero with couple's names in a serif display font (e.g. **Playfair Display**)
 - Wedding date, venue name, and address
 - Countdown timer to the wedding day
-- Subtle entrance animations (fade-in, soft upward drift) — CSS only, no heavy libraries
+- Subtle entrance animations (fade-in, soft upward drift) - CSS only, no heavy libraries
 - Floral or gold-foil decorative accents as SVG or CSS
 - Personalised greeting: *"Dear Sarah, you are warmly invited…"*
 - Smooth scroll to RSVP form below the card
 
 #### RSVP form (embedded on the card)
 - Attending? Yes / No toggle
-- Plus one — checkbox + name field (if yes)
-- Meal choice — radio buttons (Veg / Non-veg / Vegan / No preference)
-- Dietary notes — short text
-- Personal message — optional textarea
+- Plus one - checkbox + name field (if yes)
+- Meal choice - radio buttons (Veg / Non-veg / Vegan / No preference)
+- Dietary notes - short text
+- Personal message - optional textarea
 - Submit → writes to `rsvps` table → shows animated confirmation screen
 
 **Mobile-first rules:**
@@ -179,11 +179,11 @@ Each guest gets a unique URL containing their `invite_token`. On load, the serve
 
 ---
 
-### Phase 3 — WhatsApp Sending `(Week 3)`
+### Phase 3 - WhatsApp Sending `(Week 3)`
 
 **Goal:** Admin can send personalised invite links to guests via WhatsApp, individually or in batch.
 
-#### Option A — `wa.me` deep-link (free, manual send)
+#### Option A - `wa.me` deep-link (free, manual send)
 
 Each guest row in the admin table gets a **Send via WhatsApp** button.
 
@@ -191,9 +191,9 @@ Each guest row in the admin table gets a **Send via WhatsApp** button.
 https://wa.me/94771234567?text=Hi%20Sarah%2C%20you%27re%20warmly%20invited%20to%20our%20wedding!%20Please%20RSVP%20here%3A%20https%3A%2F%2Fyourdomain.com%2Finvite%2Fabc123
 ```
 
-On mobile this opens WhatsApp with the message pre-filled — admin taps send. On desktop it opens WhatsApp Web.
+On mobile this opens WhatsApp with the message pre-filled - admin taps send. On desktop it opens WhatsApp Web.
 
-#### Option B — Twilio WhatsApp Business API (automated)
+#### Option B - Twilio WhatsApp Business API (automated)
 
 For batch sending without manual taps. The admin clicks **Send all pending** and the server queues messages via Twilio's API. Requires a WhatsApp Business number.
 
@@ -221,7 +221,7 @@ export async function sendWhatsAppInvite(phone: string, guestName: string, token
 
 ---
 
-### Phase 4 — RSVP Tracking & Tables `(Week 4)`
+### Phase 4 - RSVP Tracking & Tables `(Week 4)`
 
 **Goal:** Full visibility into who's coming, from which side, in which category.
 
@@ -231,9 +231,9 @@ Filterable, sortable table with columns:
 
 | Name | Side | Category | Status | Meal | +1 | Responded |
 |---|---|---|---|---|---|---|
-| Sarah K. | Bride | Family | ✅ Attending | Veg | Yes — Tom | 12 Jun |
-| James R. | Groom | Friends | ❌ Declined | — | — | 14 Jun |
-| Maya L. | Bride | Work | ⏳ Pending | — | — | — |
+| Sarah K. | Bride | Family | ✅ Attending | Veg | Yes - Tom | 12 Jun |
+| James R. | Groom | Friends | ❌ Declined | - | - | 14 Jun |
+| Maya L. | Bride | Work | ⏳ Pending | - | - | - |
 
 - Filter by: side, category, status, meal choice
 - Search by name
@@ -268,20 +268,20 @@ Veg: 34 | Non-veg: 41 | Vegan: 8 | No preference: 4
 
 ---
 
-### Phase 5 — Analytics & Export `(Week 5)`
+### Phase 5 - Analytics & Export `(Week 5)`
 
 **Goal:** Insights over time + printable / shareable lists.
 
 #### Analytics
-- Response rate over time (line chart — responses per day since invites sent)
+- Response rate over time (line chart - responses per day since invites sent)
 - Open rate: % of invite links opened
 - Pending breakdown: invited but not opened / opened but not responded
 - Category-level response rate bar chart
 
 #### Export options
-- **CSV export** — full guest list with RSVP status, meal, +1
-- **Confirmed attendees PDF** — clean printable list grouped by side and category
-- **Seating helper CSV** — name, side, category, meal, +1 name — ready to paste into a seating chart tool
+- **CSV export** - full guest list with RSVP status, meal, +1
+- **Confirmed attendees PDF** - clean printable list grouped by side and category
+- **Seating helper CSV** - name, side, category, meal, +1 name - ready to paste into a seating chart tool
 
 ---
 
@@ -297,7 +297,7 @@ These apply across the entire project:
 | Headcount cards | 2-column grid on mobile, 3-column on tablet, 6-column on desktop |
 | Invite card | Designed mobile-first; hero image scales via `object-fit: cover` |
 | RSVP form | Full-width inputs, large radio buttons, sticky submit button at bottom |
-| Send button | Always prominently placed — admin will use this from their own phone |
+| Send button | Always prominently placed - admin will use this from their own phone |
 
 ---
 
@@ -332,7 +332,7 @@ SUPABASE_SERVICE_ROLE_KEY=
 # App
 NEXT_PUBLIC_BASE_URL=https://yourdomain.com
 
-# Twilio (optional — for automated WhatsApp sending)
+# Twilio (optional - for automated WhatsApp sending)
 TWILIO_ACCOUNT_SID=
 TWILIO_AUTH_TOKEN=
 TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
@@ -360,6 +360,6 @@ The biggest time investment is Phase 2 (making the invite card genuinely beautif
 
 1. `npx create-next-app@latest wedding-manager --typescript --tailwind --app`
 2. Create a Supabase project and run the schema SQL above
-3. Build the guest add/edit form first — it unblocks everything else
+3. Build the guest add/edit form first - it unblocks everything else
 4. Design the invite card in isolation before wiring up the token-based routing
 5. Use `wa.me` links first; upgrade to Twilio only if you need batch automation

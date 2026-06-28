@@ -97,14 +97,14 @@ export default function GuestsPage() {
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = async (silent = false) => {
     try {
-      setIsLoading(true);
+      if (!silent) setIsLoading(true);
       const [gR, cR] = await Promise.all([fetch('/api/guests'), fetch('/api/categories')]);
       setGuests(await gR.json());
       setCategories(await cR.json());
     } catch (err: any) { setError(err.message || 'An error occurred.'); }
-    finally { setIsLoading(false); }
+    finally { if (!silent) setIsLoading(false); }
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -118,8 +118,9 @@ export default function GuestsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim(), phone: normalizePhoneNumber(phone.trim()), email: email.trim(), side, category_id: categoryId || null, notes: notes.trim() }),
       });
-      await fetchData();
+      await fetchData(true);
       setName(''); setPhone(''); setEmail(''); setSide('bride'); setCategoryId(''); setNotes(''); setIsAddOpen(false);
+      showToast('Guest added successfully!', 'success');
     } catch (err: any) { showToast(err.message || 'Could not add', 'error'); }
     finally { setIsSubmitting(false); }
   };
@@ -380,7 +381,7 @@ export default function GuestsPage() {
       </Dialog>
 
       {/* Add Guest Drawer */}
-      <Drawer anchor="right" open={isAddOpen} onClose={() => setIsAddOpen(false)} slotProps={{ paper: { sx: { width: { xs: '100%', sm: 440 } } } }}>
+      <Drawer anchor="right" open={isAddOpen} onClose={() => setIsAddOpen(false)} slotProps={{ paper: { sx: { width: { xs: '100%', sm: 440 }, background: '#FFFFFF', color: '#0F172A' } } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
           <Typography variant="h6" sx={{ fontWeight: 700 }}>Add New Guest</Typography>
           <IconButton size="small" onClick={() => setIsAddOpen(false)}><X size={18} /></IconButton>

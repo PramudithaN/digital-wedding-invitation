@@ -53,9 +53,12 @@ function SideChip({ side }: { side: string }) {
   );
 }
 
-function StatusChip({ status }: { status?: string }) {
+function StatusChip({ guest }: { guest: GuestWithDetails }) {
+  const status = guest.rsvp?.status;
   if (status === 'attending') return <Chip label="Attending" size="small" sx={{ bgcolor: '#F0FDF4', color: '#16A34A', fontWeight: 700, fontSize: '0.7rem' }} />;
   if (status === 'declined')  return <Chip label="Declined"  size="small" sx={{ bgcolor: '#FEF2F2', color: '#DC2626', fontWeight: 700, fontSize: '0.7rem' }} />;
+  if (guest.invite_link?.opened_at) return <Chip label="Opened" size="small" sx={{ bgcolor: '#FFFBEB', color: '#D97706', fontWeight: 700, fontSize: '0.7rem' }} />;
+  if (guest.invite_link?.sent_at)   return <Chip label="Sent"   size="small" sx={{ bgcolor: '#EFF6FF', color: '#2563EB', fontWeight: 700, fontSize: '0.7rem' }} />;
   return <Chip label="Pending" size="small" sx={{ bgcolor: '#F9FAFB', color: '#6B7280', fontWeight: 700, fontSize: '0.7rem' }} />;
 }
 
@@ -388,7 +391,7 @@ export default function RSVPTrackerPage() {
                           )}
                         </Box>
                       </Box>
-                      <StatusChip status={rsvpStatus} />
+                      <StatusChip guest={guest} />
                     </Box>
 
                     {/* Meal / Plus One details */}

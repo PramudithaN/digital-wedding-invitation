@@ -14,7 +14,7 @@
 ## 📸 Preview
 
 **Invitation Card Mobile Landing**
-![Preview](public/ok1.webp)
+![Preview](public/ok31.webp)
 
 ---
 

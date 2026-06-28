@@ -160,7 +160,7 @@ export default function AnalyticsPage() {
             <span className="text-3xl font-bold text-gray-900">{openRate}%</span>
             <span className="text-xs text-gray-400">({openedLinks} of {totalGuests})</span>
           </div>
-          <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden border border-gray-150">
+          <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
             <div style={{ width: `${openRate}%` }} className="bg-blue-500 h-full" />
           </div>
         </div>
@@ -175,7 +175,7 @@ export default function AnalyticsPage() {
             <span className="text-3xl font-bold text-gray-900">{responseRate}%</span>
             <span className="text-xs text-gray-400">({responded} of {totalGuests})</span>
           </div>
-          <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden border border-gray-150">
+          <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
             <div style={{ width: `${responseRate}%` }} className="bg-indigo-500 h-full" />
           </div>
         </div>
@@ -218,7 +218,7 @@ export default function AnalyticsPage() {
                     <span className="text-gray-700">Non-Vegetarian ({nonVegCount})</span>
                     <span className="text-gray-500">{Math.round((nonVegCount / mealTotal) * 100)}%</span>
                   </div>
-                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden border border-gray-150">
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                     <div style={{ width: `${(nonVegCount / mealTotal) * 100}%` }} className="bg-blue-500 h-full" />
                   </div>
                 </div>
@@ -229,7 +229,7 @@ export default function AnalyticsPage() {
                     <span className="text-gray-700">Vegetarian ({vegCount})</span>
                     <span className="text-gray-500">{Math.round((vegCount / mealTotal) * 100)}%</span>
                   </div>
-                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden border border-gray-150">
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                     <div style={{ width: `${(vegCount / mealTotal) * 100}%` }} className="bg-green-500 h-full" />
                   </div>
                 </div>
@@ -240,7 +240,7 @@ export default function AnalyticsPage() {
                     <span className="text-gray-700">Vegan ({veganCount})</span>
                     <span className="text-gray-500">{Math.round((veganCount / mealTotal) * 100)}%</span>
                   </div>
-                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden border border-gray-150">
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                     <div style={{ width: `${(veganCount / mealTotal) * 100}%` }} className="bg-teal-400 h-full" />
                   </div>
                 </div>
@@ -251,7 +251,7 @@ export default function AnalyticsPage() {
                     <span className="text-gray-700">No Preference ({noPrefCount})</span>
                     <span className="text-gray-500">{Math.round((noPrefCount / mealTotal) * 100)}%</span>
                   </div>
-                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden border border-gray-150">
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                     <div style={{ width: `${(noPrefCount / mealTotal) * 100}%` }} className="bg-gray-400 h-full" />
                   </div>
                 </div>

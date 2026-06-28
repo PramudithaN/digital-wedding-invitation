@@ -98,50 +98,50 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="py-24 flex flex-col items-center justify-center text-slate-500 gap-2">
-        <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
+      <div className="py-24 flex flex-col items-center justify-center text-gray-400 gap-2">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
         <p className="text-sm">Retrieving wedding parameters...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in font-sans">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-serif tracking-wide font-semibold text-slate-100 flex items-center gap-3">
-          <Settings className="w-8 h-8 text-indigo-400" /> Wedding Settings
+      <div className="border-b border-gray-200 pb-5">
+        <h1 className="text-2xl font-sans tracking-tight font-semibold text-gray-900 flex items-center gap-2">
+          <Settings className="w-6 h-6 text-gray-405" /> Wedding Settings
         </h1>
-        <p className="text-sm text-slate-400 mt-1">
+        <p className="text-xs text-gray-500 mt-1">
           Configure names, dates, maps location, and other public invitation details displayed to guests.
         </p>
       </div>
 
       {error && (
-        <div className="bg-rose-955/40 border border-rose-900/50 text-rose-200 text-sm px-4 py-3 rounded-xl flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
+        <div className="bg-red-50 border border-red-100 text-red-655 text-xs px-4 py-3 rounded-md flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
           <span>{error}</span>
         </div>
       )}
 
       {success && (
-        <div className="bg-emerald-950/40 border border-emerald-900/50 text-emerald-350 text-sm px-4 py-3 rounded-xl flex items-center gap-3">
-          <Check className="w-5 h-5 shrink-0 text-emerald-450 animate-bounce" />
+        <div className="bg-green-50 border border-green-150 text-green-700 text-xs px-4 py-3 rounded-md flex items-center gap-3">
+          <Check className="w-5 h-5 shrink-0 text-green-600 animate-bounce" />
           <span>Wedding settings updated successfully!</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Card Group 1: Couple Names */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-            <h2 className="text-lg font-serif text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-3">
-              <Heart className="w-5 h-5 text-rose-455 fill-rose-500/10" /> Couple Details
+          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm space-y-5">
+            <h2 className="text-sm font-semibold text-gray-950 uppercase tracking-wider flex items-center gap-2 border-b border-gray-150 pb-3">
+              <Heart className="w-4.5 h-4.5 text-gray-400" /> Couple Details
             </h2>
 
             <div className="space-y-4">
               <div>
-                <label htmlFor="set-bride" className="block text-xs font-semibold uppercase tracking-wider text-slate-450 mb-2">
+                <label htmlFor="set-bride" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
                   Bride's First Name
                 </label>
                 <input
@@ -151,12 +151,12 @@ export default function SettingsPage() {
                   value={brideName}
                   onChange={(e) => setBrideName(e.target.value)}
                   placeholder="e.g. Aria"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label htmlFor="set-groom" className="block text-xs font-semibold uppercase tracking-wider text-slate-450 mb-2">
+                <label htmlFor="set-groom" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
                   Groom's First Name
                 </label>
                 <input
@@ -166,21 +166,21 @@ export default function SettingsPage() {
                   value={groomName}
                   onChange={(e) => setGroomName(e.target.value)}
                   placeholder="e.g. Ethan"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
           </div>
 
           {/* Card Group 2: Date & Time */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-            <h2 className="text-lg font-serif text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-3">
-              <Calendar className="w-5 h-5 text-indigo-400" /> Event Schedule
+          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm space-y-5">
+            <h2 className="text-sm font-semibold text-gray-950 uppercase tracking-wider flex items-center gap-2 border-b border-gray-150 pb-3">
+              <Calendar className="w-4.5 h-4.5 text-gray-400" /> Event Schedule
             </h2>
 
             <div className="space-y-4">
               <div>
-                <label htmlFor="set-date" className="block text-xs font-semibold uppercase tracking-wider text-slate-450 mb-2">
+                <label htmlFor="set-date" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
                   Wedding Date (Human Readable)
                 </label>
                 <input
@@ -190,12 +190,12 @@ export default function SettingsPage() {
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   placeholder="e.g. Saturday, September 19, 2026"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label htmlFor="set-time" className="block text-xs font-semibold uppercase tracking-wider text-slate-450 mb-2">
+                <label htmlFor="set-time" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
                   Ceremony Time
                 </label>
                 <input
@@ -205,13 +205,13 @@ export default function SettingsPage() {
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
                   placeholder="e.g. 4:00 PM"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label htmlFor="set-iso" className="block text-xs font-semibold uppercase tracking-wider text-slate-450 mb-2">
-                  ISO Date (For Live Countdown)
+                <label htmlFor="set-iso" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                  ISO Timestamp (For Countdown)
                 </label>
                 <input
                   id="set-iso"
@@ -220,22 +220,22 @@ export default function SettingsPage() {
                   value={isoDate}
                   onChange={(e) => setIsoDate(e.target.value)}
                   placeholder="2026-09-19T16:00:00"
-                  className="w-full bg-slate-950 border border-slate-850 rounded-xl py-3 px-4 text-xs font-mono text-indigo-400 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-white border border-gray-250 rounded-md py-2 px-3 text-xs font-mono text-blue-600 focus:outline-none focus:border-blue-500"
                 />
-                <p className="text-[10px] text-slate-500 mt-1">Must follow `YYYY-MM-DDTHH:MM:SS` standard syntax.</p>
+                <p className="text-[9px] text-gray-400 mt-1">Must follow `YYYY-MM-DDTHH:MM:SS` standard format.</p>
               </div>
             </div>
           </div>
 
-          {/* Card Group 3: Location & Registry */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-            <h2 className="text-lg font-serif text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-3">
-              <MapPin className="w-5 h-5 text-indigo-400" /> Location & Registry
+          {/* Card Group 3: Location */}
+          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm space-y-5">
+            <h2 className="text-sm font-semibold text-gray-950 uppercase tracking-wider flex items-center gap-2 border-b border-gray-150 pb-3">
+              <MapPin className="w-4.5 h-4.5 text-gray-400" /> Location Details
             </h2>
 
             <div className="space-y-4">
               <div>
-                <label htmlFor="set-venue" className="block text-xs font-semibold uppercase tracking-wider text-slate-450 mb-2">
+                <label htmlFor="set-venue" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
                   Venue Name
                 </label>
                 <input
@@ -245,12 +245,12 @@ export default function SettingsPage() {
                   value={venue}
                   onChange={(e) => setVenue(e.target.value)}
                   placeholder="e.g. The Grand Pavilion"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label htmlFor="set-city" className="block text-xs font-semibold uppercase tracking-wider text-slate-450 mb-2">
+                <label htmlFor="set-city" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
                   City, Country
                 </label>
                 <input
@@ -260,12 +260,12 @@ export default function SettingsPage() {
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   placeholder="e.g. Colombo, Sri Lanka"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label htmlFor="set-address" className="block text-xs font-semibold uppercase tracking-wider text-slate-450 mb-2">
+                <label htmlFor="set-address" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
                   Street Address
                 </label>
                 <input
@@ -275,7 +275,7 @@ export default function SettingsPage() {
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="e.g. 123 Galle Road, Colombo 03"
-                  className="w-full bg-slate-950 border border-slate-805 rounded-xl py-3 px-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
@@ -283,14 +283,14 @@ export default function SettingsPage() {
         </div>
 
         {/* Bottom panel: External Integrations */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <h3 className="text-md font-serif text-slate-200 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-indigo-400" /> Navigation URL
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-gray-400" /> Navigation Link
             </h3>
             <div>
-              <label htmlFor="set-maps" className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                Google Maps Embed / Navigation URL
+              <label htmlFor="set-maps" className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                Google Maps Navigation URL
               </label>
               <input
                 id="set-maps"
@@ -298,18 +298,18 @@ export default function SettingsPage() {
                 value={googleMapsUrl}
                 onChange={(e) => setGoogleMapsUrl(e.target.value)}
                 placeholder="https://maps.google.com/?q=..."
-                className="w-full bg-slate-950 border border-slate-850 rounded-xl py-3 px-4 text-xs font-mono text-indigo-400 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-white border border-gray-250 rounded-md py-2 px-3 text-xs font-mono text-blue-600 focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-md font-serif text-slate-200 flex items-center gap-2">
-              <Gift className="w-4 h-4 text-rose-400" /> Registry URL
+          <div className="space-y-3">
+            <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+              <Gift className="w-4 h-4 text-gray-400" /> Gift Registry
             </h3>
             <div>
-              <label htmlFor="set-registry" className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                Wedding Registry Link
+              <label htmlFor="set-registry" className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                Registry Link URL
               </label>
               <input
                 id="set-registry"
@@ -317,7 +317,7 @@ export default function SettingsPage() {
                 value={registryUrl}
                 onChange={(e) => setRegistryUrl(e.target.value)}
                 placeholder="https://weddingregistry.com/..."
-                className="w-full bg-slate-950 border border-slate-855 rounded-xl py-3 px-4 text-xs font-mono text-indigo-400 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-white border border-gray-250 rounded-md py-2 px-3 text-xs font-mono text-blue-600 focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
@@ -328,7 +328,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="bg-gradient-to-r from-indigo-600 to-rose-500 hover:from-indigo-500 hover:to-rose-400 text-white rounded-xl py-3.5 px-8 text-sm font-semibold tracking-wide shadow-lg shadow-indigo-600/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="bg-blue-500 hover:bg-blue-600 text-white rounded-md py-2.5 px-6 text-xs font-semibold tracking-wide shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? (
               <>
@@ -338,7 +338,7 @@ export default function SettingsPage() {
             ) : (
               <>
                 <Save className="w-4 h-4" />
-                Save Wedding Configurations
+                Save Configurations
               </>
             )}
           </button>

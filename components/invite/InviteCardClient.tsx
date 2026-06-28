@@ -54,6 +54,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [isExpired, setIsExpired] = useState(false);
 
+  const timelineRef = useRef<HTMLDivElement>(null);
   const rsvpRef = useRef<HTMLDivElement>(null);
 
   // Initialize countdown
@@ -79,8 +80,8 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
     return () => clearInterval(timer);
   }, [weddingDetails.iso_date]);
 
-  const scrollToRSVP = () => {
-    rsvpRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToNext = () => {
+    timelineRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleRSVPSubmit = async (e: React.FormEvent) => {
@@ -121,219 +122,238 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
     }
   };
 
+  // Calendar event helpers
+  const getGoogleCalendarUrl = () => {
+    const title = encodeURIComponent(`Wedding of ${weddingDetails.bride_name} & ${weddingDetails.groom_name}`);
+    const dates = '20260919T103000Z/20260919T173000Z'; // UTC time equivalent (4:00 PM to 11:00 PM SLT)
+    const details = encodeURIComponent(`Dear ${guest.name}, we look forward to celebrating this beautiful day with you.`);
+    const location = encodeURIComponent(`${weddingDetails.venue}, ${weddingDetails.address}, ${weddingDetails.city}`);
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
+  };
+
+  const getICSContentUrl = () => {
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'BEGIN:VEVENT',
+      'SUMMARY:Wedding of ' + weddingDetails.bride_name + ' & ' + weddingDetails.groom_name,
+      'DESCRIPTION:We look forward to celebrating this beautiful day with you.',
+      'LOCATION:' + weddingDetails.venue + ', ' + weddingDetails.address + ', ' + weddingDetails.city,
+      'DTSTART:20260919T103000Z',
+      'DTEND:20260919T173000Z',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+    return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsContent);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans relative overflow-x-hidden selection:bg-amber-400 selection:text-slate-950">
+    <div className="min-h-screen bg-[#FAFAF8] text-[#1A1A1A] flex flex-col font-sans relative overflow-x-hidden selection:bg-amber-100 selection:text-gray-900">
       
-      {/* Decorative Elegant Floral Background SVG Accents (Champagne Gold) */}
-      <div className="absolute top-0 left-0 w-32 h-32 text-amber-500/10 pointer-events-none md:w-64 md:h-64">
-        <svg viewBox="0 0 100 100" fill="currentColor" className="w-full h-full">
-          <path d="M0,0 C20,10 30,30 30,50 C30,70 10,90 0,100 L0,0 Z M0,0 C10,20 30,30 50,30 C70,30 90,10 100,0 L0,0 Z" />
+      {/* Decorative Elegant Gold Flourishes */}
+      <div className="absolute top-4 left-4 text-[#C8A882]/20 pointer-events-none md:top-8 md:left-8">
+        <svg width="60" height="60" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M10,10 L30,10 A20,20 0 0,1 50,30 L50,50" />
+          <path d="M10,10 L10,30 A20,20 0 0,0 30,50 L50,50" />
         </svg>
       </div>
-      <div className="absolute top-0 right-0 w-32 h-32 text-amber-500/10 pointer-events-none md:w-64 md:h-64 rotate-90">
-        <svg viewBox="0 0 100 100" fill="currentColor" className="w-full h-full">
-          <path d="M0,0 C20,10 30,30 30,50 C30,70 10,90 0,100 L0,0 Z M0,0 C10,20 30,30 50,30 C70,30 90,10 100,0 L0,0 Z" />
+      <div className="absolute top-4 right-4 text-[#C8A882]/20 pointer-events-none md:top-8 md:right-8 rotate-90">
+        <svg width="60" height="60" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M10,10 L30,10 A20,20 0 0,1 50,30 L50,50" />
+          <path d="M10,10 L10,30 A20,20 0 0,0 30,50 L50,50" />
         </svg>
       </div>
 
-      {/* --- HERO SCREEN (FULLSCREEN) --- */}
-      <section className="min-h-screen flex flex-col justify-between items-center text-center p-6 md:p-12 relative border-4 border-amber-500/20 m-3 rounded-2xl bg-gradient-to-b from-[#0B251A] via-[#05100B] to-slate-950 shadow-2xl">
-        <div className="pt-8">
-          <span className="text-xs uppercase tracking-widest text-amber-400 font-semibold">The Wedding Celebration of</span>
+      {/* --- SECTION 1 — HERO SCREEN (FULLSCREEN) --- */}
+      <section className="min-h-screen flex flex-col justify-between items-center text-center p-6 md:p-12 relative">
+        <div className="pt-12">
+          {/* Accent flourish line */}
+          <div className="flex items-center justify-center gap-2 mb-4 text-[#C8A882]">
+            <div className="h-[1px] w-8 bg-[#C8A882]" />
+            <span className="text-[10px] uppercase tracking-widest font-semibold">The Wedding Invitation</span>
+            <div className="h-[1px] w-8 bg-[#C8A882]" />
+          </div>
         </div>
 
-        {/* Serif Display Couples Names */}
-        <div className="space-y-4 my-auto py-8">
-          <h1 className="text-5xl md:text-7xl font-serif tracking-wide text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-amber-300 to-amber-100 font-semibold italic">
+        {/* Couples Names & Monogram */}
+        <div className="my-auto space-y-3">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif tracking-tight text-gray-900 font-light">
             {weddingDetails.bride_name}
           </h1>
-          <div className="flex items-center justify-center gap-4 text-amber-400/40">
-            <div className="h-px w-16 bg-amber-500/30" />
-            <Heart className="w-5 h-5 fill-amber-500/20 animate-pulse text-amber-400" />
-            <div className="h-px w-16 bg-amber-500/30" />
+          <div className="font-script text-4xl sm:text-5xl text-[#C8A882] py-2">
+            &
           </div>
-          <h1 className="text-5xl md:text-7xl font-serif tracking-wide text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-amber-300 to-amber-100 font-semibold italic">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif tracking-tight text-gray-900 font-light">
             {weddingDetails.groom_name}
           </h1>
 
-          <div className="pt-8 max-w-sm mx-auto">
-            <p className="text-sm md:text-md text-amber-100/70 italic font-serif">
+          <div className="pt-10 max-w-sm mx-auto space-y-3">
+            <p className="text-sm font-serif italic text-[#6B6B6B]">
               Dear {guest.name},
             </p>
-            <p className="text-xs md:text-sm text-slate-350 mt-2 leading-relaxed">
-              We warmly invite you to share in our joy and celebrate this special day with us.
+            <p className="text-xs text-[#6B6B6B] leading-relaxed max-w-xs mx-auto">
+              You are cordially invited to join us in celebrating our wedding ceremony and reception.
             </p>
           </div>
         </div>
 
-        {/* Date and Venue brief */}
-        <div className="space-y-6 pb-6 flex flex-col items-center">
+        {/* Schedule & Scroll cue */}
+        <div className="pb-8 space-y-8 flex flex-col items-center">
           <div className="space-y-1">
-            <p className="text-sm font-semibold tracking-wider text-amber-400 uppercase">{weddingDetails.date}</p>
-            <p className="text-xs text-slate-400">{weddingDetails.time} • {weddingDetails.venue}</p>
+            <p className="text-xs uppercase tracking-widest text-[#6B6B6B] font-semibold">{weddingDetails.date}</p>
+            <p className="text-xs text-[#6B6B6B]">{weddingDetails.time} • {weddingDetails.venue}</p>
           </div>
 
           <button 
-            onClick={scrollToRSVP}
-            className="flex flex-col items-center gap-1.5 text-xs text-amber-400/80 hover:text-amber-300 cursor-pointer transition-colors group animate-bounce"
+            onClick={scrollToNext}
+            className="flex flex-col items-center gap-1 text-[10px] uppercase tracking-widest text-[#C8A882] font-semibold hover:text-[#B69670] cursor-pointer transition-colors animate-pulse-soft"
           >
-            RSVP Details
-            <ChevronDown className="w-4 h-4 text-amber-400 transition-transform group-hover:translate-y-0.5" />
+            <span>Explore Invitation</span>
+            <ChevronDown className="w-4 h-4 mt-1" />
           </button>
         </div>
       </section>
 
-      {/* --- INVITATION DETAILS & COUNTDOWN --- */}
-      <section className="max-w-3xl mx-auto px-6 py-20 w-full space-y-16 text-center">
-        {/* Countdown Timer */}
-        <div className="space-y-6 bg-emerald-950/20 border border-emerald-900/30 p-8 rounded-3xl backdrop-blur-md">
-          <h3 className="text-xs uppercase tracking-widest text-amber-400 font-semibold">Counting Down the Days</h3>
+      {/* --- SECTION 2 — COUNTDOWN TIMER --- */}
+      <section ref={timelineRef} className="max-w-3xl mx-auto px-6 py-12 w-full text-center">
+        <div className="bg-white border border-[#E8E4DE] rounded-xl p-8 shadow-sm max-w-lg mx-auto space-y-6">
+          <span className="text-[10px] uppercase tracking-widest text-[#6B6B6B] font-semibold">Counting down the moments</span>
           
           {isExpired ? (
-            <p className="font-serif italic text-amber-300">The Celebration Has Begun!</p>
+            <p className="font-serif italic text-[#C8A882] text-lg">Today is the day! 🎉</p>
           ) : (
-            <div className="grid grid-cols-4 gap-4 max-w-sm mx-auto">
-              <div className="bg-slate-950/80 border border-slate-900/80 rounded-xl p-3 shadow-inner">
-                <span className="block text-2xl md:text-3xl font-bold text-amber-300 font-mono">{timeLeft.days}</span>
-                <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mt-1">Days</span>
+            <div className="grid grid-cols-4 gap-2 text-center divide-x divide-[#E8E4DE]">
+              <div className="px-1">
+                <span className="block text-3xl font-light text-gray-900 font-serif">{timeLeft.days}</span>
+                <span className="block text-[8px] uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Days</span>
               </div>
-              <div className="bg-slate-950/80 border border-slate-900/80 rounded-xl p-3 shadow-inner">
-                <span className="block text-2xl md:text-3xl font-bold text-amber-300 font-mono">{timeLeft.hours}</span>
-                <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mt-1">Hrs</span>
+              <div className="px-1">
+                <span className="block text-3xl font-light text-gray-900 font-serif">{timeLeft.hours}</span>
+                <span className="block text-[8px] uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Hrs</span>
               </div>
-              <div className="bg-slate-950/80 border border-slate-900/80 rounded-xl p-3 shadow-inner">
-                <span className="block text-2xl md:text-3xl font-bold text-amber-300 font-mono">{timeLeft.minutes}</span>
-                <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mt-1">Mins</span>
+              <div className="px-1">
+                <span className="block text-3xl font-light text-gray-900 font-serif">{timeLeft.minutes}</span>
+                <span className="block text-[8px] uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Min</span>
               </div>
-              <div className="bg-slate-950/80 border border-slate-900/80 rounded-xl p-3 shadow-inner">
-                <span className="block text-2xl md:text-3xl font-bold text-amber-300 font-mono">{timeLeft.seconds}</span>
-                <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mt-1">Secs</span>
+              <div className="px-1">
+                <span className="block text-3xl font-light text-gray-900 font-serif">{timeLeft.seconds}</span>
+                <span className="block text-[8px] uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Sec</span>
               </div>
             </div>
           )}
         </div>
-
-        {/* Location & Time block */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
-          {/* Card 1: Schedule */}
-          <div className="bg-slate-900/40 border border-slate-900 p-8 rounded-3xl space-y-4 shadow-lg flex flex-col justify-between">
-            <div className="space-y-4">
-              <span className="p-3 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-2xl w-fit block">
-                <Calendar className="w-5 h-5" />
-              </span>
-              <h3 className="text-xl font-serif font-semibold text-slate-205">Schedule</h3>
-              <div className="space-y-2 text-sm text-slate-400">
-                <p className="font-semibold text-slate-300">{weddingDetails.date}</p>
-                <p>Arrival of guests at {weddingDetails.time}</p>
-                <p>Reception & dinner to follow</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 2: Venue */}
-          <div className="bg-slate-900/40 border border-slate-900 p-8 rounded-3xl space-y-4 shadow-lg flex flex-col justify-between">
-            <div className="space-y-4">
-              <span className="p-3 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-2xl w-fit block">
-                <MapPin className="w-5 h-5" />
-              </span>
-              <h3 className="text-xl font-serif font-semibold text-slate-205">Venue Location</h3>
-              <div className="space-y-2 text-sm text-slate-400">
-                <p className="font-semibold text-slate-300">{weddingDetails.venue}</p>
-                <p>{weddingDetails.address}</p>
-                <p>{weddingDetails.city}</p>
-              </div>
-            </div>
-            {weddingDetails.google_maps_url && (
-              <a
-                href={weddingDetails.google_maps_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-xs font-semibold text-amber-400 hover:text-amber-300 mt-4 transition-colors"
-              >
-                Navigate with Google Maps →
-              </a>
-            )}
-          </div>
-        </div>
-
-        {/* Gift registry details if any */}
-        {weddingDetails.registry_url && (
-          <div className="bg-slate-900/20 border border-slate-900 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-left">
-            <div className="flex items-center gap-3">
-              <span className="p-2.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-xl">
-                <Gift className="w-4 h-4" />
-              </span>
-              <div>
-                <h4 className="text-sm font-semibold text-slate-200">Gift Registry</h4>
-                <p className="text-xs text-slate-500">Should you wish to honour us with a gift, details can be found here.</p>
-              </div>
-            </div>
-            <a
-              href={weddingDetails.registry_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl px-4 py-2 text-xs font-semibold transition-all w-full sm:w-auto text-center"
-            >
-              View Registry
-            </a>
-          </div>
-        )}
       </section>
 
-      {/* --- RSVP SUBMISSION FORM SECTION --- */}
-      <section 
-        id="rsvp-section" 
-        ref={rsvpRef} 
-        className="max-w-xl mx-auto px-6 py-20 w-full relative z-10"
-      >
-        <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-8 relative overflow-hidden">
-          {/* Subtle decoration */}
-          <div className="absolute -right-20 -bottom-20 w-40 h-40 bg-amber-500/5 rounded-full blur-2xl" />
+      {/* --- SECTION 3 — EVENT TIMELINE --- */}
+      <section className="max-w-xl mx-auto px-6 py-16 w-full space-y-12">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-serif tracking-tight text-gray-950 font-light">The Wedding Itinerary</h2>
+          <div className="h-[1px] w-12 bg-[#C8A882] mx-auto mt-2" />
+        </div>
 
+        <div className="relative pl-6 md:pl-0 border-l border-[#E8E4DE] md:border-none md:grid md:grid-cols-7 gap-4 items-center">
+          {/* Event 1 */}
+          <div className="md:col-span-3 md:text-right font-serif text-lg text-gray-900 py-2">3:00 PM</div>
+          <div className="hidden md:flex md:col-span-1 justify-center relative">
+            <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
+            <div className="absolute top-3 w-[1px] h-20 bg-[#E8E4DE]" />
+          </div>
+          <div className="md:col-span-3 bg-white border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
+            <h4 className="font-semibold text-xs text-gray-900">Guest Arrival</h4>
+            <p className="text-[11px] text-[#6B6B6B] mt-0.5">Grand Monarch Foyer</p>
+          </div>
+
+          {/* Event 2 */}
+          <div className="md:col-span-3 md:text-right font-serif text-lg text-gray-900 py-2">3:30 PM</div>
+          <div className="hidden md:flex md:col-span-1 justify-center relative">
+            <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
+            <div className="absolute top-3 w-[1px] h-20 bg-[#E8E4DE]" />
+          </div>
+          <div className="md:col-span-3 bg-white border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
+            <h4 className="font-semibold text-xs text-gray-900">Wedding Ceremony</h4>
+            <p className="text-[11px] text-[#6B6B6B] mt-0.5">Main Ceremonial Hall</p>
+          </div>
+
+          {/* Event 3 */}
+          <div className="md:col-span-3 md:text-right font-serif text-lg text-gray-900 py-2">4:30 PM</div>
+          <div className="hidden md:flex md:col-span-1 justify-center relative">
+            <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
+            <div className="absolute top-3 w-[1px] h-20 bg-[#E8E4DE]" />
+          </div>
+          <div className="md:col-span-3 bg-white border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
+            <h4 className="font-semibold text-xs text-gray-900">Cocktails & Couple Photos</h4>
+            <p className="text-[11px] text-[#6B6B6B] mt-0.5">Garden Terrace</p>
+          </div>
+
+          {/* Event 4 */}
+          <div className="md:col-span-3 md:text-right font-serif text-lg text-gray-900 py-2">6:00 PM</div>
+          <div className="hidden md:flex md:col-span-1 justify-center relative">
+            <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
+            <div className="absolute top-3 w-[1px] h-20 bg-[#E8E4DE]" />
+          </div>
+          <div className="md:col-span-3 bg-white border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
+            <h4 className="font-semibold text-xs text-gray-900">Reception Dinner</h4>
+            <p className="text-[11px] text-[#6B6B6B] mt-0.5">Main Banquet Hall</p>
+          </div>
+
+          {/* Event 5 */}
+          <div className="md:col-span-3 md:text-right font-serif text-lg text-gray-900 py-2">9:00 PM</div>
+          <div className="hidden md:flex md:col-span-1 justify-center relative">
+            <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
+          </div>
+          <div className="md:col-span-3 bg-white border border-[#E8E4DE] p-4 rounded-lg shadow-xs">
+            <h4 className="font-semibold text-xs text-gray-900">Dancing & Farewell</h4>
+            <p className="text-[11px] text-[#6B6B6B] mt-0.5">Dance Floor / Hall</p>
+          </div>
+        </div>
+      </section>
+
+      {/* --- SECTION 4 — RSVP FORM --- */}
+      <section id="rsvp-section" ref={rsvpRef} className="max-w-lg mx-auto px-6 py-12 w-full relative z-10">
+        <div className="bg-white border border-[#E8E4DE] rounded-xl p-8 shadow-sm space-y-6">
           {isSuccess ? (
-            /* Animated success view */
-            <div className="text-center py-12 space-y-6 animate-scale-up">
-              <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/25 rounded-full flex items-center justify-center mx-auto text-amber-400">
-                <CheckCircle2 className="w-8 h-8" />
+            /* Success screen */
+            <div className="text-center py-8 space-y-5 animate-scale-up">
+              <div className="w-12 h-12 bg-green-50 border border-green-100 rounded-full flex items-center justify-center mx-auto text-green-600">
+                <CheckCircle2 className="w-6 h-6" />
               </div>
-              <div className="space-y-2">
-                <h2 className="text-2xl font-serif font-bold text-slate-100">RSVP Submitted</h2>
-                <p className="text-sm text-slate-400 max-w-xs mx-auto">
-                  Thank you, {guest.name}. Your response has been recorded successfully.
+              <div className="space-y-1.5">
+                <h2 className="text-xl font-serif text-gray-900">RSVP Confirmed</h2>
+                <p className="text-xs text-[#6B6B6B] max-w-xs mx-auto">
+                  Thank you, {guest.name}. Your response has been logged successfully.
                 </p>
               </div>
-              
               {attending === 'attending' ? (
-                <div className="bg-emerald-955/20 border border-emerald-900/35 p-4 rounded-2xl text-xs text-emerald-300 max-w-xs mx-auto">
-                  🎉 We are excited to celebrate this beautiful milestone with you!
+                <div className="bg-green-50/50 border border-green-100 p-4 rounded text-xs text-green-700 max-w-xs mx-auto">
+                  We look forward to celebrating this beautiful day with you!
                 </div>
               ) : (
-                <div className="bg-slate-950 p-4 rounded-2xl text-xs text-slate-500 max-w-xs mx-auto italic">
-                  We are sorry you can't make it, but thank you for letting us know.
+                <div className="bg-gray-50 p-4 rounded text-xs text-gray-500 max-w-xs mx-auto italic border border-gray-200">
+                  We're sorry you can't make it, but we appreciate your response.
                 </div>
               )}
             </div>
           ) : (
-            /* Actual Form */
+            /* RSVP Form Content */
             <div className="space-y-6">
-              <div className="text-center space-y-1">
-                <h2 className="text-3xl font-serif font-semibold text-slate-100">Kindly Reply</h2>
-                <p className="text-xs text-slate-500 uppercase tracking-widest">Please respond by September 01, 2026</p>
+              <div className="text-center space-y-1.5">
+                <h2 className="text-2xl font-serif text-gray-950 font-light">Will you join us?</h2>
+                <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Please reply by September 01, 2026</p>
               </div>
 
               {error && (
-                <div className="bg-rose-955/40 border border-rose-900/50 text-rose-200 text-xs px-4 py-3 rounded-xl flex items-center gap-3">
-                  <AlertCircle className="w-4.5 h-4.5 text-rose-455 shrink-0" />
+                <div className="bg-red-50 border border-red-100 text-red-600 text-xs px-4 py-3 rounded flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
                   <span>{error}</span>
                 </div>
               )}
 
-              <form onSubmit={handleRSVPSubmit} className="space-y-6">
+              <form onSubmit={handleRSVPSubmit} className="space-y-5">
                 {/* Attending Selection */}
-                <div className="space-y-3">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 text-center">
-                    Will you attend?
-                  </label>
+                <div className="space-y-2">
+                  <span className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] text-center">
+                    Attendance
+                  </span>
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       type="button"
@@ -341,13 +361,13 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                         setAttending('attending');
                         setError('');
                       }}
-                      className={`py-3.5 rounded-xl border text-sm font-semibold tracking-wide transition-all cursor-pointer ${
+                      className={`py-3 rounded border text-xs font-semibold tracking-wide transition-all cursor-pointer ${
                         attending === 'attending'
-                          ? 'bg-amber-500/10 text-amber-300 border-amber-500/70 shadow-lg shadow-amber-500/5 scale-[1.02]'
-                          : 'bg-slate-950 border-slate-805 text-slate-400 hover:text-slate-200'
+                          ? 'bg-blue-50 text-blue-600 border-blue-500 shadow-xs'
+                          : 'bg-white border-gray-200 text-gray-500'
                       }`}
                     >
-                      Joyfully Accept
+                      Accepts with Joy
                     </button>
                     <button
                       type="button"
@@ -355,39 +375,39 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                         setAttending('declined');
                         setError('');
                       }}
-                      className={`py-3.5 rounded-xl border text-sm font-semibold tracking-wide transition-all cursor-pointer ${
+                      className={`py-3 rounded border text-xs font-semibold tracking-wide transition-all cursor-pointer ${
                         attending === 'declined'
-                          ? 'bg-rose-955/20 text-rose-300 border-rose-500/60 shadow-lg shadow-rose-900/5 scale-[1.02]'
-                          : 'bg-slate-950 border-slate-805 text-slate-400 hover:text-slate-200'
+                          ? 'bg-red-50 text-red-700 border-red-300 shadow-xs'
+                          : 'bg-white border-gray-200 text-gray-500'
                       }`}
                     >
-                      Regretfully Decline
+                      Declines with Regret
                     </button>
                   </div>
                 </div>
 
                 {/* Conditional Fields if Attending */}
                 {attending === 'attending' && (
-                  <div className="space-y-6 pt-4 border-t border-slate-850 animate-fade-in">
+                  <div className="space-y-5 pt-4 border-t border-[#E8E4DE] animate-fade-in">
                     {/* Plus One Toggle */}
-                    <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-850 space-y-4">
-                      <label className="flex items-center gap-3 cursor-pointer select-none">
+                    <div className="bg-[#FAFAF8] p-4 rounded border border-[#E8E4DE] space-y-4">
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
                         <input
                           type="checkbox"
                           checked={plusOne}
                           onChange={(e) => setPlusOne(e.target.checked)}
-                          className="w-4.5 h-4.5 rounded border-slate-800 text-amber-500 focus:ring-0 focus:ring-offset-0 bg-slate-900 cursor-pointer"
+                          className="w-4 h-4 rounded border-gray-300 text-blue-500 focus:ring-0 bg-white cursor-pointer"
                         />
-                        <div className="flex items-center gap-2 text-sm text-slate-200 font-medium">
-                          <UserPlus className="w-4 h-4 text-amber-400" />
-                          <span>I am bringing a +1 guest</span>
+                        <div className="flex items-center gap-1.5 text-xs text-gray-700 font-semibold">
+                          <UserPlus className="w-4 h-4 text-[#C8A882]" />
+                          <span>I will be bringing a +1</span>
                         </div>
                       </label>
 
                       {plusOne && (
                         <div className="animate-slide-down">
-                          <label htmlFor="plusone-name" className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                            Plus One Full Name
+                          <label htmlFor="plusone-name" className="block text-[9px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                            Plus One Guest Name
                           </label>
                           <input
                             id="plusone-name"
@@ -396,16 +416,16 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                             onChange={(e) => setPlusOneName(e.target.value)}
                             placeholder="Full name of your guest"
                             required={plusOne}
-                            className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 px-4 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                            className="w-full bg-white border border-gray-200 rounded py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
                           />
                         </div>
                       )}
                     </div>
 
                     {/* Meal Preference */}
-                    <div className="space-y-3">
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                        <UtensilsCrossed className="w-3.5 h-3.5 text-amber-400" /> Meal Preference
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] flex items-center gap-1.5">
+                        <UtensilsCrossed className="w-3.5 h-3.5 text-[#C8A882]" /> Meal Selection
                       </label>
                       <div className="grid grid-cols-3 gap-2">
                         {[
@@ -417,10 +437,10 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                             key={m.value}
                             type="button"
                             onClick={() => setMealChoice(m.value)}
-                            className={`py-2 px-3 border rounded-xl text-xs font-semibold capitalize transition-all cursor-pointer ${
+                            className={`py-2 px-3 border rounded text-xs font-semibold capitalize transition-all cursor-pointer ${
                               mealChoice === m.value
-                                ? 'bg-amber-500/10 text-amber-300 border-amber-500/50'
-                                : 'bg-slate-950 border-slate-850 text-slate-450 hover:text-slate-300'
+                                ? 'bg-blue-50 text-blue-600 border-blue-500'
+                                : 'bg-white border-gray-200 text-gray-500'
                             }`}
                           >
                             {m.label}
@@ -431,7 +451,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
 
                     {/* Dietary Restrictions */}
                     <div>
-                      <label htmlFor="diet-notes" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                      <label htmlFor="diet-notes" className="block text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] mb-2">
                         Dietary restrictions / Allergies
                       </label>
                       <input
@@ -439,8 +459,8 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                         type="text"
                         value={dietaryNotes}
                         onChange={(e) => setDietaryNotes(e.target.value)}
-                        placeholder="e.g. Gluten free, Peanut allergy, None..."
-                        className="w-full bg-slate-950 border border-slate-850 rounded-xl py-3 px-4 text-sm text-slate-200 focus:outline-none focus:border-amber-500"
+                        placeholder="e.g. Nut allergies, Gluten free"
+                        className="w-full bg-white border border-gray-200 rounded py-2.5 px-3.5 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
                       />
                     </div>
                   </div>
@@ -448,16 +468,16 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
 
                 {/* Personal Message */}
                 <div>
-                  <label htmlFor="rsvp-msg" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
-                    <MessageSquare className="w-3.5 h-3.5 text-amber-400" /> Personal Message to the Couple
+                  <label htmlFor="rsvp-msg" className="block text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] mb-2 flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5 text-[#C8A882]" /> Warm Wishes
                   </label>
                   <textarea
                     id="rsvp-msg"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Write a warm note or message (optional)"
+                    placeholder="Write a message to the couple (optional)"
                     rows={4}
-                    className="w-full bg-slate-955 border border-slate-850 rounded-xl py-3 px-4 text-sm text-slate-200 placeholder-slate-650 focus:outline-none focus:border-amber-500 resize-none"
+                    className="w-full bg-white border border-gray-200 rounded py-3 px-4 text-xs text-gray-900 focus:outline-none focus:border-blue-500 resize-none"
                   />
                 </div>
 
@@ -465,15 +485,15 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-amber-550 to-yellow-500 hover:from-amber-500 hover:to-yellow-405 text-slate-950 rounded-xl py-3.5 text-sm font-bold tracking-wider shadow-lg shadow-amber-500/10 hover:shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded py-2.5 text-xs font-semibold tracking-wider shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Submitting response...
+                      <Loader2 className="w-4 h-4 animate-spin animate-infinite" />
+                      Sending...
                     </>
                   ) : (
-                    'Send RSVP Response'
+                    'Confirm RSVP'
                   )}
                 </button>
               </form>
@@ -482,10 +502,106 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
         </div>
       </section>
 
-      {/* --- FOOTER --- */}
-      <footer className="mt-auto py-8 text-center text-xs text-slate-600 border-t border-slate-900 bg-slate-950">
-        <p>© {new Date().getFullYear()} {weddingDetails.bride_name} & {weddingDetails.groom_name}'s Wedding Celebration.</p>
-        <p className="mt-1 text-[10px] text-slate-700">Digital Invite created with ❤️ by Pramuditha Nadun.</p>
+      {/* --- SECTION 5 — ADD TO CALENDAR --- */}
+      <section className="max-w-md mx-auto px-6 py-6 w-full text-center">
+        <div className="bg-white border border-[#E8E4DE] rounded-xl p-8 shadow-xs space-y-5">
+          <h3 className="text-lg font-serif text-gray-900 font-light">Save the Date</h3>
+          <div className="flex flex-wrap justify-center gap-3 pt-1">
+            <a
+              href={getGoogleCalendarUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-gray-100 hover:bg-gray-250 text-gray-700 border border-gray-200 rounded py-2 px-4 text-xs font-medium transition-colors"
+            >
+              Google Calendar
+            </a>
+            <a
+              href={getICSContentUrl()}
+              download="wedding_invite.ics"
+              className="bg-gray-100 hover:bg-gray-250 text-gray-700 border border-gray-200 rounded py-2 px-4 text-xs font-medium transition-colors"
+            >
+              Apple Calendar
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* --- SECTION 6 — MOMENTS (IMAGE GALLERY PLACEHOLDER) --- */}
+      <section className="max-w-3xl mx-auto px-6 py-12 w-full text-center space-y-6">
+        <h2 className="text-xl font-serif text-gray-900 font-light">Moments Gallery</h2>
+        <div className="h-[1px] w-12 bg-[#C8A882] mx-auto" />
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+          <div className="bg-[#E8E4DE]/30 border border-[#E8E4DE] rounded-xl aspect-[3/4] flex items-center justify-center text-[#C8A882]">
+            <Heart className="w-8 h-8 opacity-20 fill-current" />
+          </div>
+          <div className="bg-[#E8E4DE]/30 border border-[#E8E4DE] rounded-xl aspect-[3/4] flex items-center justify-center text-[#C8A882] sm:translate-y-4">
+            <Heart className="w-8 h-8 opacity-20 fill-current" />
+          </div>
+          <div className="bg-[#E8E4DE]/30 border border-[#E8E4DE] rounded-xl aspect-[3/4] flex items-center justify-center text-[#C8A882]">
+            <Heart className="w-8 h-8 opacity-20 fill-current" />
+          </div>
+        </div>
+        <p className="text-[10px] text-gray-400 italic pt-6">"Our journey together"</p>
+      </section>
+
+      {/* --- SECTION 7 — VENUE DETAILS & MAP --- */}
+      <section className="max-w-3xl mx-auto px-6 py-16 w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        {/* Left Venue Information */}
+        <div className="bg-white border border-[#E8E4DE] rounded-xl p-8 space-y-6 shadow-xs h-full flex flex-col justify-between">
+          <div className="space-y-4">
+            <h3 className="text-2xl font-serif text-gray-950 font-light">{weddingDetails.venue}</h3>
+            <p className="text-xs text-[#6B6B6B]">{weddingDetails.city}</p>
+            <div className="h-[1px] w-full bg-[#E8E4DE]" />
+            <div className="text-xs text-[#6B6B6B] leading-relaxed space-y-1 pt-1">
+              <p>{weddingDetails.address}</p>
+              <p>Colombo, Sri Lanka</p>
+            </div>
+            <div className="h-[1px] w-full bg-[#E8E4DE]" />
+            <div className="text-[10px] text-gray-400 space-y-1">
+              <p>• Parking available on-site</p>
+              <p>• Valet service from 2:30 PM</p>
+            </div>
+          </div>
+
+          {weddingDetails.google_maps_url && (
+            <a
+              href={weddingDetails.google_maps_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 border border-blue-500 hover:bg-blue-50 text-blue-600 rounded py-2.5 px-4 text-center text-xs font-semibold transition-all inline-block"
+            >
+              Get Directions
+            </a>
+          )}
+        </div>
+
+        {/* Right Iframe Map Embed */}
+        <div className="bg-white border border-[#E8E4DE] rounded-xl overflow-hidden shadow-xs h-80 relative">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3961.2678685121404!2d79.91978257500913!3d6.858485293140026!2m3!1f0!2f0!3f0!2m2!1i1024!2i768!4f13.1!3m3!1m2!1m1!2sGrand+Monarch!5e0!3m2!1sen!2slk!4v1700000000000!5m2!1sen!2slk"
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen={false}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="w-full h-full grayscale opacity-80"
+          ></iframe>
+        </div>
+      </section>
+
+      {/* --- SECTION 8 — FOOTER --- */}
+      <footer className="mt-auto py-12 text-center text-xs text-white bg-neutral-900 px-6 space-y-4">
+        <h2 className="text-2xl font-serif tracking-tight font-light italic">
+          {weddingDetails.bride_name} & {weddingDetails.groom_name}
+        </h2>
+        <p className="text-[10px] text-gray-400 uppercase tracking-widest">{weddingDetails.date}</p>
+        <div className="flex justify-center text-[#C8A882] py-2">
+          <Heart className="w-5 h-5 fill-current" />
+        </div>
+        <p className="text-[9px] text-gray-500">Made with love for our special day.</p>
+        <p className="text-[8px] text-gray-650">Digital Invite created by Pramuditha Nadun.</p>
       </footer>
     </div>
   );

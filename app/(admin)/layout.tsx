@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { logoutAction } from './actions';
 import { 
-  LayoutDashboard, 
+  LayoutGrid, 
   Users, 
-  MailCheck, 
+  CheckCircle2, 
   Split, 
   Tags, 
   BarChart3, 
@@ -17,10 +17,10 @@ import {
 } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
   { href: '/guests', label: 'Guests', icon: Users },
-  { href: '/rsvp', label: 'RSVPs', icon: MailCheck },
-  { href: '/tables', label: 'Bride/Groom', icon: Split },
+  { href: '/rsvp', label: 'RSVPs', icon: CheckCircle2 },
+  { href: '/tables', label: 'Tables', icon: Split },
   { href: '/categories', label: 'Categories', icon: Tags },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/settings', label: 'Settings', icon: Settings },
@@ -34,22 +34,17 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col md:flex-row font-sans">
       {/* Sidebar for Desktop */}
-      <aside className="hidden md:flex md:w-64 bg-slate-900 border-r border-slate-800 flex-col shrink-0">
+      <aside className="hidden md:flex md:w-60 bg-white border-r border-gray-200 flex-col shrink-0">
         {/* Header */}
-        <div className="p-6 border-b border-slate-800 flex items-center gap-3">
-          <div className="w-9 h-9 bg-gradient-to-tr from-indigo-500 to-rose-500 rounded-full flex items-center justify-center shadow-lg shadow-indigo-500/10">
-            <Heart className="w-5 h-5 text-white fill-white/10" />
-          </div>
-          <div>
-            <h1 className="font-serif tracking-wider font-semibold text-slate-100">Wedding Hub</h1>
-            <p className="text-[10px] text-slate-400 tracking-widest uppercase">Admin Panel</p>
-          </div>
+        <div className="h-14 px-6 border-b border-gray-200 flex items-center gap-2">
+          <Heart className="w-4 h-4 text-blue-500 fill-blue-500/10" />
+          <span className="font-semibold text-gray-900 tracking-tight text-sm">Oshidhie & Kaveen</span>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -57,13 +52,13 @@ export default function AdminLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                className={`flex items-center gap-2.5 h-10 px-3 rounded-md text-xs font-medium transition-all ${
                   isActive 
-                    ? 'bg-gradient-to-r from-indigo-600/90 to-rose-500/10 text-white border-l-4 border-indigo-500 shadow-md shadow-indigo-500/5' 
-                    : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
+                    ? 'bg-blue-50 text-blue-600' 
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-400' : 'text-slate-400'}`} />
+                <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-blue-500' : 'text-gray-400'}`} />
                 {item.label}
               </Link>
             );
@@ -71,13 +66,13 @@ export default function AdminLayout({
         </nav>
 
         {/* Footer / Logout */}
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-3 border-t border-gray-200">
           <form action={logoutAction}>
             <button
               type="submit"
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-rose-400 hover:bg-rose-950/20 transition-all cursor-pointer"
+              className="w-full flex items-center gap-2.5 h-10 px-3 rounded-md text-xs font-medium text-red-500 hover:bg-red-50 hover:text-red-655 transition-all cursor-pointer"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4.5 h-4.5 text-red-400" />
               Sign Out
             </button>
           </form>
@@ -85,15 +80,15 @@ export default function AdminLayout({
       </aside>
 
       {/* Top Header for Mobile */}
-      <header className="md:hidden bg-slate-900 border-b border-slate-800 flex items-center justify-between px-6 py-4 sticky top-0 z-40">
+      <header className="md:hidden bg-white border-b border-gray-200 flex items-center justify-between px-6 py-3.5 sticky top-0 z-40">
         <div className="flex items-center gap-2">
-          <Heart className="w-5 h-5 text-indigo-400 fill-indigo-400/10" />
-          <h1 className="font-serif tracking-wider font-semibold text-slate-100">Wedding Hub</h1>
+          <Heart className="w-4 h-4 text-blue-500 fill-blue-500/10" />
+          <span className="font-semibold text-gray-900 text-sm">Oshidhie & Kaveen</span>
         </div>
         <form action={logoutAction}>
           <button 
             type="submit" 
-            className="p-2 text-rose-400 hover:bg-rose-950/20 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
             title="Sign Out"
           >
             <LogOut className="w-4 h-4" />
@@ -102,14 +97,14 @@ export default function AdminLayout({
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto pb-24 md:pb-0">
-        <div className="p-6 md:p-8 max-w-7xl w-full mx-auto">
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto pb-20 md:pb-0">
+        <div className="p-6 md:p-8 max-w-6xl w-full mx-auto">
           {children}
         </div>
       </main>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 flex justify-around py-2 px-2 z-40 backdrop-blur-lg bg-slate-900/90">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-1.5 px-2 z-40 backdrop-blur-lg bg-white/90">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -117,15 +112,15 @@ export default function AdminLayout({
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg transition-all ${
+              className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded transition-all ${
                 isActive 
-                  ? 'text-indigo-400' 
-                  : 'text-slate-500 hover:text-slate-300'
+                  ? 'text-blue-600' 
+                  : 'text-gray-500 hover:text-gray-900'
               }`}
             >
-              <Icon className="w-5 h-5" />
-              <span className="text-[10px] font-medium tracking-wide">
-                {item.label === 'Bride/Groom' ? 'Sides' : item.label}
+              <Icon className="w-4.5 h-4.5" />
+              <span className="text-[9px] font-medium tracking-wide">
+                {item.label}
               </span>
             </Link>
           );

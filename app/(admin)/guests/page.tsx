@@ -12,12 +12,7 @@ import {
   Trash2, 
   MessageCircle, 
   Loader2, 
-  Check, 
   AlertCircle, 
-  Eye,
-  CheckCircle2,
-  XCircle,
-  HelpCircle,
   X
 } from 'lucide-react';
 import { GuestWithDetails, Category } from '@/lib/types';
@@ -100,7 +95,6 @@ export default function GuestsPage() {
         throw new Error(errData.error || 'Failed to add guest');
       }
 
-      // Refresh list
       await fetchData();
       
       // Reset form
@@ -151,12 +145,10 @@ export default function GuestsPage() {
 
       const data = await res.json();
       
-      // Open the WhatsApp deep link in a new tab
       if (data.url) {
         window.open(data.url, '_blank');
       }
       
-      // Refresh to update invitation sent status in UI
       await fetchData();
     } catch (err: any) {
       alert(err.message || 'Error generating link');
@@ -185,90 +177,66 @@ export default function GuestsPage() {
     const sentAt = guest.invite_link?.sent_at;
 
     if (rsvpStatus === 'attending') {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-900/50">
-          <CheckCircle2 className="w-3.5 h-3.5" /> Attending
-        </span>
-      );
+      return <span className="badge badge-attending">Attending</span>;
     }
     if (rsvpStatus === 'declined') {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-950/60 text-rose-400 border border-rose-900/50">
-          <XCircle className="w-3.5 h-3.5" /> Declined
-        </span>
-      );
+      return <span className="badge badge-declined">Declined</span>;
     }
     if (openedAt) {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-950/60 text-sky-400 border border-sky-900/50">
-          <Eye className="w-3.5 h-3.5" /> Opened
-        </span>
-      );
+      return <span className="badge badge-pending">Opened</span>;
     }
     if (sentAt) {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-950/60 text-indigo-400 border border-indigo-900/50">
-          <Check className="w-3.5 h-3.5" /> Sent
-        </span>
-      );
+      return <span className="badge badge-groom">Sent</span>;
     }
-    return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-900 text-slate-400 border border-slate-800">
-        <HelpCircle className="w-3.5 h-3.5" /> Pending
-      </span>
-    );
+    return <span className="badge border-gray-200 text-gray-500 bg-gray-50">Pending</span>;
   };
 
   return (
-    <div className="space-y-8 animate-fade-in relative min-h-screen">
+    <div className="space-y-6 animate-fade-in relative min-h-screen">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-5">
         <div>
-          <h1 className="text-3xl font-serif tracking-wide font-semibold text-slate-100">Guests Management</h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <h1 className="text-2xl font-sans tracking-tight font-semibold text-gray-900">Guests</h1>
+          <p className="text-xs text-gray-500 mt-1">
             Track invited guests, wedding side representation, RSVP states, and send invites.
           </p>
         </div>
         <button
           onClick={() => setIsAddOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-3 px-5 text-sm font-semibold tracking-wide shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
+          className="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-md py-2.5 px-4 text-xs font-semibold tracking-wide shadow-sm hover:shadow active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer w-full sm:w-auto"
         >
-          <Plus className="w-4 h-4" /> Add Guest
+          <Plus className="w-4.5 h-4.5" /> Add Guest
         </button>
       </div>
 
       {error && (
-        <div className="bg-rose-950/40 border border-rose-900/50 text-rose-200 text-sm px-4 py-3 rounded-xl flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
+        <div className="bg-red-50 border border-red-100 text-red-655 text-xs px-4 py-3 rounded-md flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Filter and Search Bar */}
-      <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between shadow-md">
+      <div className="bg-white border border-gray-200 rounded-md p-4 flex flex-col md:flex-row gap-4 items-center justify-between shadow-sm">
         {/* Search */}
         <div className="relative w-full md:max-w-xs">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search by name, notes, details..."
+            placeholder="Search guests..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-650 focus:outline-none focus:border-indigo-500 transition-colors"
+            className="w-full bg-white border border-gray-200 rounded-md py-2 pl-9 pr-4 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
           />
         </div>
 
         {/* Filters */}
         <div className="flex flex-wrap w-full md:w-auto gap-4 items-center justify-end">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            <Filter className="w-3.5 h-3.5" /> Filter:
-          </div>
-
           {/* Side filter */}
           <select
             value={sideFilter}
             onChange={(e: any) => setSideFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-800 text-slate-200 text-sm rounded-xl py-2 px-3 focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+            className="bg-white border border-gray-200 text-gray-700 text-xs rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
           >
             <option value="all">All Sides</option>
             <option value="bride">Bride's Side</option>
@@ -279,7 +247,7 @@ export default function GuestsPage() {
           <select
             value={catFilter}
             onChange={(e) => setCatFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-800 text-slate-200 text-sm rounded-xl py-2 px-3 focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+            className="bg-white border border-gray-200 text-gray-700 text-xs rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
           >
             <option value="all">All Categories</option>
             {categories.map((cat) => (
@@ -293,90 +261,84 @@ export default function GuestsPage() {
 
       {/* Guest Table (Desktop) / Cards (Mobile) */}
       {isLoading ? (
-        <div className="py-24 flex flex-col items-center justify-center text-slate-500 gap-2">
-          <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
+        <div className="py-24 flex flex-col items-center justify-center text-gray-400 gap-2">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
           <p className="text-sm">Loading guest registry...</p>
         </div>
       ) : filteredGuests.length === 0 ? (
-        <div className="py-20 text-center text-slate-500 text-sm border border-dashed border-slate-800 rounded-2xl bg-slate-900/10">
-          No guests found matching the selected filters.
+        <div className="py-20 text-center text-gray-450 text-xs border border-dashed border-gray-200 rounded bg-white">
+          No guests found matching search criteria.
         </div>
       ) : (
         <>
           {/* Desktop Table View */}
-          <div className="hidden md:block overflow-hidden bg-slate-900/40 border border-slate-800 rounded-2xl shadow-xl">
+          <div className="hidden md:block overflow-hidden bg-white border border-gray-200 rounded-md shadow-sm">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/50">
-                  <th className="p-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Guest Name</th>
-                  <th className="p-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Side</th>
-                  <th className="p-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Category</th>
-                  <th className="p-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Contact</th>
-                  <th className="p-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Invite Status</th>
-                  <th className="p-4 text-xs font-semibold uppercase tracking-wider text-slate-400 text-right">Actions</th>
+                <tr className="border-b border-gray-200 bg-gray-50 h-10">
+                  <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Guest Name</th>
+                  <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Side</th>
+                  <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Category</th>
+                  <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Contact</th>
+                  <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Invite Status</th>
+                  <th className="px-6 text-[10px] font-semibold uppercase tracking-wider text-gray-400 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-850">
+              <tbody className="divide-y divide-gray-150">
                 {filteredGuests.map((guest) => (
-                  <tr key={guest.id} className="hover:bg-slate-900/20 transition-colors">
-                    <td className="p-4">
-                      <div className="font-semibold text-slate-200">{guest.name}</div>
+                  <tr key={guest.id} className="hover:bg-gray-50/50 transition-colors duration-150 group h-14">
+                    <td className="px-6">
+                      <div className="text-sm font-medium text-gray-900">{guest.name}</div>
                       {guest.notes && (
-                        <div className="text-xs text-slate-500 mt-1 max-w-[200px] truncate" title={guest.notes}>
+                        <div className="text-[10px] text-gray-400 mt-0.5 max-w-[220px] truncate" title={guest.notes}>
                           {guest.notes}
                         </div>
                       )}
                     </td>
-                    <td className="p-4">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium uppercase tracking-wider ${
-                        guest.side === 'bride' 
-                          ? 'bg-rose-950/40 text-rose-300 border border-rose-900/30' 
-                          : 'bg-indigo-950/40 text-indigo-300 border border-indigo-900/30'
-                      }`}>
+                    <td className="px-6">
+                      <span className={`badge ${guest.side === 'bride' ? 'badge-bride' : 'badge-groom'}`}>
                         {guest.side}
                       </span>
                     </td>
-                    <td className="p-4">
+                    <td className="px-6">
                       {guest.category ? (
-                        <span 
-                          style={{ borderColor: guest.category.colour + '30', color: guest.category.colour }}
-                          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium border"
-                        >
+                        <div className="flex items-center gap-1.5 text-xs text-gray-600">
                           <span 
                             style={{ backgroundColor: guest.category.colour }} 
-                            className="w-1.5 h-1.5 rounded-full" 
+                            className="w-2 h-2 rounded-full shrink-0" 
                           />
                           {guest.category.name}
-                        </span>
+                        </div>
                       ) : (
-                        <span className="text-slate-650 text-xs">—</span>
+                        <span className="text-gray-300 text-xs">—</span>
                       )}
                     </td>
-                    <td className="p-4 space-y-1">
+                    <td className="px-6 space-y-0.5">
                       {guest.phone ? (
-                        <div className="flex items-center gap-1.5 text-xs text-slate-350">
-                          <Phone className="w-3.5 h-3.5 text-slate-500" />
+                        <div className="flex items-center gap-1 text-[11px] text-gray-500">
+                          <Phone className="w-3.5 h-3.5 text-gray-400" />
                           <span>{guest.phone}</span>
                         </div>
                       ) : null}
                       {guest.email ? (
-                        <div className="flex items-center gap-1.5 text-xs text-slate-355">
-                          <Mail className="w-3.5 h-3.5 text-slate-500" />
+                        <div className="flex items-center gap-1 text-[11px] text-gray-500">
+                          <Mail className="w-3.5 h-3.5 text-gray-400" />
                           <span>{guest.email}</span>
                         </div>
                       ) : null}
                       {!guest.phone && !guest.email ? (
-                        <span className="text-slate-650 text-xs">—</span>
+                        <span className="text-gray-300 text-xs">—</span>
                       ) : null}
                     </td>
-                    <td className="p-4">{renderStatusBadge(guest)}</td>
-                    <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-6">{renderStatusBadge(guest)}</td>
+                    <td className="px-6 text-right">
+                      {/* Show actions cleanly */}
+                      <div className="flex items-center justify-end gap-1">
                         {guest.phone && (
                           <button
                             onClick={() => handleSendWhatsApp(guest)}
                             disabled={sendingId !== null}
-                            className="p-2 text-indigo-400 hover:bg-indigo-950/30 hover:text-indigo-350 rounded-lg transition-all cursor-pointer"
+                            className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-md transition-all cursor-pointer"
                             title="Send Invite via WhatsApp"
                           >
                             {sendingId === guest.id ? (
@@ -388,7 +350,7 @@ export default function GuestsPage() {
                         )}
                         <Link
                           href={`/guests/${guest.id}`}
-                          className="p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-200 rounded-lg transition-all"
+                          className="p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-all"
                           title="Edit Guest"
                         >
                           <Edit2 className="w-4 h-4" />
@@ -396,7 +358,7 @@ export default function GuestsPage() {
                         <button
                           onClick={() => handleDeleteGuest(guest.id)}
                           disabled={deletingId !== null}
-                          className="p-2 text-slate-500 hover:bg-rose-950/20 hover:text-rose-455 rounded-lg transition-all cursor-pointer"
+                          className="p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-md transition-all cursor-pointer"
                           title="Delete Guest"
                         >
                           {deletingId === guest.id ? (
@@ -414,31 +376,25 @@ export default function GuestsPage() {
           </div>
 
           {/* Mobile Card Grid View */}
-          <div className="grid grid-cols-1 gap-4 md:hidden">
+          <div className="grid grid-cols-1 gap-2.5 md:hidden">
             {filteredGuests.map((guest) => (
               <div 
                 key={guest.id} 
-                className="bg-slate-900/60 border border-slate-850 rounded-xl p-5 space-y-4 shadow-lg hover:border-slate-800 transition-colors"
+                className="bg-white border border-gray-200 rounded-md p-4 space-y-3 shadow-sm hover:border-gray-350 transition-colors"
               >
                 {/* Header */}
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-semibold text-slate-200">{guest.name}</h3>
-                    <div className="flex gap-2 mt-2">
-                      <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${
-                        guest.side === 'bride' 
-                          ? 'bg-rose-950/40 text-rose-300 border border-rose-900/30' 
-                          : 'bg-indigo-950/40 text-indigo-300 border border-indigo-900/30'
-                      }`}>
+                    <h3 className="font-medium text-gray-900 text-sm">{guest.name}</h3>
+                    <div className="flex gap-2 mt-1.5">
+                      <span className={`badge ${guest.side === 'bride' ? 'badge-bride' : 'badge-groom'}`}>
                         {guest.side}
                       </span>
                       {guest.category && (
-                        <span 
-                          style={{ borderColor: guest.category.colour + '30', color: guest.category.colour }}
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border"
-                        >
-                          {guest.category.name}
-                        </span>
+                        <div className="flex items-center gap-1.5 text-[10px] text-gray-550">
+                          <span style={{ backgroundColor: guest.category.colour }} className="w-1.5 h-1.5 rounded-full" />
+                          <span>{guest.category.name}</span>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -447,21 +403,21 @@ export default function GuestsPage() {
 
                 {/* Contacts & Notes */}
                 {(guest.phone || guest.email || guest.notes) && (
-                  <div className="space-y-2 border-t border-slate-850 pt-3">
+                  <div className="space-y-1.5 border-t border-gray-100 pt-2 text-[11px] text-gray-550">
                     {guest.phone && (
-                      <div className="flex items-center gap-2 text-xs text-slate-400">
-                        <Phone className="w-3.5 h-3.5 text-slate-500" />
+                      <div className="flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5 text-gray-400" />
                         <span>{guest.phone}</span>
                       </div>
                     )}
                     {guest.email && (
-                      <div className="flex items-center gap-2 text-xs text-slate-400">
-                        <Mail className="w-3.5 h-3.5 text-slate-500" />
+                      <div className="flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-gray-400" />
                         <span className="truncate">{guest.email}</span>
                       </div>
                     )}
                     {guest.notes && (
-                      <p className="text-xs text-slate-500 bg-slate-950/50 p-2.5 rounded-lg border border-slate-850">
+                      <p className="text-xs text-gray-500 bg-gray-50 p-2 rounded mt-1 border border-gray-150">
                         {guest.notes}
                       </p>
                     )}
@@ -469,40 +425,42 @@ export default function GuestsPage() {
                 )}
 
                 {/* Mobile Actions */}
-                <div className="flex justify-end gap-2 border-t border-slate-850 pt-3">
+                <div className="flex justify-end gap-4 border-t border-gray-100 pt-2 text-xs font-semibold">
                   {guest.phone && (
                     <button
                       onClick={() => handleSendWhatsApp(guest)}
                       disabled={sendingId !== null}
-                      className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold text-white bg-indigo-600/90 rounded-lg hover:bg-indigo-500 active:scale-[0.98] transition-all cursor-pointer"
+                      className="text-blue-500 hover:text-blue-600 flex items-center gap-1 cursor-pointer"
                     >
                       {sendingId === guest.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       ) : (
                         <>
-                          <MessageCircle className="w-4 h-4" />
-                          Send Invite
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          Send WhatsApp
                         </>
                       )}
                     </button>
                   )}
                   <Link
                     href={`/guests/${guest.id}`}
-                    className="p-2 text-slate-400 hover:bg-slate-800 rounded-lg transition-colors flex items-center justify-center border border-slate-800"
-                    title="Edit Guest"
+                    className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
                   >
-                    <Edit2 className="w-4 h-4" />
+                    <Edit2 className="w-3.5 h-3.5 text-gray-400" />
+                    Edit
                   </Link>
                   <button
                     onClick={() => handleDeleteGuest(guest.id)}
                     disabled={deletingId !== null}
-                    className="p-2 text-slate-500 hover:bg-rose-955/20 hover:text-rose-400 rounded-lg transition-colors flex items-center justify-center border border-slate-800 cursor-pointer"
-                    title="Delete Guest"
+                    className="text-gray-400 hover:text-red-600 flex items-center gap-1 cursor-pointer"
                   >
                     {deletingId === guest.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : (
-                      <Trash2 className="w-4 h-4" />
+                      <>
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Delete
+                      </>
                     )}
                   </button>
                 </div>
@@ -517,28 +475,28 @@ export default function GuestsPage() {
         <div className="fixed inset-0 z-50 overflow-hidden select-none">
           {/* Overlay */}
           <div 
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            className="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
             onClick={() => setIsAddOpen(false)}
           />
 
           <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-            <div className="w-screen max-w-md bg-slate-900 border-l border-slate-800 text-slate-100 flex flex-col h-full shadow-2xl animate-slide-in">
+            <div className="w-screen max-w-md bg-white border-l border-gray-200 text-gray-900 flex flex-col h-full shadow-lg animate-slide-in">
               {/* Header */}
-              <div className="px-6 py-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
-                <h2 className="text-xl font-serif text-slate-100 font-medium">Add New Guest</h2>
+              <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h2 className="text-lg font-medium text-gray-900">Add New Guest</h2>
                 <button 
                   onClick={() => setIsAddOpen(false)}
-                  className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+                  className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-all cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Form */}
-              <form onSubmit={handleAddGuest} className="flex-1 overflow-y-auto p-6 space-y-6">
+              <form onSubmit={handleAddGuest} className="flex-1 overflow-y-auto p-6 space-y-5">
                 {/* Name */}
                 <div>
-                  <label htmlFor="guest-name" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                  <label htmlFor="guest-name" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
                     Guest Name *
                   </label>
                   <input
@@ -548,14 +506,14 @@ export default function GuestsPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Sarah Karunaratne"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 placeholder-slate-650 focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 {/* Phone */}
                 <div>
-                  <label htmlFor="guest-phone" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                    Phone Number (with Country Code)
+                  <label htmlFor="guest-phone" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
+                    Phone (with Country Code)
                   </label>
                   <input
                     id="guest-phone"
@@ -563,14 +521,14 @@ export default function GuestsPage() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="e.g. +94771234567"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 placeholder-slate-650 focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500"
                   />
-                  <p className="text-[10px] text-slate-500 mt-1">Needed for automated or manual WhatsApp sending.</p>
+                  <p className="text-[10px] text-gray-400 mt-1">Needed for manual wa.me links or automated Twilio messages.</p>
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label htmlFor="guest-email" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                  <label htmlFor="guest-email" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
                     Email Address
                   </label>
                   <input
@@ -579,23 +537,23 @@ export default function GuestsPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="e.g. sarah@example.com"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 placeholder-slate-650 focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
-                {/* Side representation */}
+                {/* Side */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
                     Wedding Side *
                   </label>
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       type="button"
                       onClick={() => setSide('bride')}
-                      className={`py-3 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                      className={`py-2.5 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
                         side === 'bride'
-                          ? 'bg-rose-950/20 text-rose-300 border-rose-500/70 shadow-lg shadow-rose-900/5'
-                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                          ? 'bg-purple-50 text-purple-700 border-purple-300'
+                          : 'bg-white border-gray-200 text-gray-500'
                       }`}
                     >
                       Bride's Side
@@ -603,10 +561,10 @@ export default function GuestsPage() {
                     <button
                       type="button"
                       onClick={() => setSide('groom')}
-                      className={`py-3 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                      className={`py-2.5 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
                         side === 'groom'
-                          ? 'bg-indigo-950/20 text-indigo-300 border-indigo-500/70 shadow-lg shadow-indigo-900/5'
-                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                          ? 'bg-blue-50 text-blue-700 border-blue-300'
+                          : 'bg-white border-gray-200 text-gray-500'
                       }`}
                     >
                       Groom's Side
@@ -616,14 +574,14 @@ export default function GuestsPage() {
 
                 {/* Category Selection */}
                 <div>
-                  <label htmlFor="guest-cat" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                  <label htmlFor="guest-cat" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
                     Category Group
                   </label>
                   <select
                     id="guest-cat"
                     value={categoryId}
                     onChange={(e) => setCategoryId(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 text-slate-200 text-sm rounded-xl py-3 px-4 focus:outline-none focus:border-indigo-500 cursor-pointer"
+                    className="w-full bg-white border border-gray-200 text-gray-700 text-xs rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 cursor-pointer"
                   >
                     <option value="">No Category</option>
                     {categories.map((cat) => (
@@ -636,32 +594,32 @@ export default function GuestsPage() {
 
                 {/* Notes */}
                 <div>
-                  <label htmlFor="guest-notes" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                  <label htmlFor="guest-notes" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
                     Private Notes
                   </label>
                   <textarea
                     id="guest-notes"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="e.g. Vegetarian, needs wheelchair accessibility, seating preference..."
+                    placeholder="Seating preferences, restrictions, relationships..."
                     rows={4}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 placeholder-slate-650 focus:outline-none focus:border-indigo-500 resize-none"
+                    className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-none"
                   />
                 </div>
 
                 {/* Actions */}
-                <div className="pt-4 border-t border-slate-800 flex gap-4">
+                <div className="pt-4 border-t border-gray-100 flex gap-4">
                   <button
                     type="button"
                     onClick={() => setIsAddOpen(false)}
-                    className="w-1/2 bg-slate-950 border border-slate-800 hover:bg-slate-850 text-slate-300 rounded-xl py-3 text-sm font-semibold transition-all cursor-pointer"
+                    className="w-1/2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-550 rounded-md py-2.5 text-xs font-semibold transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting || !name.trim()}
-                    className="w-1/2 bg-gradient-to-r from-indigo-600 to-rose-500 hover:from-indigo-500 hover:to-rose-400 text-white rounded-xl py-3 text-sm font-semibold tracking-wide shadow-lg shadow-indigo-600/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white rounded-md py-2.5 text-xs font-semibold tracking-wide shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                   >
                     {isSubmitting ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

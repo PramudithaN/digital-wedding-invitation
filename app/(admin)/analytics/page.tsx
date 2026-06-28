@@ -6,12 +6,10 @@ import {
   Download, 
   Loader2, 
   AlertCircle, 
-  PieChart, 
-  Users, 
-  HelpCircle, 
   Eye, 
   UtensilsCrossed,
-  Printer
+  Printer,
+  HelpCircle
 } from 'lucide-react';
 import { GuestWithDetails } from '@/lib/types';
 
@@ -38,8 +36,8 @@ export default function AnalyticsPage() {
 
   if (isLoading) {
     return (
-      <div className="py-24 flex flex-col items-center justify-center text-slate-500 gap-2">
-        <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
+      <div className="py-24 flex flex-col items-center justify-center text-gray-400 gap-2">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
         <p className="text-sm">Calculating guest analytics...</p>
       </div>
     );
@@ -111,7 +109,6 @@ export default function AnalyticsPage() {
   const exportSeatingHelper = () => {
     let csv = 'Guest Name,Wedding Side,Category,RSVP,Plus One Confirmed,Plus One Name,Meal Preference,Dietary Details\r\n';
     
-    // Only export confirmed attending guests
     guests.filter(g => g.rsvp?.status === 'attending').forEach((g) => {
       const row = [
         `"${g.name.replace(/"/g, '""')}"`,
@@ -135,115 +132,115 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in print:bg-white print:text-black">
+    <div className="space-y-6 animate-fade-in print:bg-white print:text-black">
       {/* Header (hidden in print) */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden border-b border-gray-200 pb-5">
         <div>
-          <h1 className="text-3xl font-serif tracking-wide font-semibold text-slate-100">Analytics & Exports</h1>
-          <p className="text-sm text-slate-400 mt-1">Review invitation engagement, response distributions, and compile guest lists.</p>
+          <h1 className="text-2xl font-sans tracking-tight font-semibold text-gray-900">Analytics & Exports</h1>
+          <p className="text-xs text-gray-500 mt-1">Review invitation engagement, response distributions, and compile guest lists.</p>
         </div>
       </div>
 
       {error && (
-        <div className="bg-rose-955/40 border border-rose-900/50 text-rose-200 text-sm px-4 py-3 rounded-xl flex items-center gap-3 print:hidden">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
+        <div className="bg-red-50 border border-red-100 text-red-655 text-xs px-4 py-3 rounded-md flex items-center gap-3 print:hidden">
+          <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Analytics Overview Cards (hidden in print) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 print:hidden">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:hidden">
         {/* Open Rate */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Invite Open Rate</span>
-            <Eye className="w-5 h-5 text-sky-400" />
+        <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-3.5">
+          <div className="flex items-center justify-between text-gray-550">
+            <span className="text-xs font-semibold uppercase tracking-wider">Invite Open Rate</span>
+            <Eye className="w-4.5 h-4.5 text-blue-500" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold text-slate-100">{openRate}%</span>
-            <span className="text-xs text-slate-500">({openedLinks} of {totalGuests} links)</span>
+            <span className="text-3xl font-bold text-gray-900">{openRate}%</span>
+            <span className="text-xs text-gray-400">({openedLinks} of {totalGuests})</span>
           </div>
-          <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-850">
-            <div style={{ width: `${openRate}%` }} className="bg-sky-450 h-full" />
+          <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden border border-gray-150">
+            <div style={{ width: `${openRate}%` }} className="bg-blue-500 h-full" />
           </div>
         </div>
 
         {/* Response Rate */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">RSVP Response Rate</span>
-            <BarChart3 className="w-5 h-5 text-indigo-455" />
+        <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-3.5">
+          <div className="flex items-center justify-between text-gray-550">
+            <span className="text-xs font-semibold uppercase tracking-wider">RSVP Rate</span>
+            <BarChart3 className="w-4.5 h-4.5 text-indigo-500" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold text-slate-100">{responseRate}%</span>
-            <span className="text-xs text-slate-500">({responded} of {totalGuests} responses)</span>
+            <span className="text-3xl font-bold text-gray-900">{responseRate}%</span>
+            <span className="text-xs text-gray-400">({responded} of {totalGuests})</span>
           </div>
-          <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-850">
+          <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden border border-gray-150">
             <div style={{ width: `${responseRate}%` }} className="bg-indigo-500 h-full" />
           </div>
         </div>
 
         {/* Pending responses */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Pending Breakdown</span>
-            <HelpCircle className="w-5 h-5 text-amber-400" />
+        <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-3">
+          <div className="flex items-center justify-between text-gray-550">
+            <span className="text-xs font-semibold uppercase tracking-wider">Pending Breakdown</span>
+            <HelpCircle className="w-4.5 h-4.5 text-amber-500" />
           </div>
-          <div className="grid grid-cols-2 gap-4 text-xs">
-            <div className="bg-slate-950/60 p-2.5 rounded-lg border border-slate-850">
-              <span className="block text-slate-500 uppercase tracking-wider text-[9px] font-semibold">Opened, No RSVP</span>
-              <span className="text-lg font-bold text-slate-300">{openedNotResponded}</span>
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="bg-gray-50 p-2 rounded border border-gray-200">
+              <span className="block text-gray-400 uppercase tracking-wider text-[8px] font-semibold">Opened, no RSVP</span>
+              <span className="text-base font-bold text-gray-800">{openedNotResponded}</span>
             </div>
-            <div className="bg-slate-950/60 p-2.5 rounded-lg border border-slate-850">
-              <span className="block text-slate-500 uppercase tracking-wider text-[9px] font-semibold">Never Opened</span>
-              <span className="text-lg font-bold text-slate-350">{neverOpened}</span>
+            <div className="bg-gray-50 p-2 rounded border border-gray-200">
+              <span className="block text-gray-400 uppercase tracking-wider text-[8px] font-semibold">Never Opened</span>
+              <span className="text-base font-bold text-gray-800">{neverOpened}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 print:hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 print:hidden">
         {/* Custom CSS charts */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-6">
           {/* Meal Preference Chart */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-            <h2 className="text-lg font-serif text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-3">
-              <UtensilsCrossed className="w-5 h-5 text-indigo-400" /> Meal Preferences (Attending Guests)
+          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm space-y-5">
+            <h2 className="text-sm font-semibold text-gray-950 uppercase tracking-wider flex items-center gap-2 border-b border-gray-150 pb-3">
+              <UtensilsCrossed className="w-4.5 h-4.5 text-blue-500" /> Meal Preferences (Attending Guests)
             </h2>
 
             {mealTotal === 0 ? (
-              <p className="text-xs text-slate-500 italic py-6 text-center">No meal preferences recorded yet.</p>
+              <p className="text-xs text-gray-400 italic py-6 text-center">No meal preferences recorded yet.</p>
             ) : (
               <div className="space-y-4 text-xs">
                 {/* Non veg */}
                 <div>
                   <div className="flex justify-between font-semibold mb-1">
-                    <span className="text-slate-300">Non-Vegetarian ({nonVegCount})</span>
-                    <span className="text-slate-400">{Math.round((nonVegCount / mealTotal) * 100)}%</span>
+                    <span className="text-gray-700">Non-Vegetarian ({nonVegCount})</span>
+                    <span className="text-gray-500">{Math.round((nonVegCount / mealTotal) * 100)}%</span>
                   </div>
-                  <div className="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-850">
-                    <div style={{ width: `${(nonVegCount / mealTotal) * 100}%` }} className="bg-indigo-550 h-full" />
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden border border-gray-150">
+                    <div style={{ width: `${(nonVegCount / mealTotal) * 100}%` }} className="bg-blue-500 h-full" />
                   </div>
                 </div>
 
                 {/* Veg */}
                 <div>
                   <div className="flex justify-between font-semibold mb-1">
-                    <span className="text-slate-300">Vegetarian ({vegCount})</span>
-                    <span className="text-slate-400">{Math.round((vegCount / mealTotal) * 100)}%</span>
+                    <span className="text-gray-700">Vegetarian ({vegCount})</span>
+                    <span className="text-gray-500">{Math.round((vegCount / mealTotal) * 100)}%</span>
                   </div>
-                  <div className="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-850">
-                    <div style={{ width: `${(vegCount / mealTotal) * 100}%` }} className="bg-emerald-500 h-full" />
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden border border-gray-150">
+                    <div style={{ width: `${(vegCount / mealTotal) * 100}%` }} className="bg-green-500 h-full" />
                   </div>
                 </div>
 
                 {/* Vegan */}
                 <div>
                   <div className="flex justify-between font-semibold mb-1">
-                    <span className="text-slate-300">Vegan ({veganCount})</span>
-                    <span className="text-slate-400">{Math.round((veganCount / mealTotal) * 100)}%</span>
+                    <span className="text-gray-700">Vegan ({veganCount})</span>
+                    <span className="text-gray-500">{Math.round((veganCount / mealTotal) * 100)}%</span>
                   </div>
-                  <div className="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-850">
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden border border-gray-150">
                     <div style={{ width: `${(veganCount / mealTotal) * 100}%` }} className="bg-teal-400 h-full" />
                   </div>
                 </div>
@@ -251,11 +248,11 @@ export default function AnalyticsPage() {
                 {/* No preference */}
                 <div>
                   <div className="flex justify-between font-semibold mb-1">
-                    <span className="text-slate-300">No Preference ({noPrefCount})</span>
-                    <span className="text-slate-400">{Math.round((noPrefCount / mealTotal) * 100)}%</span>
+                    <span className="text-gray-700">No Preference ({noPrefCount})</span>
+                    <span className="text-gray-500">{Math.round((noPrefCount / mealTotal) * 100)}%</span>
                   </div>
-                  <div className="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-850">
-                    <div style={{ width: `${(noPrefCount / mealTotal) * 100}%` }} className="bg-slate-700 h-full" />
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden border border-gray-150">
+                    <div style={{ width: `${(noPrefCount / mealTotal) * 100}%` }} className="bg-gray-400 h-full" />
                   </div>
                 </div>
               </div>
@@ -264,33 +261,33 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Exports panel */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6 h-fit">
-          <h2 className="text-lg font-serif text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-3">
-            <Download className="w-5 h-5 text-indigo-400" /> Export Utilities
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm space-y-4 h-fit">
+          <h2 className="text-sm font-semibold text-gray-950 uppercase tracking-wider flex items-center gap-2 border-b border-gray-150 pb-3">
+            <Download className="w-4.5 h-4.5 text-blue-500" /> Export Utilities
           </h2>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <button
               onClick={exportFullGuestList}
-              className="w-full bg-slate-950 border border-slate-800 hover:bg-slate-850 hover:text-slate-100 text-slate-300 rounded-xl py-3 text-xs font-semibold transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+              className="w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-md py-2.5 text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Download className="w-4 h-4 text-indigo-400" />
+              <Download className="w-4 h-4 text-blue-500" />
               Export Full Guest CSV
             </button>
 
             <button
               onClick={exportSeatingHelper}
-              className="w-full bg-slate-950 border border-slate-800 hover:bg-slate-850 hover:text-slate-100 text-slate-300 rounded-xl py-3 text-xs font-semibold transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+              className="w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-md py-2.5 text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Download className="w-4 h-4 text-rose-400" />
+              <Download className="w-4 h-4 text-purple-500" />
               Export Seating CSV
             </button>
 
             <button
               onClick={triggerPrint}
-              className="w-full bg-slate-950 border border-slate-800 hover:bg-slate-850 hover:text-slate-100 text-slate-305 rounded-xl py-3 text-xs font-semibold transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+              className="w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-md py-2.5 text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Printer className="w-4 h-4 text-sky-400" />
+              <Printer className="w-4 h-4 text-gray-500" />
               Print Attendees PDF
             </button>
           </div>
@@ -300,12 +297,12 @@ export default function AnalyticsPage() {
       {/* Printable block (Visible only in print mode or when requested) */}
       <div className="hidden print:block bg-white text-black p-8 max-w-4xl mx-auto space-y-6">
         <div className="text-center space-y-2 border-b-2 border-black pb-4">
-          <h1 className="text-3xl font-serif font-bold">Confirmed Attendees Dossier</h1>
-          <p className="text-xs uppercase tracking-widest text-gray-505 font-semibold">Real-time Wedding Coordinator List</p>
-          <p className="text-[10px] text-gray-500">Printed: {new Date().toLocaleString()}</p>
+          <h1 className="text-2xl font-serif font-bold">Confirmed Attendees List</h1>
+          <p className="text-xs uppercase tracking-widest text-gray-500 font-semibold">Wedding Coordination Dossier</p>
+          <p className="text-[10px] text-gray-400">Printed: {new Date().toLocaleString()}</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 text-xs font-mono py-2 border-b border-gray-300">
+        <div className="grid grid-cols-2 gap-4 text-xs font-mono py-2 border-b border-gray-200">
           <div>Bride's Side Confirmed: {guests.filter(g => g.side === 'bride' && g.rsvp?.status === 'attending').length + guests.filter(g => g.side === 'bride' && g.rsvp?.status === 'attending' && g.rsvp.plus_one).length} Seats</div>
           <div>Groom's Side Confirmed: {guests.filter(g => g.side === 'groom' && g.rsvp?.status === 'attending').length + guests.filter(g => g.side === 'groom' && g.rsvp?.status === 'attending' && g.rsvp.plus_one).length} Seats</div>
         </div>
@@ -327,12 +324,12 @@ export default function AnalyticsPage() {
                 .filter(g => g.rsvp?.status === 'attending')
                 .map((g) => (
                   <tr key={g.id}>
-                    <td className="py-2.5 font-semibold">{g.name}</td>
-                    <td className="py-2.5 uppercase text-[10px]">{g.side}</td>
-                    <td className="py-2.5 text-[10px]">{g.category?.name || 'Uncategorised'}</td>
-                    <td className="py-2.5 text-[10px]">{g.rsvp?.plus_one ? `Yes (${g.rsvp.plus_one_name || 'Unnamed'})` : 'No'}</td>
-                    <td className="py-2.5 text-[10px] capitalize">{g.rsvp?.meal_choice || 'No preference'}</td>
-                    <td className="py-2.5 text-[10px] italic">{g.rsvp?.dietary_notes || 'None'}</td>
+                    <td className="py-2 font-semibold text-gray-900">{g.name}</td>
+                    <td className="py-2 uppercase text-[10px] text-gray-650">{g.side}</td>
+                    <td className="py-2 text-[10px] text-gray-600">{g.category?.name || 'Uncategorised'}</td>
+                    <td className="py-2 text-[10px] text-gray-600">{g.rsvp?.plus_one ? `Yes (${g.rsvp.plus_one_name || 'Unnamed'})` : 'No'}</td>
+                    <td className="py-2 text-[10px] capitalize text-gray-600">{g.rsvp?.meal_choice || 'No preference'}</td>
+                    <td className="py-2 text-[10px] italic text-gray-500">{g.rsvp?.dietary_notes || 'None'}</td>
                   </tr>
                 ))}
             </tbody>

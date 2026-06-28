@@ -25,39 +25,35 @@ function LoginContent() {
   }, [state?.success, router, callbackUrl]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 relative overflow-hidden select-none">
-      {/* Decorative blurred background shapes */}
-      <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-indigo-900/20 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-rose-900/10 rounded-full blur-3xl" />
-      
-      <div className="w-full max-w-md z-10 transition-all duration-300">
-        {/* Logo/Header */}
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-4 select-none">
+      <div className="w-full max-w-md animate-fade-in">
+        {/* Monogram/Header */}
         <div className="text-center mb-8 flex flex-col items-center">
-          <div className="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-rose-400 rounded-full flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-4 animate-pulse">
-            <Heart className="w-8 h-8 text-white fill-white/10" />
+          <div className="w-12 h-12 bg-blue-50 border border-blue-100 rounded-full flex items-center justify-center mb-3">
+            <Heart className="w-5 h-5 text-blue-500 fill-blue-500/10" />
           </div>
-          <h1 className="text-3xl font-serif tracking-wide bg-gradient-to-r from-slate-100 via-indigo-200 to-rose-100 bg-clip-text text-transparent font-semibold">
-            Wedding Manager
+          <h1 className="text-2xl font-sans tracking-tight text-gray-900 font-semibold">
+            O & K
           </h1>
-          <p className="text-sm text-slate-400 mt-2 tracking-wide">
-            Digital Invitation & RSVP Dashboard
+          <p className="text-xs text-gray-500 mt-1 uppercase tracking-widest font-medium">
+            Wedding invitation manager
           </p>
         </div>
 
-        {/* Card */}
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl">
-          <h2 className="text-xl font-medium mb-6 text-slate-200">Admin Sign In</h2>
+        {/* Login Card */}
+        <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
+          <h2 className="text-lg font-medium mb-6 text-gray-950">Admin Sign In</h2>
           
           <form action={formAction} className="space-y-6">
             <div>
               <label 
                 htmlFor="password" 
-                className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2"
+                className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2"
               >
                 Access Password
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
                   <Lock className="w-4 h-4" />
                 </span>
                 <input
@@ -66,17 +62,17 @@ function LoginContent() {
                   type="password"
                   autoFocus
                   placeholder="Enter admin password"
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl py-3 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                  className="w-full bg-white border border-gray-200 rounded-md py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
                   disabled={isPending}
                 />
               </div>
-              <p className="text-xs text-slate-500 mt-2">
-                Hint: Default is <code className="bg-slate-950 px-1.5 py-0.5 rounded text-indigo-400">admin123</code>
+              <p className="text-xs text-gray-450 mt-2">
+                Hint: Default is <code className="bg-gray-100 px-1.5 py-0.5 rounded text-blue-600 font-mono">admin123</code>
               </p>
             </div>
 
             {state?.error && (
-              <div className="bg-rose-950/40 border border-rose-900/50 text-rose-200 text-xs px-4 py-3 rounded-xl">
+              <div className="bg-red-50 border border-red-100 text-red-600 text-xs px-4 py-3 rounded-md">
                 {state.error}
               </div>
             )}
@@ -85,7 +81,7 @@ function LoginContent() {
               id="login-submit-btn"
               type="submit"
               disabled={isPending}
-              className="w-full bg-gradient-to-r from-indigo-600 to-rose-500 hover:from-indigo-500 hover:to-rose-400 text-white rounded-xl py-3 text-sm font-semibold tracking-wide shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+              className="w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-md py-2.5 text-sm font-semibold tracking-wide shadow-sm hover:shadow active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
             >
               {isPending ? (
                 <>
@@ -100,8 +96,8 @@ function LoginContent() {
         </div>
         
         {/* Footer */}
-        <p className="text-center text-xs text-slate-600 mt-8">
-          Developed with ❤️ by Pramuditha Nadun
+        <p className="text-center text-xs text-gray-400 mt-8">
+          Developed by Pramuditha Nadun
         </p>
       </div>
     </div>
@@ -111,8 +107,8 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
       </div>
     }>
       <LoginContent />

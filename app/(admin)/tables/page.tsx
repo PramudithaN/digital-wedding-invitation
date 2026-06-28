@@ -7,8 +7,8 @@ import {
   AlertCircle, 
   ChevronDown, 
   ChevronUp, 
-  Check, 
-  Users, 
+  UserPlus, 
+  UtensilsCrossed, 
   Heart 
 } from 'lucide-react';
 import { GuestWithDetails, Category } from '@/lib/types';
@@ -53,8 +53,8 @@ export default function SideBySidePage() {
 
   if (isLoading) {
     return (
-      <div className="py-24 flex flex-col items-center justify-center text-slate-500 gap-2">
-        <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
+      <div className="py-24 flex flex-col items-center justify-center text-gray-400 gap-2">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
         <p className="text-sm">Balancing wedding representations...</p>
       </div>
     );
@@ -80,25 +80,31 @@ export default function SideBySidePage() {
     const sidePlusOnes = side === 'bride' ? bridePlusOnes : groomPlusOnes;
     const sideTotalSeats = side === 'bride' ? brideTotalSeats : groomTotalSeats;
     const sideName = side === 'bride' ? "Bride's Side" : "Groom's Side";
-    const sideThemeColor = side === 'bride' ? 'from-rose-500/10 to-rose-950/20 text-rose-400 border-rose-900/30' : 'from-indigo-500/10 to-indigo-950/20 text-indigo-400 border-indigo-900/30';
-    const sideProgressColor = side === 'bride' ? 'bg-rose-500' : 'bg-indigo-500';
+    
+    // Light minimalist theme headers
+    const sideHeaderStyle = side === 'bride' 
+      ? 'bg-purple-50/50 border-purple-100 text-purple-700 border' 
+      : 'bg-blue-50/50 border-blue-100 text-blue-700 border';
+      
+    const sideProgressColor = side === 'bride' ? 'bg-purple-500' : 'bg-blue-500';
+    const sideCountColor = side === 'bride' ? 'text-purple-600' : 'text-blue-600';
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Side Header Block */}
-        <div className={`bg-gradient-to-br border rounded-2xl p-6 shadow-md flex items-center justify-between ${sideThemeColor}`}>
+        <div className={`rounded-xl p-5 shadow-sm flex items-center justify-between bg-white border border-gray-200`}>
           <div>
-            <h2 className="text-2xl font-serif font-semibold">{sideName}</h2>
-            <p className="text-xs text-slate-400 mt-1">{sideGuests.length} Guests Invited</p>
+            <h2 className="text-lg font-semibold text-gray-900">{sideName}</h2>
+            <p className="text-xs text-gray-450 mt-0.5">{sideGuests.length} guests invited</p>
           </div>
           <div className="text-right">
-            <span className="text-3xl font-bold text-slate-100">{sideTotalSeats}</span>
-            <span className="block text-[10px] text-slate-500 uppercase font-semibold">Confirmed Seats</span>
+            <span className={`text-2xl font-bold ${sideCountColor}`}>{sideTotalSeats}</span>
+            <span className="block text-[9px] text-gray-400 uppercase font-bold tracking-wider">Confirmed</span>
           </div>
         </div>
 
         {/* Categories Breakdown */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {categories.map((cat) => {
             const catGuests = sideGuests.filter(g => g.category_id === cat.id);
             const catAttending = catGuests.filter(g => g.rsvp?.status === 'attending');
@@ -113,23 +119,23 @@ export default function SideBySidePage() {
             return (
               <div 
                 key={cat.id} 
-                className="bg-slate-900/40 border border-slate-850 rounded-2xl overflow-hidden transition-all duration-200"
+                className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs"
               >
                 {/* Accordion Trigger */}
                 <button
                   onClick={() => toggleGroup(side, cat.id)}
-                  className="w-full text-left p-5 flex items-center justify-between hover:bg-slate-900/20 transition-all cursor-pointer"
+                  className="w-full text-left p-4.5 flex items-center justify-between hover:bg-gray-50/50 transition-all cursor-pointer"
                 >
                   <div className="space-y-1.5 flex-1 pr-4">
                     <div className="flex items-center gap-2">
-                      <span style={{ backgroundColor: cat.colour }} className="w-2.5 h-2.5 rounded-full shrink-0" />
-                      <span className="font-semibold text-slate-200 text-sm">{cat.name}</span>
-                      <span className="text-xs text-slate-500 font-normal">
-                        ({catAttending.length} of {catGuests.length} responded Yes)
+                      <span style={{ backgroundColor: cat.colour }} className="w-2 h-2 rounded-full shrink-0" />
+                      <span className="font-semibold text-gray-800 text-xs">{cat.name}</span>
+                      <span className="text-[10px] text-gray-450 font-normal">
+                        ({catAttending.length} of {catGuests.length} attending)
                       </span>
                     </div>
-                    {/* Tiny Progress bar */}
-                    <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-850">
+                    {/* Progress bar track */}
+                    <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden border border-gray-150">
                       <div 
                         style={{ width: `${(catAttending.length / catGuests.length) * 100}%` }}
                         className={`h-full ${sideProgressColor}`}
@@ -137,38 +143,38 @@ export default function SideBySidePage() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3">
                     <div className="text-right">
-                      <span className="text-sm font-bold text-slate-100">{catConfirmedSeats}</span>
-                      <span className="block text-[9px] text-slate-500 uppercase font-semibold">Seats</span>
+                      <span className="text-xs font-bold text-gray-900">{catConfirmedSeats}</span>
+                      <span className="block text-[8px] text-gray-400 uppercase font-bold">Seats</span>
                     </div>
-                    {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                    {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
                   </div>
                 </button>
 
                 {/* Accordion Content */}
                 {isExpanded && (
-                  <div className="border-t border-slate-850 bg-slate-950/40 px-5 py-4 space-y-3">
-                    <h4 className="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-2">
-                      Confirmed Attendees ({catAttending.length})
+                  <div className="border-t border-gray-150 bg-gray-50/30 px-5 py-4 space-y-2">
+                    <h4 className="text-[9px] text-gray-400 uppercase font-bold tracking-wider mb-2">
+                      Attendees ({catAttending.length})
                     </h4>
                     {catAttending.length === 0 ? (
-                      <p className="text-xs text-slate-500 italic py-1">No confirmed guests in this category yet.</p>
+                      <p className="text-xs text-gray-450 italic py-0.5">No confirmed guests here yet.</p>
                     ) : (
-                      <div className="divide-y divide-slate-900">
+                      <div className="divide-y divide-gray-100">
                         {catAttending.map((guest) => (
-                          <div key={guest.id} className="py-2.5 flex items-center justify-between text-xs">
-                            <div className="space-y-1">
-                              <span className="font-medium text-slate-200">{guest.name}</span>
+                          <div key={guest.id} className="py-2 flex items-center justify-between text-xs">
+                            <div className="space-y-0.5">
+                              <span className="font-medium text-gray-900">{guest.name}</span>
                               {guest.rsvp?.plus_one && (
-                                <span className="block text-[10px] text-slate-500">
-                                  +1: <span className="text-slate-400">{guest.rsvp.plus_one_name || 'Yes'}</span>
+                                <span className="block text-[9px] text-gray-450">
+                                  +1: <span className="text-gray-500 font-semibold">{guest.rsvp.plus_one_name || 'Yes'}</span>
                                 </span>
                               )}
                             </div>
-                            <div className="text-right space-y-0.5">
+                            <div className="text-right">
                               {guest.rsvp?.meal_choice && (
-                                <span className="inline-flex px-1.5 py-0.5 rounded bg-slate-950 text-slate-400 uppercase text-[9px] tracking-wide border border-slate-850">
+                                <span className="inline-flex px-1.5 py-0.5 rounded bg-white text-gray-500 uppercase text-[9px] tracking-wide border border-gray-200">
                                   {guest.rsvp.meal_choice}
                                 </span>
                               )}
@@ -196,20 +202,20 @@ export default function SideBySidePage() {
             const isExpanded = expandedGroups[groupKey] || false;
 
             return (
-              <div className="bg-slate-900/40 border border-slate-855 rounded-2xl overflow-hidden">
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs">
                 <button
                   onClick={() => toggleGroup(side, 'none')}
-                  className="w-full text-left p-5 flex items-center justify-between hover:bg-slate-900/20 transition-all cursor-pointer"
+                  className="w-full text-left p-4.5 flex items-center justify-between hover:bg-gray-50/50 transition-all cursor-pointer"
                 >
                   <div className="space-y-1.5 flex-1 pr-4">
                     <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full shrink-0 border border-slate-700 bg-transparent" />
-                      <span className="font-medium text-slate-350 text-sm italic">Uncategorised Guests</span>
-                      <span className="text-xs text-slate-500 font-normal">
-                        ({catAttending.length} of {catGuests.length} responded Yes)
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0 border border-gray-300 bg-transparent" />
+                      <span className="font-medium text-gray-400 text-xs italic">Uncategorised</span>
+                      <span className="text-xs text-gray-450 font-normal">
+                        ({catAttending.length} of {catGuests.length} attending)
                       </span>
                     </div>
-                    <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-850">
+                    <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden border border-gray-150">
                       <div 
                         style={{ width: `${(catAttending.length / catGuests.length) * 100}%` }}
                         className={`h-full ${sideProgressColor}`}
@@ -217,37 +223,37 @@ export default function SideBySidePage() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3">
                     <div className="text-right">
-                      <span className="text-sm font-bold text-slate-100">{catConfirmedSeats}</span>
-                      <span className="block text-[9px] text-slate-500 uppercase font-semibold">Seats</span>
+                      <span className="text-xs font-bold text-gray-900">{catConfirmedSeats}</span>
+                      <span className="block text-[8px] text-gray-400 uppercase font-bold">Seats</span>
                     </div>
-                    {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                    {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
                   </div>
                 </button>
 
                 {isExpanded && (
-                  <div className="border-t border-slate-850 bg-slate-950/40 px-5 py-4 space-y-3">
-                    <h4 className="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-2">
-                      Confirmed Attendees ({catAttending.length})
+                  <div className="border-t border-gray-150 bg-gray-50/30 px-5 py-4 space-y-2">
+                    <h4 className="text-[9px] text-gray-400 uppercase font-bold tracking-wider mb-2">
+                      Attendees ({catAttending.length})
                     </h4>
                     {catAttending.length === 0 ? (
-                      <p className="text-xs text-slate-500 italic py-1">No confirmed guests here yet.</p>
+                      <p className="text-xs text-gray-450 italic py-0.5">No confirmed guests here.</p>
                     ) : (
-                      <div className="divide-y divide-slate-900">
+                      <div className="divide-y divide-gray-100">
                         {catAttending.map((guest) => (
-                          <div key={guest.id} className="py-2.5 flex items-center justify-between text-xs">
-                            <div className="space-y-1">
-                              <span className="font-medium text-slate-200">{guest.name}</span>
+                          <div key={guest.id} className="py-2 flex items-center justify-between text-xs">
+                            <div className="space-y-0.5">
+                              <span className="font-medium text-gray-900">{guest.name}</span>
                               {guest.rsvp?.plus_one && (
-                                <span className="block text-[10px] text-slate-500">
-                                  +1: <span className="text-slate-400">{guest.rsvp.plus_one_name || 'Yes'}</span>
+                                <span className="block text-[9px] text-gray-450">
+                                  +1: <span className="text-gray-500 font-semibold">{guest.rsvp.plus_one_name || 'Yes'}</span>
                                 </span>
                               )}
                             </div>
                             <div className="text-right">
                               {guest.rsvp?.meal_choice && (
-                                <span className="inline-flex px-1.5 py-0.5 rounded bg-slate-955 text-slate-400 uppercase text-[9px] tracking-wide border border-slate-850">
+                                <span className="inline-flex px-1.5 py-0.5 rounded bg-white text-gray-500 uppercase text-[9px] tracking-wide border border-gray-200">
                                   {guest.rsvp.meal_choice}
                                 </span>
                               )}
@@ -267,53 +273,51 @@ export default function SideBySidePage() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-serif tracking-wide font-semibold text-slate-100 flex items-center gap-3">
-          <Split className="w-8 h-8 text-indigo-400" /> Side-by-Side Balance
-        </h1>
-        <p className="text-sm text-slate-400 mt-1">
+      <div className="border-b border-gray-200 pb-5">
+        <h1 className="text-2xl font-sans tracking-tight font-semibold text-gray-900">Side-by-Side Balance</h1>
+        <p className="text-xs text-gray-500 mt-1">
           Review details of Bride vs Groom side guests, see confirmed seating breakdowns, and plan seating arrangements.
         </p>
       </div>
 
       {error && (
-        <div className="bg-rose-955/40 border border-rose-900/50 text-rose-200 text-sm px-4 py-3 rounded-xl flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
+        <div className="bg-red-50 border border-red-100 text-red-655 text-xs px-4 py-3 rounded-md flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Comparison Stats Bar */}
-      <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center opacity-[0.03]">
-          <Heart className="w-48 h-48 text-indigo-500 fill-indigo-500" />
+      <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center opacity-[0.015]">
+          <Heart className="w-40 h-40 text-blue-500 fill-blue-500" />
         </div>
         
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-around gap-6 text-center">
-          <div className="space-y-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Bride's Seats</span>
-            <div className="text-3xl font-serif text-rose-400 font-bold">{brideTotalSeats}</div>
-            <p className="text-[10px] text-slate-400">
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Bride's Seats</span>
+            <div className="text-2xl font-sans text-purple-650 font-bold">{brideTotalSeats}</div>
+            <p className="text-[9px] text-gray-450">
               {brideAttending.length} guests + {bridePlusOnes} plus ones
             </p>
           </div>
 
-          <div className="h-px w-24 bg-slate-800 md:h-12 md:w-px" />
+          <div className="h-px w-24 bg-gray-150 md:h-12 md:w-px" />
 
-          <div className="space-y-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Confirmed Seats</span>
-            <div className="text-5xl font-serif text-slate-100 font-bold">{brideTotalSeats + groomTotalSeats}</div>
-            <p className="text-[10px] text-slate-400">Combining both sides</p>
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Confirmed</span>
+            <div className="text-4xl font-sans text-gray-900 font-bold">{brideTotalSeats + groomTotalSeats}</div>
+            <p className="text-[9px] text-gray-455 font-medium">Combining both sides</p>
           </div>
 
-          <div className="h-px w-24 bg-slate-800 md:h-12 md:w-px" />
+          <div className="h-px w-24 bg-gray-150 md:h-12 md:w-px" />
 
-          <div className="space-y-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Groom's Seats</span>
-            <div className="text-3xl font-serif text-indigo-400 font-bold">{groomTotalSeats}</div>
-            <p className="text-[10px] text-slate-400">
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Groom's Seats</span>
+            <div className="text-2xl font-sans text-blue-600 font-bold">{groomTotalSeats}</div>
+            <p className="text-[9px] text-gray-450">
               {groomAttending.length} guests + {groomPlusOnes} plus ones
             </p>
           </div>
@@ -321,7 +325,7 @@ export default function SideBySidePage() {
       </div>
 
       {/* Two Column Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {renderSideColumn('bride')}
         {renderSideColumn('groom')}
       </div>

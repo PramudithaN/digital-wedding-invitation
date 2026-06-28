@@ -11,12 +11,10 @@ import {
   AlertCircle, 
   User, 
   Calendar, 
-  CheckCircle2, 
-  XCircle, 
-  Eye,
   MessageSquare,
   UtensilsCrossed,
-  UserPlus
+  UserPlus,
+  CheckCircle2
 } from 'lucide-react';
 import { GuestWithDetails, Category } from '@/lib/types';
 
@@ -132,8 +130,8 @@ export default function EditGuestPage() {
 
   if (isLoading) {
     return (
-      <div className="py-24 flex flex-col items-center justify-center text-slate-500 gap-2">
-        <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
+      <div className="py-24 flex flex-col items-center justify-center text-gray-400 gap-2">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
         <p className="text-sm">Loading guest dossier...</p>
       </div>
     );
@@ -142,48 +140,48 @@ export default function EditGuestPage() {
   if (!guest && error) {
     return (
       <div className="space-y-6">
-        <Link href="/guests" className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200">
-          <ArrowLeft className="w-4 h-4" /> Back to guest list
+        <Link href="/guests" className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 font-semibold uppercase tracking-wider">
+          <ArrowLeft className="w-4 h-4" /> Back to guest registry
         </Link>
-        <div className="bg-rose-950/40 border border-rose-900/50 text-rose-200 text-sm p-6 rounded-2xl flex flex-col items-center gap-3">
-          <AlertCircle className="w-10 h-10 text-rose-455" />
-          <h2 className="text-lg font-semibold">{error}</h2>
+        <div className="bg-red-50 border border-red-100 text-red-655 p-6 rounded-md flex flex-col items-center gap-3">
+          <AlertCircle className="w-8 h-8 text-red-500" />
+          <h2 className="text-sm font-semibold">{error}</h2>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       {/* Back navigation */}
-      <Link href="/guests" className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 w-fit">
-        <ArrowLeft className="w-4 h-4" /> Back to Guest List
+      <Link href="/guests" className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-950 font-semibold uppercase tracking-wider w-fit">
+        <ArrowLeft className="w-4 h-4" /> Back to Guests
       </Link>
 
       {/* Title */}
-      <div>
-        <h1 className="text-3xl font-serif tracking-wide font-semibold text-slate-100">Edit Guest Dossier</h1>
-        <p className="text-sm text-slate-400 mt-1">Review guest card logs, personal messages, and modify details.</p>
+      <div className="border-b border-gray-200 pb-5">
+        <h1 className="text-2xl font-sans tracking-tight font-semibold text-gray-900">Edit Guest Dossier</h1>
+        <p className="text-xs text-gray-500 mt-1">Review guest card logs, personal messages, and modify details.</p>
       </div>
 
       {error && (
-        <div className="bg-rose-955/40 border border-rose-900/50 text-rose-200 text-sm px-4 py-3 rounded-xl flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
+        <div className="bg-red-50 border border-red-100 text-red-655 text-xs px-4 py-3 rounded-md flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
           <span>{error}</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Edit Form */}
-        <div className="lg:col-span-2 bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6 h-fit">
-          <h2 className="text-xl font-serif text-slate-200 flex items-center gap-2">
-            <User className="w-5 h-5 text-indigo-400" /> Guest Details
+        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg p-6 shadow-sm space-y-6 h-fit">
+          <h2 className="text-sm font-semibold text-gray-950 uppercase tracking-wider flex items-center gap-2 border-b border-gray-150 pb-3">
+            <User className="w-4.5 h-4.5 text-gray-400" /> Guest Profile
           </h2>
 
-          <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Name */}
             <div className="md:col-span-2">
-              <label htmlFor="edit-name" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+              <label htmlFor="edit-name" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
                 Full Name *
               </label>
               <input
@@ -192,13 +190,13 @@ export default function EditGuestPage() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
               />
             </div>
 
             {/* Phone */}
             <div>
-              <label htmlFor="edit-phone" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+              <label htmlFor="edit-phone" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
                 Phone Number (WhatsApp)
               </label>
               <input
@@ -207,13 +205,13 @@ export default function EditGuestPage() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+94771234567"
-                className="w-full bg-slate-955 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
               />
             </div>
 
             {/* Email */}
             <div>
-              <label htmlFor="edit-email" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+              <label htmlFor="edit-email" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
                 Email Address
               </label>
               <input
@@ -221,23 +219,23 @@ export default function EditGuestPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
               />
             </div>
 
             {/* Side */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
                 Wedding Side *
               </label>
               <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
                   onClick={() => setSide('bride')}
-                  className={`py-3 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                  className={`py-2 px-3 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
                     side === 'bride'
-                      ? 'bg-rose-955/20 text-rose-300 border-rose-500/70 shadow-lg shadow-rose-900/5'
-                      : 'bg-slate-950 border-slate-800 text-slate-400'
+                      ? 'bg-purple-50 text-purple-700 border-purple-300'
+                      : 'bg-white border-gray-200 text-gray-500'
                   }`}
                 >
                   Bride's Side
@@ -245,10 +243,10 @@ export default function EditGuestPage() {
                 <button
                   type="button"
                   onClick={() => setSide('groom')}
-                  className={`py-3 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                  className={`py-2 px-3 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
                     side === 'groom'
-                      ? 'bg-indigo-950/20 text-indigo-300 border-indigo-500/70 shadow-lg shadow-indigo-900/5'
-                      : 'bg-slate-950 border-slate-800 text-slate-400'
+                      ? 'bg-blue-50 text-blue-700 border-blue-300'
+                      : 'bg-white border-gray-200 text-gray-500'
                   }`}
                 >
                   Groom's Side
@@ -258,14 +256,14 @@ export default function EditGuestPage() {
 
             {/* Category */}
             <div>
-              <label htmlFor="edit-cat" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+              <label htmlFor="edit-cat" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
                 Category Group
               </label>
               <select
                 id="edit-cat"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-850 text-slate-200 text-sm rounded-xl py-3 px-4 focus:outline-none focus:border-indigo-500 cursor-pointer"
+                className="w-full bg-white border border-gray-200 text-gray-700 text-xs rounded-md py-2.5 px-3 focus:outline-none focus:border-blue-500 cursor-pointer"
               >
                 <option value="">No Category</option>
                 {categories.map((cat) => (
@@ -278,31 +276,31 @@ export default function EditGuestPage() {
 
             {/* Notes */}
             <div className="md:col-span-2">
-              <label htmlFor="edit-notes" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                Private Admin Notes
+              <label htmlFor="edit-notes" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                Private Notes
               </label>
               <textarea
                 id="edit-notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-sm text-slate-100 placeholder-slate-650 focus:outline-none focus:border-indigo-500 resize-none"
+                className="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500 resize-none"
               />
             </div>
 
             {/* Actions */}
-            <div className="md:col-span-2 pt-4 border-t border-slate-800 flex flex-col sm:flex-row justify-between gap-4">
+            <div className="md:col-span-2 pt-4 border-t border-gray-100 flex flex-col sm:flex-row justify-between gap-4">
               <button
                 type="button"
                 onClick={handleDelete}
                 disabled={isDeleting || isSubmitting}
-                className="bg-rose-955/20 border border-rose-900/40 text-rose-400 hover:bg-rose-900/20 rounded-xl py-3 px-5 text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="bg-red-50 border border-red-100 hover:bg-red-100 text-red-600 rounded-md py-2 px-4 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 {isDeleting ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <>
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4.5 h-4.5" />
                     Delete Guest
                   </>
                 )}
@@ -311,13 +309,13 @@ export default function EditGuestPage() {
               <button
                 type="submit"
                 disabled={isSubmitting || isDeleting}
-                className="bg-gradient-to-r from-indigo-600 to-rose-500 hover:from-indigo-500 hover:to-rose-400 text-white rounded-xl py-3 px-6 text-sm font-semibold tracking-wide shadow-lg shadow-indigo-600/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-md py-2 px-5 text-xs font-semibold shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <>
-                    <Save className="w-4 h-4" />
+                    <Save className="w-4.5 h-4.5" />
                     Save Changes
                   </>
                 )}
@@ -327,61 +325,56 @@ export default function EditGuestPage() {
         </div>
 
         {/* Tracking & RSVP Summary Sidebar */}
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* Invitation Tracking */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <h2 className="text-xl font-serif text-slate-200 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-indigo-400" /> Invite Tracking
+          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm space-y-4">
+            <h2 className="text-sm font-semibold text-gray-950 uppercase tracking-wider flex items-center gap-2 border-b border-gray-150 pb-3">
+              <Calendar className="w-4.5 h-4.5 text-gray-400" /> Engagement Details
             </h2>
 
-            <div className="space-y-4 text-sm pt-2">
-              {/* Short URL / Token */}
+            <div className="space-y-4 text-xs pt-1">
               <div>
-                <span className="block text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">
-                  Invite Link
+                <span className="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-1">
+                  Access Invite URL
                 </span>
                 <input
                   type="text"
                   readOnly
                   value={`${window.location.origin}/invite/${guest?.invite_token}`}
                   onClick={(e) => (e.target as HTMLInputElement).select()}
-                  className="w-full bg-slate-950 border border-slate-850 rounded-lg py-2 px-3 text-xs text-indigo-400 font-mono focus:outline-none cursor-pointer"
-                  title="Click to select and copy"
+                  className="w-full bg-gray-50 border border-gray-250 rounded py-2 px-3 text-[10px] text-blue-605 font-mono focus:outline-none cursor-pointer"
+                  title="Click to copy invite link"
                 />
               </div>
 
               {/* Status Timestamps */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between text-xs py-1 border-b border-slate-850">
-                  <span className="text-slate-400">Invite Created:</span>
-                  <span className="text-slate-200 font-mono">
+              <div className="space-y-2.5 pt-2">
+                <div className="flex items-center justify-between text-xs py-1 border-b border-gray-100">
+                  <span className="text-gray-500">Record Created:</span>
+                  <span className="text-gray-900 font-medium font-mono">
                     {guest?.created_at ? new Date(guest.created_at).toLocaleDateString() : 'N/A'}
                   </span>
                 </div>
                 
-                <div className="flex items-center justify-between text-xs py-1 border-b border-slate-850">
-                  <span className="text-slate-400">Sent via WhatsApp:</span>
+                <div className="flex items-center justify-between text-xs py-1 border-b border-gray-100">
+                  <span className="text-gray-500">Sent via WhatsApp:</span>
                   {guest?.invite_link?.sent_at ? (
-                    <span className="text-indigo-400 font-medium">
-                      {new Date(guest.invite_link.sent_at).toLocaleDateString()} at{' '}
-                      {new Date(guest.invite_link.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <span className="text-blue-600 font-medium">
+                      {new Date(guest.invite_link.sent_at).toLocaleDateString()}
                     </span>
                   ) : (
-                    <span className="text-slate-500 italic">Not Sent Yet</span>
+                    <span className="text-gray-450 italic">Never Sent</span>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between text-xs py-1 border-b border-slate-850">
-                  <span className="text-slate-400 font-semibold flex items-center gap-1">
-                    <Eye className="w-3.5 h-3.5 text-sky-400" /> Opened Link:
-                  </span>
+                <div className="flex items-center justify-between text-xs py-1 border-b border-gray-100">
+                  <span className="text-gray-500 font-semibold">Opened Invitation:</span>
                   {guest?.invite_link?.opened_at ? (
-                    <span className="text-sky-400 font-medium">
-                      {new Date(guest.invite_link.opened_at).toLocaleDateString()} at{' '}
-                      {new Date(guest.invite_link.opened_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <span className="text-green-600 font-semibold">
+                      {new Date(guest.invite_link.opened_at).toLocaleDateString()}
                     </span>
                   ) : (
-                    <span className="text-slate-500 italic">Not Opened Yet</span>
+                    <span className="text-gray-450 italic">Never Opened</span>
                   )}
                 </div>
               </div>
@@ -389,38 +382,33 @@ export default function EditGuestPage() {
           </div>
 
           {/* RSVP Status */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <h2 className="text-xl font-serif text-slate-200 flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-indigo-400" /> RSVP Status
+          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm space-y-4">
+            <h2 className="text-sm font-semibold text-gray-950 uppercase tracking-wider flex items-center gap-2 border-b border-gray-150 pb-3">
+              <CheckCircle2 className="w-4.5 h-4.5 text-gray-400" /> RSVP Data
             </h2>
 
             {guest?.rsvp ? (
-              <div className="space-y-4 pt-2">
-                {/* RSVP Status Badge */}
+              <div className="space-y-4 pt-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Status:</span>
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status:</span>
                   {guest.rsvp.status === 'attending' ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-900/50">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Attending
-                    </span>
+                    <span className="badge badge-attending">Attending</span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-955/60 text-rose-400 border border-rose-900/50">
-                      <XCircle className="w-3.5 h-3.5" /> Declined
-                    </span>
+                    <span className="badge badge-declined">Declined</span>
                   )}
                 </div>
 
-                <div className="border-t border-slate-850 pt-4 space-y-4">
+                <div className="border-t border-gray-100 pt-3 space-y-3.5 text-xs text-gray-700">
                   {/* Plus One Details */}
                   {guest.rsvp.plus_one && (
-                    <div className="flex gap-2.5 text-sm text-slate-300">
-                      <UserPlus className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                    <div className="flex gap-2 text-gray-600">
+                      <UserPlus className="w-4.5 h-4.5 text-gray-400 shrink-0 mt-0.5" />
                       <div>
-                        <span className="block text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                        <span className="block text-[10px] text-gray-400 uppercase tracking-wider font-semibold">
                           Plus One guest
                         </span>
-                        <span className="font-semibold text-slate-200">
-                          {guest.rsvp.plus_one_name || 'Anonymous Guest'}
+                        <span className="font-semibold text-gray-900">
+                          {guest.rsvp.plus_one_name || 'Yes'}
                         </span>
                       </div>
                     </div>
@@ -428,13 +416,13 @@ export default function EditGuestPage() {
 
                   {/* Meal Selection */}
                   {guest.rsvp.meal_choice && (
-                    <div className="flex gap-2.5 text-sm text-slate-300">
-                      <UtensilsCrossed className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                    <div className="flex gap-2 text-gray-600">
+                      <UtensilsCrossed className="w-4.5 h-4.5 text-gray-400 shrink-0 mt-0.5" />
                       <div>
-                        <span className="block text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                        <span className="block text-[10px] text-gray-400 uppercase tracking-wider font-semibold">
                           Meal Choice
                         </span>
-                        <span className="font-medium text-slate-200 capitalize">
+                        <span className="font-semibold text-gray-900 capitalize">
                           {guest.rsvp.meal_choice}
                         </span>
                       </div>
@@ -443,35 +431,35 @@ export default function EditGuestPage() {
 
                   {/* Dietary Restrictions */}
                   {guest.rsvp.dietary_notes && (
-                    <div className="text-xs bg-slate-950/60 border border-slate-850 p-3 rounded-xl space-y-1">
-                      <span className="block text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
-                        Dietary notes
+                    <div className="bg-gray-50 border border-gray-250 p-3 rounded space-y-1">
+                      <span className="block text-[10px] text-gray-400 uppercase tracking-wider font-semibold">
+                        Dietary restrictions
                       </span>
-                      <p className="text-slate-300">{guest.rsvp.dietary_notes}</p>
+                      <p className="text-gray-700 font-medium">{guest.rsvp.dietary_notes}</p>
                     </div>
                   )}
 
                   {/* Message from Guest */}
                   {guest.rsvp.message && (
-                    <div className="text-xs bg-indigo-950/20 border border-indigo-900/25 p-3 rounded-xl space-y-1">
-                      <span className="block text-[10px] text-indigo-400 uppercase tracking-wider font-semibold flex items-center gap-1">
+                    <div className="bg-blue-50/50 border border-blue-100 p-3 rounded space-y-1">
+                      <span className="block text-[10px] text-blue-500 uppercase tracking-wider font-semibold flex items-center gap-1">
                         <MessageSquare className="w-3.5 h-3.5" /> Guest Message
                       </span>
-                      <p className="text-slate-300 italic">"{guest.rsvp.message}"</p>
+                      <p className="text-gray-700 font-medium italic">"{guest.rsvp.message}"</p>
                     </div>
                   )}
 
                   {/* Response date */}
-                  <div className="text-[10px] text-slate-550 text-right pt-2">
+                  <div className="text-[10px] text-gray-400 text-right pt-2 border-t border-gray-100">
                     Responded:{' '}
                     {guest.rsvp.responded_at
-                      ? new Date(guest.rsvp.responded_at).toLocaleString()
+                      ? new Date(guest.rsvp.responded_at).toLocaleDateString()
                       : 'N/A'}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="text-center py-6 text-xs text-slate-500 italic">
+              <div className="text-center py-6 text-xs text-gray-400 italic">
                 No RSVP response recorded yet.
               </div>
             )}

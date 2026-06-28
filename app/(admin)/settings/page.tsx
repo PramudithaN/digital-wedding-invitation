@@ -16,8 +16,8 @@ import {
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Form states
   const [brideName, setBrideName] = useState('');
@@ -30,6 +30,11 @@ export default function SettingsPage() {
   const [address, setAddress] = useState('');
   const [googleMapsUrl, setGoogleMapsUrl] = useState('');
   const [registryUrl, setRegistryUrl] = useState('');
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -63,7 +68,6 @@ export default function SettingsPage() {
     try {
       setIsSubmitting(true);
       setError('');
-      setSuccess(false);
 
       const res = await fetch('/api/settings', {
         method: 'POST',
@@ -87,10 +91,10 @@ export default function SettingsPage() {
         throw new Error(errData.error || 'Failed to save settings');
       }
 
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      showToast('Settings updated successfully!', 'success');
     } catch (err: any) {
       setError(err.message || 'Could not save configurations.');
+      showToast(err.message || 'Could not save configurations.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -124,10 +128,20 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {success && (
-        <div className="bg-green-50 border border-green-150 text-green-700 text-xs px-4 py-3 rounded-md flex items-center gap-3">
-          <Check className="w-5 h-5 shrink-0 text-green-600 animate-bounce" />
-          <span>Wedding settings updated successfully!</span>
+      {toast && (
+        <div className="fixed top-5 right-5 z-55 animate-fade-in select-none">
+          <div className={`flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
+            toast.type === 'success'
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : 'bg-red-50 text-red-750 border-red-200'
+          }`}>
+            {toast.type === 'success' ? (
+              <Check className="w-4 h-4 text-green-600" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-500" />
+            )}
+            <span>{toast.message}</span>
+          </div>
         </div>
       )}
 

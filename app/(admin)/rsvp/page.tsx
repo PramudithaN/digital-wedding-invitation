@@ -21,6 +21,12 @@ export default function RSVPTrackerPage() {
   const [guests, setGuests] = useState<GuestWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
   
   // Filters state
   const [search, setSearch] = useState('');
@@ -47,6 +53,7 @@ export default function RSVPTrackerPage() {
   }, []);
 
   const handleStatusChange = async (guestId: string, newStatus: 'attending' | 'declined' | 'pending') => {
+    const guestObj = guests.find(g => g.id === guestId);
     try {
       setUpdatingId(guestId);
       const res = await fetch('/api/rsvp', {
@@ -76,8 +83,10 @@ export default function RSVPTrackerPage() {
           return g;
         })
       );
+      showToast(`RSVP status for ${guestObj?.name || 'guest'} updated to "${newStatus}"!`, 'success');
     } catch (err: any) {
-      alert(err.message || 'Error updating RSVP');
+      setError(err.message || 'Error updating RSVP');
+      showToast(err.message || 'Error updating RSVP', 'error');
     } finally {
       setUpdatingId(null);
     }
@@ -282,6 +291,22 @@ export default function RSVPTrackerPage() {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+      {toast && (
+        <div className="fixed top-5 right-5 z-55 animate-fade-in select-none">
+          <div className={`flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
+            toast.type === 'success'
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : 'bg-red-50 text-red-755 border-red-200'
+          }`}>
+            {toast.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-green-600" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-500" />
+            )}
+            <span>{toast.message}</span>
+          </div>
         </div>
       )}
     </div>

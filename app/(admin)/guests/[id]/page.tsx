@@ -29,6 +29,12 @@ export default function EditGuestPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState('');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   // Form states
   const [name, setName] = useState('');
@@ -105,10 +111,14 @@ export default function EditGuestPage() {
         throw new Error(errData.error || 'Failed to update guest');
       }
 
-      router.push('/guests');
-      router.refresh();
+      showToast('Guest dossier updated successfully!', 'success');
+      setTimeout(() => {
+        router.push('/guests');
+        router.refresh();
+      }, 1500);
     } catch (err: any) {
       setError(err.message || 'Could not update guest');
+      showToast(err.message || 'Could not update guest', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -120,10 +130,14 @@ export default function EditGuestPage() {
       setIsDeleting(true);
       const res = await fetch(`/api/guests/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete guest');
-      router.push('/guests');
-      router.refresh();
+      showToast('Guest record deleted successfully!', 'success');
+      setTimeout(() => {
+        router.push('/guests');
+        router.refresh();
+      }, 1550);
     } catch (err: any) {
       setError(err.message || 'Could not delete guest');
+      showToast(err.message || 'Could not delete guest', 'error');
       setIsDeleting(false);
     }
   };
@@ -466,6 +480,23 @@ export default function EditGuestPage() {
           </div>
         </div>
       </div>
+
+      {toast && (
+        <div className="fixed top-5 right-5 z-55 animate-fade-in select-none">
+          <div className={`flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
+            toast.type === 'success'
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : 'bg-red-50 text-red-755 border-red-200'
+          }`}>
+            {toast.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-green-600" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-500" />
+            )}
+            <span>{toast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

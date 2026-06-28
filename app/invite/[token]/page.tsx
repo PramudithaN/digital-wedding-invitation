@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { getGuestByToken, markInviteOpened, getWeddingDetails } from '@/lib/db';
 import InviteCardClient from '@/components/invite/InviteCardClient';
 
+export const dynamic = 'force-dynamic';
+
 interface InvitePageProps {
   params: Promise<{ token: string }>;
 }

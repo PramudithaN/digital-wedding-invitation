@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Loader2, Tag, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Loader2, Tag, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Category } from '@/lib/types';
 
 const COLOR_PRESETS = [
@@ -22,6 +22,12 @@ export default function CategoriesPage() {
   const [colour, setColour] = useState(COLOR_PRESETS[0].value);
   const [error, setError] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   // Fetch all categories
   const fetchCategories = async () => {
@@ -63,10 +69,12 @@ export default function CategoriesPage() {
 
       const newCat = await res.json();
       setCategories((prev) => [...prev, newCat]);
+      showToast(`Category "${name.trim()}" created successfully!`, 'success');
       setName('');
       setColour(COLOR_PRESETS[0].value);
     } catch (err: any) {
       setError(err.message || 'Could not add category');
+      showToast(err.message || 'Could not add category', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -87,8 +95,10 @@ export default function CategoriesPage() {
       }
 
       setCategories((prev) => prev.filter((c) => c.id !== id));
+      showToast('Category deleted successfully!', 'success');
     } catch (err: any) {
       setError(err.message || 'Could not delete category');
+      showToast(err.message || 'Could not delete category', 'error');
     } finally {
       setDeletingId(null);
     }
@@ -235,6 +245,22 @@ export default function CategoriesPage() {
           )}
         </div>
       </div>
+      {toast && (
+        <div className="fixed top-5 right-5 z-55 animate-fade-in select-none">
+          <div className={`flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
+            toast.type === 'success'
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : 'bg-red-50 text-red-755 border-red-200'
+          }`}>
+            {toast.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-green-600" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-500" />
+            )}
+            <span>{toast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

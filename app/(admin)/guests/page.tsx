@@ -13,7 +13,8 @@ import {
   MessageCircle, 
   Loader2, 
   AlertCircle, 
-  X
+  X,
+  CheckCircle2
 } from 'lucide-react';
 import { GuestWithDetails, Category } from '@/lib/types';
 
@@ -22,7 +23,13 @@ export default function GuestsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   // Search & Filter state
   const [search, setSearch] = useState('');
   const [sideFilter, setSideFilter] = useState<'all' | 'bride' | 'groom'>('all');
@@ -96,6 +103,7 @@ export default function GuestsPage() {
       }
 
       await fetchData();
+      showToast(`${name.trim()} added successfully!`, 'success');
       
       // Reset form
       setName('');
@@ -107,6 +115,7 @@ export default function GuestsPage() {
       setIsAddOpen(false);
     } catch (err: any) {
       setError(err.message || 'Could not add guest');
+      showToast(err.message || 'Could not add guest', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -119,8 +128,10 @@ export default function GuestsPage() {
       const res = await fetch(`/api/guests/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete guest');
       setGuests((prev) => prev.filter((g) => g.id !== id));
+      showToast('Guest record deleted successfully!', 'success');
     } catch (err: any) {
       setError(err.message || 'Could not delete guest');
+      showToast(err.message || 'Could not delete guest', 'error');
     } finally {
       setDeletingId(null);
     }
@@ -150,8 +161,10 @@ export default function GuestsPage() {
       }
       
       await fetchData();
+      showToast('WhatsApp link generated successfully!', 'success');
     } catch (err: any) {
       alert(err.message || 'Error generating link');
+      showToast(err.message || 'Error generating link', 'error');
     } finally {
       setSendingId(null);
     }
@@ -630,6 +643,23 @@ export default function GuestsPage() {
                 </div>
               </form>
             </div>
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <div className="fixed top-5 right-5 z-55 animate-fade-in select-none">
+          <div className={`flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold ${
+            toast.type === 'success'
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : 'bg-red-50 text-red-755 border-red-200'
+          }`}>
+            {toast.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-green-600" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-500" />
+            )}
+            <span>{toast.message}</span>
           </div>
         </div>
       )}

@@ -11,7 +11,19 @@ interface InvitePageProps {
 
 export async function generateMetadata({ params }: InvitePageProps) {
   const { token } = await params;
-  const guest = await getGuestByToken(token);
+  const isGeneral = token === 'general';
+  
+  let guest;
+  if (isGeneral) {
+    guest = {
+      id: 'general',
+      name: 'general',
+      invite_token: 'general'
+    };
+  } else {
+    guest = await getGuestByToken(token);
+  }
+  
   const weddingDetails = await getWeddingDetails();
   
   if (!guest) {
@@ -22,21 +34,39 @@ export async function generateMetadata({ params }: InvitePageProps) {
 
   return {
     title: `Wedding Invitation - ${weddingDetails.bride_name} & ${weddingDetails.groom_name}`,
-    description: `Dear ${guest.name}, you are cordially invited to celebrate our wedding.`,
+    description: isGeneral 
+      ? 'You are cordially invited to celebrate our wedding.'
+      : `Dear ${guest.name}, you are cordially invited to celebrate our wedding.`,
   };
 }
 
 export default async function InvitePage({ params }: InvitePageProps) {
   const { token } = await params;
+  const isGeneral = token === 'general';
   
   // 1. Fetch guest by token
-  const guest = await getGuestByToken(token);
+  let guest;
+  if (isGeneral) {
+    guest = {
+      id: 'general',
+      name: 'general',
+      invite_token: 'general',
+      phone: '',
+      email: '',
+      notes: 'General public invitation link'
+    };
+  } else {
+    guest = await getGuestByToken(token);
+  }
+
   if (!guest) {
     return notFound();
   }
 
-  // 2. Mark invite as opened (side-effect during SSR page load)
-  await markInviteOpened(guest.id);
+  // 2. Mark invite as opened (only for personalized guests)
+  if (!isGeneral) {
+    await markInviteOpened(guest.id);
+  }
 
   // 3. Fetch current wedding configurations
   const weddingDetails = await getWeddingDetails();

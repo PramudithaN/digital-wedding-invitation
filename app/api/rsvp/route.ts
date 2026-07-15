@@ -1,10 +1,21 @@
 import { NextResponse } from 'next/server';
-import { saveRSVP, updateRSVPStatus } from '@/lib/db';
+import { saveRSVP, updateRSVPStatus, addGuest } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { guest_id, status, plus_one, plus_one_name, meal_choice, dietary_notes, message, alcohol_choice } = body;
+    const { 
+      guest_id, 
+      status, 
+      plus_one, 
+      plus_one_name, 
+      meal_choice, 
+      dietary_notes, 
+      message, 
+      alcohol_choice,
+      general_guest_name,
+      general_guest_side
+    } = body;
     
     if (!guest_id || !status) {
       return NextResponse.json({ error: 'Guest ID and status are required' }, { status: 400 });
@@ -14,7 +25,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid status value' }, { status: 400 });
     }
     
-    const rsvp = await saveRSVP(guest_id, {
+    let targetGuestId = guest_id;
+    if (guest_id === 'general') {
+      const newGuest = await addGuest({
+        name: general_guest_name || 'General Guest',
+        phone: '',
+        email: '',
+        side: (general_guest_side === 'groom' || general_guest_side === 'bride') ? general_guest_side : 'bride',
+        notes: 'RSVP via general invite link'
+      });
+      targetGuestId = newGuest.id;
+    }
+    
+    const rsvp = await saveRSVP(targetGuestId, {
       status,
       plus_one: !!plus_one,
       plus_one_name: plus_one_name || '',

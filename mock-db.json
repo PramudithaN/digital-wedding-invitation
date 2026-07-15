@@ -63,6 +63,16 @@
       "id": "guest-1782624785258",
       "invite_token": "101cc308-5255-4f5e-9d28-8a80e1608462",
       "created_at": "2026-06-28T05:33:05.258Z"
+    },
+    {
+      "name": "Test",
+      "phone": "",
+      "email": "",
+      "side": "bride",
+      "notes": "RSVP via general invite link",
+      "id": "guest-1784122889026",
+      "invite_token": "940f4d08-410d-4ebf-bb41-e932c015673e",
+      "created_at": "2026-07-15T13:41:29.026Z"
     }
   ],
   "rsvps": [
@@ -86,6 +96,18 @@
       "dietary_notes": "",
       "message": "Sorry I cannot make it, I will be out of the country. Wishing you the best!",
       "responded_at": "2026-06-28T05:32:07.273Z"
+    },
+    {
+      "id": "rsvp-1784122889029",
+      "guest_id": "guest-1784122889026",
+      "status": "attending",
+      "plus_one": false,
+      "plus_one_name": "",
+      "meal_choice": "non-veg",
+      "dietary_notes": "",
+      "message": "",
+      "alcohol_choice": "hard liquor",
+      "responded_at": "2026-07-15T13:41:29.028Z"
     }
   ],
   "invite_links": [

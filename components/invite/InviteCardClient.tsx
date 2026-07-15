@@ -47,6 +47,8 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
   const [dietaryNotes, setDietaryNotes] = useState(guest.rsvp?.dietary_notes || '');
   const [message, setMessage] = useState(guest.rsvp?.message || '');
   const [alcoholChoice, setAlcoholChoice] = useState(guest.rsvp?.alcohol_choice || '');
+  const [generalGuestName, setGeneralGuestName] = useState('');
+  const [generalGuestSide, setGeneralGuestSide] = useState<'bride' | 'groom'>('bride');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(!!(guest.rsvp && guest.rsvp.status && guest.rsvp.status !== 'pending'));
@@ -133,6 +135,11 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
       return;
     }
 
+    if (guest.id === 'general' && !generalGuestName.trim()) {
+      setError('Please enter your full name');
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       setError('');
@@ -148,7 +155,9 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
           meal_choice: attending === 'attending' ? mealChoice : '',
           dietary_notes: attending === 'attending' ? dietaryNotes.trim() : '',
           message: message.trim(),
-          alcohol_choice: attending === 'attending' ? alcoholChoice : ''
+          alcohol_choice: attending === 'attending' ? alcoholChoice : '',
+          general_guest_name: guest.id === 'general' ? generalGuestName.trim() : '',
+          general_guest_side: guest.id === 'general' ? generalGuestSide : ''
         }),
       });
 
@@ -170,7 +179,11 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
   const getGoogleCalendarUrl = () => {
     const title = encodeURIComponent(`Wedding of ${weddingDetails.bride_name} & ${weddingDetails.groom_name}`);
     const dates = '20260923T123000Z/20260923T180000Z'; // UTC time equivalent (6:00 PM to 11:30 PM SLT)
-    const details = encodeURIComponent(`Dear ${guest.name}, we look forward to celebrating this beautiful day with you.`);
+    const details = encodeURIComponent(
+      guest.name === 'general'
+        ? `We look forward to celebrating this beautiful day with you.`
+        : `Dear ${guest.name}, we look forward to celebrating this beautiful day with you.`
+    );
     const location = encodeURIComponent(`${weddingDetails.venue}, ${weddingDetails.address}, ${weddingDetails.city}`);
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
   };
@@ -437,7 +450,9 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                     <div className="w-8 h-[1px] bg-[#C8A882]/40 mx-auto my-1.5" />
                     <div className="space-y-1">
                       <p className="text-[9px] text-gray-400 uppercase tracking-wider" style={{ fontFamily: invitationTypography.body }}>Honorary Guest</p>
-                      <p className="italic text-sm font-semibold" style={{ fontFamily: invitationTypography.body, color: invitationTypography.bodyColor }}>{guest.name}</p>
+                      <p className="italic text-sm font-semibold" style={{ fontFamily: invitationTypography.body, color: invitationTypography.bodyColor }}>
+                        {guest.name === 'general' ? 'You & Your Family' : guest.name}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -480,7 +495,9 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                 >
                   <div className="px-5 py-2 rounded-md border border-[#C8A882]/20 bg-[#070b14]/90 backdrop-blur-xs shadow-lg max-w-[80%]">
                     <span className="text-[7px] text-[#C8A882]/60 uppercase tracking-[0.2em] block mb-0.5">Invited Guest</span>
-                    <p className="font-script text-[#C8A882] text-lg sm:text-xl leading-none px-2">{guest.name}</p>
+                    <p className="font-script text-[#C8A882] text-lg sm:text-xl leading-none px-2">
+                      {guest.name === 'general' ? 'You & Your Family' : guest.name}
+                    </p>
                   </div>
                 </div>
 
@@ -685,7 +702,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
 
             <div className="py-2">
               <p className="text-sm sm:text-base italic text-[#4A4A4A]" style={{ fontFamily: invitationTypography.body }}>
-                {guest.name},
+                {guest.name === 'general' ? 'You & Your Family' : guest.name},
               </p>
             </div>
               <p className="text-xs sm:text-sm tracking-wide leading-relaxed max-w-sm mx-auto text-[#6B6B6B]" style={{ fontFamily: invitationTypography.body }}>
@@ -836,7 +853,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
               <div className="space-y-1.5">
                 <h2 className="text-xl font-serif text-gray-900">RSVP Confirmed</h2>
                 <p className="text-xs text-[#6B6B6B] max-w-xs mx-auto">
-                  Thank you, {guest.name}. Your response has been logged successfully.
+                  Thank you, {guest.name === 'general' ? (generalGuestName || 'Guest') : guest.name}. Your response has been logged successfully.
                 </p>
               </div>
               {attending === 'attending' ? (
@@ -876,6 +893,55 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
               )}
 
               <form onSubmit={handleRSVPSubmit} className="space-y-5">
+                {/* General Guest Details (Name and Side selection) */}
+                {guest.id === 'general' && (
+                  <div className="space-y-4 bg-[#FAFAF8] p-4 rounded border border-[#E8E4DE] text-left animate-fade-in">
+                    <div>
+                      <label htmlFor="general-name" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
+                        Your Full Name
+                      </label>
+                      <input
+                        id="general-name"
+                        type="text"
+                        value={generalGuestName}
+                        onChange={(e) => setGeneralGuestName(e.target.value)}
+                        placeholder="Please enter your full name"
+                        required
+                        className="w-full bg-white border border-gray-200 rounded py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-[#D38A99]"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B]">
+                        Which side do you belong to?
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setGeneralGuestSide('bride')}
+                          className={`py-2 px-3 border rounded text-xs font-semibold transition-all cursor-pointer ${
+                            generalGuestSide === 'bride'
+                              ? 'bg-[#FAF0F2] text-[#D38A99] border-[#D38A99]'
+                              : 'bg-white border-gray-200 text-gray-500'
+                          }`}
+                        >
+                          Bride's Side
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setGeneralGuestSide('groom')}
+                          className={`py-2 px-3 border rounded text-xs font-semibold transition-all cursor-pointer ${
+                            generalGuestSide === 'groom'
+                              ? 'bg-[#EFF6FF] text-[#2563EB] border-[#3B82F6]'
+                              : 'bg-white border-gray-200 text-gray-500'
+                          }`}
+                        >
+                          Groom's Side
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Attending Selection */}
                 <div className="space-y-2">
                   <span className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] text-center">

@@ -1129,22 +1129,34 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
           <h3 className="text-2xl font-serif text-gray-950 font-light tracking-wide" style={{ fontFamily: invitationTypography.body, color: invitationTypography.nameColor }}>Contact Details</h3>
           <div className="h-[1px] w-12 bg-[#D38A99] mx-auto" />
           
-          <div className="grid grid-cols-2 gap-6 text-left">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 text-left max-w-sm mx-auto">
             {/* Bride's Family */}
-            <div className="space-y-2">
-              <h4 className="font-serif font-semibold text-sm sm:text-base text-[#D38A99] uppercase tracking-wider">Bride&apos;s Family</h4>
-              <div className="text-sm sm:text-base text-gray-800 space-y-1.5 font-serif">
-                <p><span className="font-medium text-gray-955">Oshidhie:</span> 077 141 4181</p>
-                <p><span className="font-medium text-gray-955">Jeevani:</span> 077 789 6891</p>
+            <div className="space-y-3">
+              <h4 className="font-serif font-semibold text-sm sm:text-base text-[#D38A99] uppercase tracking-wider pb-1 border-b border-[#D38A99]/10">Bride&apos;s Family</h4>
+              <div className="text-sm sm:text-base text-gray-800 space-y-2 font-serif">
+                <div className="flex justify-between items-center gap-4">
+                  <span className="font-medium text-gray-955">Oshidhie:</span>
+                  <span className="whitespace-nowrap">077 141 4181</span>
+                </div>
+                <div className="flex justify-between items-center gap-4">
+                  <span className="font-medium text-gray-955">Jeevani:</span>
+                  <span className="whitespace-nowrap">077 789 6891</span>
+                </div>
               </div>
             </div>
 
             {/* Groom's Family */}
-            <div className="space-y-2">
-              <h4 className="font-serif font-semibold text-sm sm:text-base text-[#D38A99] uppercase tracking-wider">Groom&apos;s Family</h4>
-              <div className="text-sm sm:text-base text-gray-800 space-y-1.5 font-serif">
-                <p><span className="font-medium text-gray-955">Kaveen:</span> 077 340 9762</p>
-                <p><span className="font-medium text-gray-955">Geethanie:</span> 071 808 3732</p>
+            <div className="space-y-3">
+              <h4 className="font-serif font-semibold text-sm sm:text-base text-[#D38A99] uppercase tracking-wider pb-1 border-b border-[#D38A99]/10">Groom&apos;s Family</h4>
+              <div className="text-sm sm:text-base text-gray-800 space-y-2 font-serif">
+                <div className="flex justify-between items-center gap-4">
+                  <span className="font-medium text-gray-955">Kaveen:</span>
+                  <span className="whitespace-nowrap">077 340 9762</span>
+                </div>
+                <div className="flex justify-between items-center gap-4">
+                  <span className="font-medium text-gray-955">Geethanie:</span>
+                  <span className="whitespace-nowrap">071 808 3732</span>
+                </div>
               </div>
             </div>
           </div>

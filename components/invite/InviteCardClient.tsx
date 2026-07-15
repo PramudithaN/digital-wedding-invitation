@@ -158,6 +158,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
       }
 
       setIsSuccess(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || 'There was a problem submitting your RSVP. Please try again.');
     } finally {
@@ -844,7 +845,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                 </div>
               ) : (
                 <div className="bg-gray-50 p-4 rounded text-xs text-gray-500 max-w-xs mx-auto italic border border-gray-200">
-                  We're sorry you can't make it, but we appreciate your response.
+                  We&apos;re sorry you can&apos;t make it, but we appreciate your response.
                 </div>
               )}
               <div className="pt-2">
@@ -1064,7 +1065,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
           <div className="grid grid-cols-2 gap-6 text-left">
             {/* Bride's Family */}
             <div className="space-y-2">
-              <h4 className="font-serif font-semibold text-sm sm:text-base text-[#D38A99] uppercase tracking-wider">Bride's Family</h4>
+              <h4 className="font-serif font-semibold text-sm sm:text-base text-[#D38A99] uppercase tracking-wider">Bride&apos;s Family</h4>
               <div className="text-sm sm:text-base text-gray-800 space-y-1.5 font-serif">
                 <p><span className="font-medium text-gray-955">Oshidhie:</span> 077 141 4181</p>
                 <p><span className="font-medium text-gray-955">Jeevani:</span> 077 789 6891</p>
@@ -1073,7 +1074,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
 
             {/* Groom's Family */}
             <div className="space-y-2">
-              <h4 className="font-serif font-semibold text-sm sm:text-base text-[#D38A99] uppercase tracking-wider">Groom's Family</h4>
+              <h4 className="font-serif font-semibold text-sm sm:text-base text-[#D38A99] uppercase tracking-wider">Groom&apos;s Family</h4>
               <div className="text-sm sm:text-base text-gray-800 space-y-1.5 font-serif">
                 <p><span className="font-medium text-gray-955">Kaveen:</span> 077 340 9762</p>
                 <p><span className="font-medium text-gray-955">Geethanie:</span> 071 808 3732</p>
@@ -1135,7 +1136,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
             />
           </div>
         </div>
-        <p className="text-[10px] text-gray-400 italic pt-6">"Our journey together"</p>
+        <p className="text-[10px] text-gray-400 italic pt-6">&quot;Our journey together&quot;</p>
       </section>
 
       {/* --- SECTION 7 - VENUE DETAILS & MAP --- */}

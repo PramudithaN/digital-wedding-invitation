@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS rsvps (
   meal_choice     TEXT,              -- e.g. "veg", "non-veg", "vegan"
   dietary_notes   TEXT,
   message         TEXT,              -- personal note from guest
+  alcohol_choice  TEXT,              -- e.g. "hard liquor", "wine", "none"
   responded_at    TIMESTAMPTZ,
   created_at      TIMESTAMPTZ DEFAULT now()
 );

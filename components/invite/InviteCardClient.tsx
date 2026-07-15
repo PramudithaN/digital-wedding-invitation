@@ -924,7 +924,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                               : 'bg-white border-gray-200 text-gray-500'
                           }`}
                         >
-                          Bride's Side
+                          Bride&apos;s Side
                         </button>
                         <button
                           type="button"
@@ -935,7 +935,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                               : 'bg-white border-gray-200 text-gray-500'
                           }`}
                         >
-                          Groom's Side
+                          Groom&apos;s Side
                         </button>
                       </div>
                     </div>

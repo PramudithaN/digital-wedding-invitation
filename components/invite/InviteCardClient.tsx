@@ -696,18 +696,19 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
             </h1>
 
             <p className="text-xs sm:text-sm tracking-wide leading-relaxed max-w-sm mx-auto text-[#6B6B6B] pt-4" style={{ fontFamily: invitationTypography.body }}>
-              request the pleasure of the company of
-             
+              {guest.name === 'general' ? 'request the pleasure of the company' : 'request the pleasure of the company of'}
             </p>
 
-            <div className="py-2">
-              <p className="text-sm sm:text-base italic text-[#4A4A4A]" style={{ fontFamily: invitationTypography.body }}>
-                {guest.name === 'general' ? 'You & Your Family' : guest.name},
-              </p>
-            </div>
-              <p className="text-xs sm:text-sm tracking-wide leading-relaxed max-w-sm mx-auto text-[#6B6B6B]" style={{ fontFamily: invitationTypography.body }}>
+            {guest.name !== 'general' && (
+              <div className="py-2">
+                <p className="text-sm sm:text-base italic text-[#4A4A4A]" style={{ fontFamily: invitationTypography.body }}>
+                  {guest.name},
+                </p>
+              </div>
+            )}
+            
+            <p className="text-xs sm:text-sm tracking-wide leading-relaxed max-w-sm mx-auto text-[#6B6B6B]" style={{ fontFamily: invitationTypography.body }}>
               on their wedding day
-             
             </p>
           </div>
 

@@ -102,7 +102,8 @@
       "guest_id": "guest-1782624785258",
       "short_code": "guest-",
       "channel": "whatsapp",
-      "sent_at": "2026-06-28T05:39:42.783Z"
+      "sent_at": "2026-06-28T05:39:42.783Z",
+      "opened_at": "2026-07-15T07:51:32.436Z"
     }
   ]
 }

@@ -177,7 +177,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
   // Calendar event helpers
   const getGoogleCalendarUrl = () => {
     const title = encodeURIComponent(`Wedding of ${weddingDetails.bride_name} & ${weddingDetails.groom_name}`);
-    const dates = '20260919T103000Z/20260919T173000Z'; // UTC time equivalent (4:00 PM to 11:00 PM SLT)
+    const dates = '20260923T123000Z/20260923T180000Z'; // UTC time equivalent (6:00 PM to 11:30 PM SLT)
     const details = encodeURIComponent(`Dear ${guest.name}, we look forward to celebrating this beautiful day with you.`);
     const location = encodeURIComponent(`${weddingDetails.venue}, ${weddingDetails.address}, ${weddingDetails.city}`);
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
@@ -191,8 +191,8 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
       'SUMMARY:Wedding of ' + weddingDetails.bride_name + ' & ' + weddingDetails.groom_name,
       'DESCRIPTION:We look forward to celebrating this beautiful day with you.',
       'LOCATION:' + weddingDetails.venue + ', ' + weddingDetails.address + ', ' + weddingDetails.city,
-      'DTSTART:20260919T103000Z',
-      'DTEND:20260919T173000Z',
+      'DTSTART:20260923T123000Z',
+      'DTEND:20260923T180000Z',
       'END:VEVENT',
       'END:VCALENDAR'
     ].join('\r\n');
@@ -344,6 +344,38 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
     );
   };
 
+  const invitationTypography = {
+    mainNames: '"Miracle World Personal use regular", "Miracle World Personal Use Regular", "Miracle World", "Playfair Display", serif',
+    ampersand: '"Boheme Floral", "Great Vibes", cursive',
+    body: '"Playfair Display", serif',
+    nameColor: '#2D312E',
+    ampColor: '#D38A99',
+    bodyColor: '#2D312E',
+  };
+
+  // The Order of the Day individual transparent high-resolution PNG icon sources
+  const itineraryItems = [
+    { time: '6:00 PM', title: 'Poruwa Ceremony', iconSrc: '/Rings.png' },
+    { time: '6:45 PM', title: 'Cutting the Cake', iconSrc: '/cake.png' },
+    { time: '7:00 PM', title: 'Toast and Speeches', iconSrc: '/toast.png' },
+    { time: '7:15 PM', title: 'Photoshoot', iconSrc: '/photo.png' },
+    { time: '8:00 PM', title: 'First Dance', iconSrc: '/first%20dance.png' },
+    { time: '9:00 PM', title: 'Dinner', iconSrc: '/Dinner.png' },
+    { time: '9:30 PM', title: 'Photoshoot', iconSrc: '/photo.png' },
+    { time: '10:30 PM', title: 'Dance Floor', iconSrc: '/dance.png' },
+    { time: '11:30 PM', title: 'Sweet Dreams', iconSrc: '/sweet%20dreams.png' }
+  ];
+
+  const ItineraryIcon = ({ src, className }: { src: string; className?: string }) => (
+    <div className={`relative w-full h-full flex items-center justify-center overflow-hidden ${className}`}>
+      <img
+        src={src}
+        alt="Timeline Icon"
+        className="w-full h-full object-contain scale-[1.8] transform"
+      />
+    </div>
+  );
+
 
   return (
     <div className="min-h-screen bg-[#F2F1EB] text-[#1A1A1A] flex flex-col font-sans relative overflow-x-hidden selection:bg-amber-100 selection:text-gray-900 px-4 py-4 sm:py-8">
@@ -363,9 +395,9 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                 envelopeState !== 'closed' ? 'opacity-0 -translate-y-4' : 'opacity-100'
               }`}
             >
-              <span className="text-[#C8A882] text-[10px] uppercase tracking-[0.25em] font-semibold block mb-2">You are Invited</span>
-              <h2 className="font-serif text-white text-2xl font-light tracking-wide">
-                {weddingDetails.bride_name} & {weddingDetails.groom_name}
+              <span className="text-[#C8A882] text-[10px] uppercase tracking-[0.25em] font-semibold block mb-2" style={{ fontFamily: invitationTypography.body }}>You are Invited</span>
+              <h2 className="text-white text-2xl font-light tracking-wide" style={{ fontFamily: invitationTypography.mainNames }}>
+                {weddingDetails.bride_name} <span style={{ fontFamily: invitationTypography.ampersand, color: invitationTypography.ampColor }}>&</span> {weddingDetails.groom_name}
               </h2>
               <div className="h-[1px] w-12 bg-[#C8A882]/40 mx-auto mt-3" />
             </div>
@@ -404,16 +436,16 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                     <div className="w-10 h-10 text-[#C8A882] opacity-80 mx-auto mb-1">
                       {renderMotifSVG('nelum')}
                     </div>
-                    <span className="text-[8px] uppercase tracking-widest text-[#C8A882] font-semibold block">The Wedding of</span>
-                    <h3 className="font-serif text-xl sm:text-2xl text-gray-900 leading-tight font-light">
+                    <span className="text-[8px] uppercase tracking-widest text-[#C8A882] font-semibold block" style={{ fontFamily: invitationTypography.body }}>The Wedding of</span>
+                    <h3 className="text-xl sm:text-2xl leading-tight font-light" style={{ fontFamily: invitationTypography.mainNames, color: invitationTypography.nameColor }}>
                       {weddingDetails.bride_name}
-                      <span className="font-script block text-[#C8A882] text-xl py-0.5">&</span>
+                      <span className="block text-xl py-0.5" style={{ fontFamily: invitationTypography.ampersand, color: invitationTypography.ampColor }}>&</span>
                       {weddingDetails.groom_name}
                     </h3>
                     <div className="w-8 h-[1px] bg-[#C8A882]/40 mx-auto my-1.5" />
                     <div className="space-y-1">
-                      <p className="text-[9px] text-gray-400 uppercase tracking-wider">Honorary Guest</p>
-                      <p className="font-serif italic text-gray-800 text-sm font-semibold">{guest.name}</p>
+                      <p className="text-[9px] text-gray-400 uppercase tracking-wider" style={{ fontFamily: invitationTypography.body }}>Honorary Guest</p>
+                      <p className="italic text-sm font-semibold" style={{ fontFamily: invitationTypography.body, color: invitationTypography.bodyColor }}>{guest.name}</p>
                     </div>
                   </div>
                 </div>
@@ -603,99 +635,95 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
       </div>
 
       {/* The Invitation Card Container */}
-      <div className="relative z-10 w-full max-w-[650px] mx-auto bg-[#FAFAF8] shadow-[0_20px_50px_rgba(0,0,0,0.06)] border border-[#E3DEC9] rounded-2xl overflow-hidden my-4 sm:my-6 md:my-8 flex flex-col">
+      <div className="relative z-10 w-full max-w-[650px] mx-auto bg-[#F7F1E8] shadow-[0_20px_50px_rgba(0,0,0,0.06)] border border-[#E3DEC9] rounded-2xl overflow-hidden my-4 sm:my-6 md:my-8 flex flex-col">
         {/* Background Mandala inside Card (Fixed attachment with scroll parallax listener) */}
         <div 
           ref={parallaxBgRef}
-          className="absolute inset-0 z-0 pointer-events-none select-none rounded-2xl"
+          className="absolute inset-0 z-0 pointer-events-none select-none rounded-2xl animate-fade-in"
           style={{
-            backgroundImage: 'url("/islamic-style-mandala-pattern-wedding-invitation-backdrop-design-vector_1017-46608.avif")',
-            backgroundAttachment: 'fixed',
+            backgroundImage: 'url("/Invitation-background.png")',
             backgroundSize: 'cover',
-            backgroundPosition: 'center 50%',
-            opacity: 0.05
+            backgroundPosition: 'center',
+            opacity: 1
           }}
         />
 
-        {/* Background Motifs inside Card */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 rounded-2xl">
-          {bgMotifs.map((motif, idx) => {
-            const style: React.CSSProperties = {
-              top: motif.top,
-              left: motif.left || undefined,
-              right: motif.right || undefined,
-              width: `${motif.size}px`,
-              height: `${motif.size}px`,
-              transform: `translate3d(${mousePos.x * motif.parallax}px, ${mousePos.y * motif.parallax}px, 0) rotate(${motif.rotate}deg)`,
-            };
-            return (
-              <div
-                key={idx}
-                style={style}
-                className="absolute select-none pointer-events-none transition-transform duration-300 ease-out"
-              >
-                {renderMotifSVG(motif.type)}
-              </div>
-            );
-          })}
-        </div>
+        {/* Soft paper overlay to keep text readable over the floral artwork */}
+        <div className="absolute inset-0 z-0 rounded-2xl bg-[#F7F1E8]/40 pointer-events-none" />
 
-        {/* Elegant Gold Corner Flourishes inside Card */}
-        <div className="absolute top-4 left-4 text-[#C8A882]/20 pointer-events-none md:top-6 md:left-6">
-          <svg width="45" height="45" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M10,10 L30,10 A20,20 0 0,1 50,30 L50,50" />
-            <path d="M10,10 L10,30 A20,20 0 0,0 30,50 L50,50" />
-          </svg>
-        </div>
-        <div className="absolute top-4 right-4 text-[#C8A882]/20 pointer-events-none md:top-6 md:right-6 rotate-90">
-          <svg width="45" height="45" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M10,10 L30,10 A20,20 0 0,1 50,30 L50,50" />
-            <path d="M10,10 L10,30 A20,20 0 0,0 30,50 L50,50" />
-          </svg>
-        </div>
+        {/* Top Floral Decoration — flowers hang down from the top edge, matching the Photoshop artboard */}
+        <div
+          className="absolute top-0 left-0 right-0 z-[1] w-full pointer-events-none"
+          style={{
+            backgroundImage: 'url("/top%20flowers.png")',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'contain',
+            backgroundPosition: 'top center',
+            aspectRatio: '2299/1121',
+          }}
+        />
 
         {/* Content Wrapper to raise content above z-0 backgrounds */}
         <div className="relative z-10 w-full flex flex-col">
 
 
         {/* --- SECTION 1 - HERO SCREEN (FULLSCREEN) --- */}
-        <section className="min-h-[75vh] flex flex-col justify-between items-center text-center p-6 md:p-10 relative">
+        <section className="flex flex-col items-center text-center p-6 md:p-10 relative pt-32 sm:pt-44 md:pt-48 pb-6">
           <div className="pt-6 sm:pt-8">
-            {/* Accent flourish line */}
-            <div className="flex items-center justify-center gap-2 mb-2 text-[#C8A882]">
-              <div className="h-[1px] w-8 bg-[#C8A882]" />
-              <span className="text-[11px] sm:text-xs uppercase tracking-widest font-semibold">The Wedding Invitation</span>
-              <div className="h-[1px] w-8 bg-[#C8A882]" />
-            </div>
+            <p className="text-xs sm:text-sm uppercase tracking-[0.2em] text-[#6B6B6B]" style={{ fontFamily: invitationTypography.body }}>
+              Together with their families
+            </p>
           </div>
 
           {/* Couples Names & Monogram */}
           <div className="my-auto space-y-4 pt-4 pb-6">
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif tracking-tight text-gray-900 font-light leading-none">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-light tracking-wide leading-none" style={{ fontFamily: invitationTypography.mainNames, color: invitationTypography.nameColor }}>
               {weddingDetails.bride_name}
             </h1>
-            <div className="font-script text-5xl sm:text-6xl text-[#C8A882] py-1">
-              &
+            <div className="text-4xl sm:text-5xl font-script py-1" style={{ fontFamily: invitationTypography.ampersand, color: invitationTypography.ampColor }}>
+              and
             </div>
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif tracking-tight text-gray-900 font-light leading-none">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-light tracking-wide leading-none" style={{ fontFamily: invitationTypography.mainNames, color: invitationTypography.nameColor }}>
               {weddingDetails.groom_name}
             </h1>
 
-            <div className="pt-6 sm:pt-8 max-w-sm mx-auto space-y-3">
-              <p className="text-base sm:text-lg font-serif italic text-[#6B6B6B]">
-                Dear {guest.name},
-              </p>
-              <p className="text-sm sm:text-base text-[#6B6B6B] leading-relaxed max-w-xs mx-auto">
-                You are cordially invited to join us in celebrating our wedding ceremony and reception.
+            <p className="text-xs sm:text-sm tracking-wide leading-relaxed max-w-sm mx-auto text-[#6B6B6B] pt-4" style={{ fontFamily: invitationTypography.body }}>
+              request the pleasure of the company of
+             
+            </p>
+
+            <div className="py-2">
+              <p className="text-sm sm:text-base italic text-[#4A4A4A]" style={{ fontFamily: invitationTypography.body }}>
+                {guest.name},
               </p>
             </div>
+              <p className="text-xs sm:text-sm tracking-wide leading-relaxed max-w-sm mx-auto text-[#6B6B6B]" style={{ fontFamily: invitationTypography.body }}>
+              on their wedding day
+             
+            </p>
           </div>
 
           {/* Schedule & Scroll cue */}
           <div className="pb-4 space-y-6 flex flex-col items-center">
-            <div className="space-y-1">
-              <p className="text-sm sm:text-base uppercase tracking-widest text-[#6B6B6B] font-semibold">{weddingDetails.date}</p>
-              <p className="text-xs sm:text-sm text-[#6B6B6B]">{weddingDetails.time} • {weddingDetails.venue}</p>
+            {/* Date & Time block (Pink, Serif, Uppercase) */}
+            <div className="space-y-2 py-2">
+              <p className="text-lg sm:text-xl md:text-2xl uppercase tracking-[0.15em] font-medium" style={{ fontFamily: invitationTypography.body, color: invitationTypography.ampColor }}>
+                {weddingDetails.date.toUpperCase()}
+              </p>
+              <p className="text-md sm:text-lg md:text-xl uppercase tracking-[0.15em] font-medium" style={{ fontFamily: invitationTypography.body, color: invitationTypography.ampColor }}>
+                AT {weddingDetails.time.toUpperCase()}
+              </p>
+            </div>
+
+            {/* Arrive & Venue */}
+            <div className="space-y-1 text-xs sm:text-sm tracking-wide text-[#6B6B6B]" style={{ fontFamily: invitationTypography.body }}>
+              <p>Please arrive no later than 5:30 pm</p>
+              <p className="font-semibold text-gray-900">At {weddingDetails.venue}</p>
+            </div>
+
+            {/* Reception flourish */}
+            <div className="text-2xl sm:text-3xl font-script pt-2 pb-4" style={{ fontFamily: invitationTypography.ampersand, color: invitationTypography.ampColor }}>
+              Reception to follow
             </div>
 
             <button 
@@ -708,11 +736,29 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
           </div>
         </section>
 
+      {/* Bottom Floral Decoration before countdown — flowers grow up from the bottom edge,
+          sitting directly above the countdown section like on the Photoshop artboard */}
+      <div
+        className="w-full pointer-events-none relative z-[1] -mt-16 sm:-mt-24 md:-mt-32 -mb-20 sm:-mb-28 md:-mb-36"
+        style={{
+          backgroundImage: 'url("/digital%20invitation%20bottomfowers.png")',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'contain',
+          backgroundPosition: 'bottom center',
+          aspectRatio: '2299/1638', // Exact aspect ratio of the image file (no clipping)
+          maskImage: 'linear-gradient(to top, transparent, black 15%)',
+          WebkitMaskImage: 'linear-gradient(to top, transparent, black 15%)',
+        }}
+      />
+
 
       {/* --- SECTION 2 - COUNTDOWN TIMER --- */}
-      <section ref={timelineRef} className="max-w-3xl mx-auto px-6 py-12 w-full text-center">
-        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-8 shadow-sm max-w-lg mx-auto space-y-6">
-          <span className="text-xs sm:text-sm uppercase tracking-widest text-[#6B6B6B] font-semibold">Counting down the moments</span>
+      <section ref={timelineRef} className="max-w-3xl mx-auto px-6 pt-2 pb-12 w-full text-center relative z-10">
+        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-8 shadow-sm max-w-lg mx-auto space-y-6 relative z-10">
+          <div>
+            <span className="text-xs sm:text-sm uppercase tracking-widest text-[#6B6B6B] font-semibold block">Counting down the moments</span>
+            <p className="text-base sm:text-lg font-serif text-[#D38A99] font-medium tracking-wide mt-1">Wednesday, September 23, 2026</p>
+          </div>
           
           {isExpired ? (
             <p className="font-serif italic text-[#C8A882] text-xl">Today is the day! 🎉</p>
@@ -740,65 +786,49 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
       </section>
 
       {/* --- SECTION 3 - EVENT TIMELINE --- */}
-      <section className="max-w-xl mx-auto px-6 py-16 w-full space-y-12">
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl font-serif tracking-tight text-gray-950 font-light">The Wedding Itinerary</h2>
-          <div className="h-[1px] w-12 bg-[#C8A882] mx-auto mt-2" />
-        </div>
+      <section className="w-full py-16 relative overflow-hidden animate-fade-in z-10">
+        {/* Flowers on the sides background overlay */}
+        <div 
+          className="absolute inset-0 z-0 pointer-events-none select-none"
+          style={{
+            backgroundImage: 'url("/sides.png")',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+            opacity: 0.95,
+          }}
+        />
 
-        <div className="relative pl-6 md:pl-0 border-l border-[#E8E4DE] md:border-none md:grid md:grid-cols-7 gap-4 items-center">
-          {/* Event 1 */}
-          <div className="md:col-span-3 md:text-right font-serif text-lg text-gray-900 py-2">3:00 PM</div>
-          <div className="hidden md:flex md:col-span-1 justify-center relative">
-            <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
-            <div className="absolute top-3 w-[1px] h-20 bg-[#E8E4DE]" />
-          </div>
-          <div className="md:col-span-3 bg-white/75 backdrop-blur-xs border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
-            <h4 className="font-semibold text-xs text-gray-900">Guest Arrival</h4>
-            <p className="text-[11px] text-[#6B6B6B] mt-0.5">Grand Monarch Foyer</p>
-          </div>
-
-          {/* Event 2 */}
-          <div className="md:col-span-3 md:text-right font-serif text-lg text-gray-900 py-2">3:30 PM</div>
-          <div className="hidden md:flex md:col-span-1 justify-center relative">
-            <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
-            <div className="absolute top-3 w-[1px] h-20 bg-[#E8E4DE]" />
-          </div>
-          <div className="md:col-span-3 bg-white/75 backdrop-blur-xs border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
-            <h4 className="font-semibold text-xs text-gray-900">Wedding Ceremony</h4>
-            <p className="text-[11px] text-[#6B6B6B] mt-0.5">Main Ceremonial Hall</p>
+        <div className="max-w-xl mx-auto px-6 space-y-12 relative z-10">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-serif tracking-tight text-gray-950 font-light" style={{ fontFamily: invitationTypography.body, color: invitationTypography.nameColor }}>Order of the Day</h2>
+            <div className="h-[1px] w-12 bg-[#D38A99] mx-auto mt-2" />
           </div>
 
-          {/* Event 3 */}
-          <div className="md:col-span-3 md:text-right font-serif text-lg text-gray-900 py-2">4:30 PM</div>
-          <div className="hidden md:flex md:col-span-1 justify-center relative">
-            <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
-            <div className="absolute top-3 w-[1px] h-20 bg-[#E8E4DE]" />
-          </div>
-          <div className="md:col-span-3 bg-white/75 backdrop-blur-xs border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
-            <h4 className="font-semibold text-xs text-gray-900">Cocktails & Couple Photos</h4>
-            <p className="text-[11px] text-[#6B6B6B] mt-0.5">Garden Terrace</p>
-          </div>
+          <div className="relative py-4 flex flex-col items-center">
+            {/* Timeline vertical line */}
+            <div className="absolute left-1/2 top-10 bottom-10 w-[1.5px] bg-[#D38A99]/20 -translate-x-1/2 z-0" />
 
-          {/* Event 4 */}
-          <div className="md:col-span-3 md:text-right font-serif text-lg text-gray-900 py-2">6:00 PM</div>
-          <div className="hidden md:flex md:col-span-1 justify-center relative">
-            <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
-            <div className="absolute top-3 w-[1px] h-20 bg-[#E8E4DE]" />
-          </div>
-          <div className="md:col-span-3 bg-white/75 backdrop-blur-xs border border-[#E8E4DE] p-4 rounded-lg shadow-xs mb-6 md:mb-0">
-            <h4 className="font-semibold text-xs text-gray-900">Reception Dinner</h4>
-            <p className="text-[11px] text-[#6B6B6B] mt-0.5">Main Banquet Hall</p>
-          </div>
-
-          {/* Event 5 */}
-          <div className="md:col-span-3 md:text-right font-serif text-lg text-gray-900 py-2">9:00 PM</div>
-          <div className="hidden md:flex md:col-span-1 justify-center relative">
-            <span className="w-3.5 h-3.5 rounded-full bg-[#C8A882] border-2 border-white z-10" />
-          </div>
-          <div className="md:col-span-3 bg-white/75 backdrop-blur-xs border border-[#E8E4DE] p-4 rounded-lg shadow-xs">
-            <h4 className="font-semibold text-xs text-gray-900">Dancing & Farewell</h4>
-            <p className="text-[11px] text-[#6B6B6B] mt-0.5">Dance Floor / Hall</p>
+            <div className="w-full space-y-8 sm:space-y-10">
+              {itineraryItems.map((item, idx) => (
+                <div key={idx} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6 w-full relative z-10">
+                  {/* Left side: Time */}
+                  <div className="text-right">
+                    <p className="font-serif text-sm sm:text-base font-semibold tracking-wider text-[#D38A99] uppercase">{item.time}</p>
+                  </div>
+                  
+                  {/* Centered Large Icon circle */}
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#FCFAF5] border border-[#E8DCC7] flex items-center justify-center overflow-hidden shadow-md hover:scale-110 transition-transform duration-300 relative z-10">
+                    <ItineraryIcon src={item.iconSrc} />
+                  </div>
+                  
+                  {/* Right side: Title */}
+                  <div className="text-left">
+                    <h4 className="font-serif text-sm sm:text-base text-[#2D312E] font-medium leading-snug max-w-[160px] sm:max-w-[200px]">{item.title}</h4>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -831,7 +861,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                 <button
                   type="button"
                   onClick={() => setIsSuccess(false)}
-                  className="text-xs font-semibold text-blue-500 hover:text-blue-600 border border-blue-200 bg-blue-50/50 hover:bg-blue-50 rounded px-4 py-2 cursor-pointer transition-colors"
+                  className="text-xs font-semibold text-[#D38A99] hover:text-[#c78c97] border border-[#FAF0F2] bg-[#FAF0F2] hover:bg-[#f5e1e5] rounded px-4 py-2 cursor-pointer transition-colors"
                 >
                   Edit Response
                 </button>
@@ -869,7 +899,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                       }}
                       className={`py-3 rounded border text-xs font-semibold tracking-wide transition-all cursor-pointer ${
                         attending === 'attending'
-                          ? 'bg-blue-50 text-blue-600 border-blue-500 shadow-xs'
+                          ? 'bg-[#FAF0F2] text-[#D38A99] border-[#D38A99] shadow-xs'
                           : 'bg-white border-gray-200 text-gray-500'
                       }`}
                     >
@@ -902,7 +932,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                           type="checkbox"
                           checked={plusOne}
                           onChange={(e) => setPlusOne(e.target.checked)}
-                          className="w-4 h-4 rounded border-gray-300 text-blue-500 focus:ring-0 bg-white cursor-pointer"
+                          className="w-4 h-4 rounded border-gray-300 text-[#D38A99] focus:ring-0 bg-white cursor-pointer"
                         />
                         <div className="flex items-center gap-1.5 text-xs text-gray-700 font-semibold">
                           <UserPlus className="w-4 h-4 text-[#C8A882]" />
@@ -922,7 +952,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                             onChange={(e) => setPlusOneName(e.target.value)}
                             placeholder="Full name of your guest"
                             required={plusOne}
-                            className="w-full bg-white border border-gray-200 rounded py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
+                            className="w-full bg-white border border-gray-200 rounded py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-[#D38A99]"
                           />
                         </div>
                       )}
@@ -945,7 +975,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                             onClick={() => setMealChoice(m.value)}
                             className={`py-2 px-3 border rounded text-xs font-semibold capitalize transition-all cursor-pointer ${
                               mealChoice === m.value
-                                ? 'bg-blue-50 text-blue-600 border-blue-500'
+                                ? 'bg-[#FAF0F2] text-[#D38A99] border-[#D38A99]'
                                 : 'bg-white border-gray-200 text-gray-500'
                             }`}
                           >
@@ -966,7 +996,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                         value={dietaryNotes}
                         onChange={(e) => setDietaryNotes(e.target.value)}
                         placeholder="e.g. Nut allergies, Gluten free"
-                        className="w-full bg-white border border-gray-200 rounded py-2.5 px-3.5 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
+                        className="w-full bg-white border border-gray-200 rounded py-2.5 px-3.5 text-xs text-gray-900 focus:outline-none focus:border-[#D38A99]"
                       />
                     </div>
                   </div>
@@ -983,7 +1013,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Write a message to the couple (optional)"
                     rows={4}
-                    className="w-full bg-white border border-gray-200 rounded py-3 px-4 text-xs text-gray-900 focus:outline-none focus:border-blue-500 resize-none"
+                    className="w-full bg-white border border-gray-200 rounded py-3 px-4 text-xs text-gray-900 focus:outline-none focus:border-[#D38A99] resize-none"
                   />
                 </div>
 
@@ -991,7 +1021,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded py-2.5 text-xs font-semibold tracking-wider shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="w-full bg-[#D38A99] hover:bg-[#c78c97] text-white rounded py-2.5 text-xs font-semibold tracking-wider shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>
@@ -1005,6 +1035,34 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
               </form>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* --- SECTION 4.5 - CONTACT DETAILS --- */}
+      <section className="max-w-lg mx-auto px-6 pb-12 w-full relative z-10">
+        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-8 shadow-sm space-y-6 text-center">
+          <h3 className="text-2xl font-serif text-gray-950 font-light tracking-wide" style={{ fontFamily: invitationTypography.body, color: invitationTypography.nameColor }}>Contact Details</h3>
+          <div className="h-[1px] w-12 bg-[#D38A99] mx-auto" />
+          
+          <div className="grid grid-cols-2 gap-6 text-left">
+            {/* Bride's Family */}
+            <div className="space-y-2">
+              <h4 className="font-serif font-semibold text-sm sm:text-base text-[#D38A99] uppercase tracking-wider">Bride's Family</h4>
+              <div className="text-sm sm:text-base text-gray-800 space-y-1.5 font-serif">
+                <p><span className="font-medium text-gray-955">Oshidhie:</span> 077 141 4181</p>
+                <p><span className="font-medium text-gray-955">Jeevani:</span> 077 789 6891</p>
+              </div>
+            </div>
+
+            {/* Groom's Family */}
+            <div className="space-y-2">
+              <h4 className="font-serif font-semibold text-sm sm:text-base text-[#D38A99] uppercase tracking-wider">Groom's Family</h4>
+              <div className="text-sm sm:text-base text-gray-800 space-y-1.5 font-serif">
+                <p><span className="font-medium text-gray-955">Kaveen:</span> 077 340 9762</p>
+                <p><span className="font-medium text-gray-955">Geethanie:</span> 071 808 3732</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1035,7 +1093,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
       {/* --- SECTION 6 - MOMENTS (IMAGE GALLERY PLACEHOLDER) --- */}
       <section className="max-w-3xl mx-auto px-6 py-12 w-full text-center space-y-6">
         <h2 className="text-xl font-serif text-gray-900 font-light">Moments Gallery</h2>
-        <div className="h-[1px] w-12 bg-[#C8A882] mx-auto" />
+        <div className="h-[1px] w-12 bg-[#D38A99] mx-auto" />
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
           <div className="overflow-hidden rounded-xl border border-[#E8E4DE] shadow-xs group bg-[#FAFAF8]">
@@ -1087,7 +1145,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
               href={weddingDetails.google_maps_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 border border-blue-500 hover:bg-blue-50 text-blue-600 rounded py-2.5 px-4 text-center text-xs font-semibold transition-all inline-block"
+              className="mt-6 border border-[#D38A99] hover:bg-[#FAF0F2] text-[#D38A99] rounded py-2.5 px-4 text-center text-xs font-semibold transition-all inline-block"
             >
               Get Directions
             </a>

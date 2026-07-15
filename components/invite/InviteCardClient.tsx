@@ -13,7 +13,8 @@ import {
   Loader2,
   CheckCircle2,
   ChevronDown,
-  AlertCircle
+  AlertCircle,
+  Wine
 } from 'lucide-react';
 import { GuestWithDetails } from '@/lib/types';
 
@@ -45,6 +46,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
   const [mealChoice, setMealChoice] = useState(guest.rsvp?.meal_choice || '');
   const [dietaryNotes, setDietaryNotes] = useState(guest.rsvp?.dietary_notes || '');
   const [message, setMessage] = useState(guest.rsvp?.message || '');
+  const [alcoholChoice, setAlcoholChoice] = useState(guest.rsvp?.alcohol_choice || '');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(!!(guest.rsvp && guest.rsvp.status && guest.rsvp.status !== 'pending'));
@@ -95,18 +97,6 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
 
   const timelineRef = useRef<HTMLDivElement>(null);
   const rsvpRef = useRef<HTMLDivElement>(null);
-  const parallaxBgRef = useRef<HTMLDivElement>(null);
-
-  // Passive scroll listener for smooth parallax background shifting
-  useEffect(() => {
-    const handleScroll = () => {
-      if (parallaxBgRef.current) {
-        parallaxBgRef.current.style.backgroundPositionY = `calc(50% - ${window.scrollY * 0.08}px)`;
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
 
   // Initialize countdown
@@ -157,7 +147,8 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
           plus_one_name: attending === 'attending' ? plusOneName.trim() : '',
           meal_choice: attending === 'attending' ? mealChoice : '',
           dietary_notes: attending === 'attending' ? dietaryNotes.trim() : '',
-          message: message.trim()
+          message: message.trim(),
+          alcohol_choice: attending === 'attending' ? alcoholChoice : ''
         }),
       });
 
@@ -636,14 +627,13 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
 
       {/* The Invitation Card Container */}
       <div className="relative z-10 w-full max-w-[650px] mx-auto bg-[#F7F1E8] shadow-[0_20px_50px_rgba(0,0,0,0.06)] border border-[#E3DEC9] rounded-2xl overflow-hidden my-4 sm:my-6 md:my-8 flex flex-col">
-        {/* Background Mandala inside Card (Fixed attachment with scroll parallax listener) */}
+        {/* Background Mandala inside Card (Aligned statically to the card container) */}
         <div 
-          ref={parallaxBgRef}
           className="absolute inset-0 z-0 pointer-events-none select-none rounded-2xl animate-fade-in"
           style={{
             backgroundImage: 'url("/Invitation-background.png")',
             backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            backgroundPosition: 'center center',
             opacity: 1
           }}
         />
@@ -980,6 +970,33 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                             }`}
                           >
                             {m.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Alcohol Preference */}
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] flex items-center gap-1.5">
+                        <Wine className="w-3.5 h-3.5 text-[#C8A882]" /> Alcohol Selection
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { value: 'hard liquor', label: 'Hard Liquor' },
+                          { value: 'wine', label: 'Wine' },
+                          { value: 'none', label: 'No Alcohol' }
+                        ].map((alc) => (
+                          <button
+                            key={alc.value}
+                            type="button"
+                            onClick={() => setAlcoholChoice(alc.value)}
+                            className={`py-2 px-3 border rounded text-xs font-semibold capitalize transition-all cursor-pointer ${
+                              alcoholChoice === alc.value
+                                ? 'bg-[#FAF0F2] text-[#D38A99] border-[#D38A99]'
+                                : 'bg-white border-gray-200 text-gray-500'
+                            }`}
+                          >
+                            {alc.label}
                           </button>
                         ))}
                       </div>

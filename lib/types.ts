@@ -26,6 +26,7 @@ export interface RSVP {
   meal_choice?: string;
   dietary_notes?: string;
   message?: string;
+  alcohol_choice?: string;
   responded_at?: string;
 }
 

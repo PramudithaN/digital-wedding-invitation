@@ -9,7 +9,8 @@ import {
   Eye, 
   UtensilsCrossed,
   Printer,
-  HelpCircle
+  HelpCircle,
+  Wine
 } from 'lucide-react';
 import { GuestWithDetails } from '@/lib/types';
 
@@ -65,6 +66,13 @@ export default function AnalyticsPage() {
   
   const mealTotal = vegCount + nonVegCount + veganCount + noPrefCount;
 
+  // Alcohol Stats
+  const hardLiquorCount = attendingGuests.filter(g => g.rsvp?.alcohol_choice === 'hard liquor').length;
+  const wineCount = attendingGuests.filter(g => g.rsvp?.alcohol_choice === 'wine').length;
+  const noAlcCount = attendingGuests.filter(g => !g.rsvp?.alcohol_choice || g.rsvp.alcohol_choice === 'none' || g.rsvp.alcohol_choice === '').length;
+  
+  const alcTotal = hardLiquorCount + wineCount + noAlcCount;
+
   // Export CSV Helper
   const downloadCSV = (content: string, filename: string) => {
     const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
@@ -80,7 +88,7 @@ export default function AnalyticsPage() {
 
   // 1. Full Guest List Export
   const exportFullGuestList = () => {
-    let csv = 'Name,Phone,Email,Wedding Side,Category,Invite Sent At,Invite Opened At,RSVP Status,Plus One,Plus One Name,Meal Choice,Dietary Notes,Message,Responded At\r\n';
+    let csv = 'Name,Phone,Email,Wedding Side,Category,Invite Sent At,Invite Opened At,RSVP Status,Plus One,Plus One Name,Meal Choice,Dietary Notes,Alcohol Preference,Message,Responded At\r\n';
     
     guests.forEach((g) => {
       const row = [
@@ -96,6 +104,7 @@ export default function AnalyticsPage() {
         `"${(g.rsvp?.plus_one_name || '').replace(/"/g, '""')}"`,
         `"${(g.rsvp?.meal_choice || '').replace(/"/g, '""')}"`,
         `"${(g.rsvp?.dietary_notes || '').replace(/"/g, '""')}"`,
+        `"${(g.rsvp?.alcohol_choice || 'none').replace(/"/g, '""')}"`,
         `"${(g.rsvp?.message || '').replace(/"/g, '""')}"`,
         g.rsvp?.responded_at ? `"${new Date(g.rsvp.responded_at).toISOString()}"` : '""'
       ];
@@ -107,7 +116,7 @@ export default function AnalyticsPage() {
 
   // 2. Seating Chart helper
   const exportSeatingHelper = () => {
-    let csv = 'Guest Name,Wedding Side,Category,RSVP,Plus One Confirmed,Plus One Name,Meal Preference,Dietary Details\r\n';
+    let csv = 'Guest Name,Wedding Side,Category,RSVP,Plus One Confirmed,Plus One Name,Meal Preference,Dietary Details,Alcohol Preference\r\n';
     
     guests.filter(g => g.rsvp?.status === 'attending').forEach((g) => {
       const row = [
@@ -118,7 +127,8 @@ export default function AnalyticsPage() {
         g.rsvp?.plus_one ? '"Yes"' : '"No"',
         `"${(g.rsvp?.plus_one_name || '').replace(/"/g, '""')}"`,
         `"${(g.rsvp?.meal_choice || 'No preference').replace(/"/g, '""')}"`,
-        `"${(g.rsvp?.dietary_notes || '').replace(/"/g, '""')}"`
+        `"${(g.rsvp?.dietary_notes || '').replace(/"/g, '""')}"`,
+        `"${(g.rsvp?.alcohol_choice || 'none').replace(/"/g, '""')}"`
       ];
       csv += row.join(',') + '\r\n';
     });
@@ -258,6 +268,52 @@ export default function AnalyticsPage() {
               </div>
             )}
           </div>
+
+          {/* Alcohol Preference Chart */}
+          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm space-y-5">
+            <h2 className="text-sm font-semibold text-gray-950 uppercase tracking-wider flex items-center gap-2 border-b border-gray-150 pb-3">
+              <Wine className="w-4.5 h-4.5 text-[#D38A99]" /> Alcohol Preferences (Attending Guests)
+            </h2>
+
+            {alcTotal === 0 ? (
+              <p className="text-xs text-gray-400 italic py-6 text-center">No alcohol preferences recorded yet.</p>
+            ) : (
+              <div className="space-y-4 text-xs">
+                {/* Hard Liquor */}
+                <div>
+                  <div className="flex justify-between font-semibold mb-1">
+                    <span className="text-gray-700">Hard Liquor ({hardLiquorCount})</span>
+                    <span className="text-gray-500">{alcTotal > 0 ? Math.round((hardLiquorCount / alcTotal) * 100) : 0}%</span>
+                  </div>
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                    <div style={{ width: `${alcTotal > 0 ? (hardLiquorCount / alcTotal) * 100 : 0}%` }} className="bg-purple-500 h-full" />
+                  </div>
+                </div>
+
+                {/* Wine */}
+                <div>
+                  <div className="flex justify-between font-semibold mb-1">
+                    <span className="text-gray-700">Wine ({wineCount})</span>
+                    <span className="text-gray-500">{alcTotal > 0 ? Math.round((wineCount / alcTotal) * 100) : 0}%</span>
+                  </div>
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                    <div style={{ width: `${alcTotal > 0 ? (wineCount / alcTotal) * 100 : 0}%` }} className="bg-red-500 h-full" />
+                  </div>
+                </div>
+
+                {/* No Alcohol */}
+                <div>
+                  <div className="flex justify-between font-semibold mb-1">
+                    <span className="text-gray-700">No Alcohol ({noAlcCount})</span>
+                    <span className="text-gray-500">{alcTotal > 0 ? Math.round((noAlcCount / alcTotal) * 100) : 0}%</span>
+                  </div>
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                    <div style={{ width: `${alcTotal > 0 ? (noAlcCount / alcTotal) * 100 : 0}%` }} className="bg-gray-400 h-full" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Exports panel */}
@@ -317,6 +373,7 @@ export default function AnalyticsPage() {
                 <th className="py-2">Plus One</th>
                 <th className="py-2">Meal Selection</th>
                 <th className="py-2">Dietary Restrictions</th>
+                <th className="py-2">Alcohol</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -330,6 +387,7 @@ export default function AnalyticsPage() {
                     <td className="py-2 text-[10px] text-gray-600">{g.rsvp?.plus_one ? `Yes (${g.rsvp.plus_one_name || 'Unnamed'})` : 'No'}</td>
                     <td className="py-2 text-[10px] capitalize text-gray-600">{g.rsvp?.meal_choice || 'No preference'}</td>
                     <td className="py-2 text-[10px] italic text-gray-500">{g.rsvp?.dietary_notes || 'None'}</td>
+                    <td className="py-2 text-[10px] capitalize text-gray-600">{g.rsvp?.alcohol_choice || 'none'}</td>
                   </tr>
                 ))}
             </tbody>

@@ -1150,7 +1150,6 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
             <div className="h-[1px] w-full bg-[#E8E4DE]" />
             <div className="text-[10px] text-gray-400 space-y-1">
               <p>• Parking available on-site</p>
-              <p>• Valet service from 2:30 PM</p>
             </div>
           </div>
 

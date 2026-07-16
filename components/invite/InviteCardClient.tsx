@@ -3,13 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Heart, 
-  MapPin, 
-  Calendar, 
-  Clock, 
   UtensilsCrossed, 
   UserPlus, 
   MessageSquare,
-  Gift,
   Loader2,
   CheckCircle2,
   ChevronDown,
@@ -47,13 +43,9 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
   const [dietaryNotes, setDietaryNotes] = useState(guest.rsvp?.dietary_notes || '');
   const [message, setMessage] = useState(guest.rsvp?.message || '');
   const [alcoholChoice, setAlcoholChoice] = useState(guest.rsvp?.alcohol_choice || '');
-  const [generalGuestName, setGeneralGuestName] = useState('');
-  const [generalGuestSide, setGeneralGuestSide] = useState<'bride' | 'groom'>('bride');
-  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(!!(guest.rsvp && guest.rsvp.status && guest.rsvp.status !== 'pending'));
   const [error, setError] = useState('');
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [envelopeState, setEnvelopeState] = useState<'closed' | 'opening' | 'exiting' | 'open'>('closed');
 
   // Disable scroll when envelope is closed/opening
@@ -80,18 +72,6 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
       setEnvelopeState('open');
     }, 2400);
   };
-
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({
-        x: (e.clientX / window.innerWidth - 0.5) * 16,
-        y: (e.clientY / window.innerHeight - 0.5) * 16,
-      });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   // Countdown timer state
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -135,10 +115,6 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
       return;
     }
 
-    if (guest.id === 'general' && !generalGuestName.trim()) {
-      setError('Please enter your full name');
-      return;
-    }
 
     try {
       setIsSubmitting(true);
@@ -156,8 +132,6 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
           dietary_notes: attending === 'attending' ? dietaryNotes.trim() : '',
           message: message.trim(),
           alcohol_choice: attending === 'attending' ? alcoholChoice : '',
-          general_guest_name: guest.id === 'general' ? generalGuestName.trim() : '',
-          general_guest_side: guest.id === 'general' ? generalGuestSide : ''
         }),
       });
 
@@ -203,22 +177,6 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
     ].join('\r\n');
     return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsContent);
   };
-
-  const bgMotifs = [
-    { type: 'nelum', top: '3%', left: '4%', size: 140, rotate: 10, anim: 'animate-float-1', parallax: 0.3 },
-    { type: 'vine', top: '10%', right: '5%', size: 180, rotate: 0, anim: 'animate-float-2', parallax: -0.4 },
-    { type: 'bud', top: '18%', left: '12%', size: 110, rotate: -15, anim: 'animate-float-3', parallax: 0.5 },
-    { type: 'nelum', top: '26%', right: '10%', size: 130, rotate: 45, anim: 'animate-float-1', parallax: -0.3 },
-    { type: 'vine_rev', top: '34%', left: '3%', size: 160, rotate: 90, anim: 'animate-float-2', parallax: 0.6 },
-    { type: 'bud', top: '42%', right: '14%', size: 100, rotate: 30, anim: 'animate-float-3', parallax: -0.5 },
-    { type: 'nelum', top: '50%', left: '8%', size: 140, rotate: -20, anim: 'animate-float-1', parallax: 0.4 },
-    { type: 'vine', top: '58%', right: '6%', size: 190, rotate: 180, anim: 'animate-float-2', parallax: -0.6 },
-    { type: 'bud', top: '67%', left: '10%', size: 110, rotate: 15, anim: 'animate-float-3', parallax: 0.7 },
-    { type: 'nelum', top: '75%', right: '12%', size: 150, rotate: -45, anim: 'animate-float-1', parallax: -0.4 },
-    { type: 'vine_rev', top: '83%', left: '4%', size: 170, rotate: -90, anim: 'animate-float-2', parallax: 0.5 },
-    { type: 'bud', top: '90%', right: '8%', size: 120, rotate: 60, anim: 'animate-float-3', parallax: -0.3 },
-    { type: 'nelum', top: '96%', left: '6%', size: 130, rotate: 120, anim: 'animate-float-1', parallax: 0.4 }
-  ];
 
   const renderMotifSVG = (type: string) => {
     switch (type) {
@@ -373,6 +331,8 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
 
   const ItineraryIcon = ({ src, className }: { src: string; className?: string }) => (
     <div className={`relative w-full h-full flex items-center justify-center overflow-hidden ${className}`}>
+      {/* Decorative timeline icons intentionally rendered as raw img for simple static assets. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt="Timeline Icon"
@@ -451,7 +411,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                     <div className="space-y-1">
                       <p className="text-[9px] text-gray-400 uppercase tracking-wider" style={{ fontFamily: invitationTypography.body }}>Honorary Guest</p>
                       <p className="italic text-sm font-semibold" style={{ fontFamily: invitationTypography.body, color: invitationTypography.bodyColor }}>
-                        {guest.name === 'general' ? 'You & Your Family' : guest.name}
+                        {guest.name === 'general' ? 'Warmly Invited' : guest.name}
                       </p>
                     </div>
                   </div>
@@ -494,9 +454,9 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                   }`}
                 >
                   <div className="px-5 py-2 rounded-md border border-[#C8A882]/20 bg-[#070b14]/90 backdrop-blur-xs shadow-lg max-w-[80%]">
-                    <span className="text-[7px] text-[#C8A882]/60 uppercase tracking-[0.2em] block mb-0.5">Invited Guest</span>
+                    <span className="text-[7px] text-[#C8A882]/60 uppercase tracking-[0.2em] block mb-0.5">{guest.name === 'general' ? "": 'Invited Guest'}</span>
                     <p className="font-script text-[#C8A882] text-lg sm:text-xl leading-none px-2">
-                      {guest.name === 'general' ? 'You & Your Family' : guest.name}
+                      {guest.name === 'general' ? 'Warmly Invited' : guest.name}
                     </p>
                   </div>
                 </div>
@@ -843,7 +803,8 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
       </section>
 
       {/* --- SECTION 4 - RSVP FORM --- */}
-      <section id="rsvp-section" ref={rsvpRef} className="max-w-lg mx-auto px-6 py-12 w-full relative z-10">
+      {guest.name !== 'general' && (
+<section id="rsvp-section" ref={rsvpRef} className="max-w-lg mx-auto px-6 py-12 w-full relative z-10">
         <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-8 shadow-sm space-y-6">
           {isSuccess ? (
             /* Success screen */
@@ -854,7 +815,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
               <div className="space-y-1.5">
                 <h2 className="text-xl font-serif text-gray-900">RSVP Confirmed</h2>
                 <p className="text-xs text-[#6B6B6B] max-w-xs mx-auto">
-                  Thank you, {guest.name === 'general' ? (generalGuestName || 'Guest') : guest.name}. Your response has been logged successfully.
+                  Thank you, {guest.name}. Your response has been logged successfully.
                 </p>
               </div>
               {attending === 'attending' ? (
@@ -893,55 +854,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
                 </div>
               )}
 
-              <form onSubmit={handleRSVPSubmit} className="space-y-5">
-                {/* General Guest Details (Name and Side selection) */}
-                {guest.id === 'general' && (
-                  <div className="space-y-4 bg-[#FAFAF8] p-4 rounded border border-[#E8E4DE] text-left animate-fade-in">
-                    <div>
-                      <label htmlFor="general-name" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
-                        Your Full Name
-                      </label>
-                      <input
-                        id="general-name"
-                        type="text"
-                        value={generalGuestName}
-                        onChange={(e) => setGeneralGuestName(e.target.value)}
-                        placeholder="Please enter your full name"
-                        required
-                        className="w-full bg-white border border-gray-200 rounded py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-[#D38A99]"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B]">
-                        Which side do you belong to?
-                      </label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setGeneralGuestSide('bride')}
-                          className={`py-2 px-3 border rounded text-xs font-semibold transition-all cursor-pointer ${
-                            generalGuestSide === 'bride'
-                              ? 'bg-[#FAF0F2] text-[#D38A99] border-[#D38A99]'
-                              : 'bg-white border-gray-200 text-gray-500'
-                          }`}
-                        >
-                          Bride&apos;s Side
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setGeneralGuestSide('groom')}
-                          className={`py-2 px-3 border rounded text-xs font-semibold transition-all cursor-pointer ${
-                            generalGuestSide === 'groom'
-                              ? 'bg-[#EFF6FF] text-[#2563EB] border-[#3B82F6]'
-                              : 'bg-white border-gray-200 text-gray-500'
-                          }`}
-                        >
-                          Groom&apos;s Side
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+              <form onSubmit={handleRSVPSubmit} className="space-y-5">              
 
                 {/* Attending Selection */}
                 <div className="space-y-2">
@@ -1122,6 +1035,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
           )}
         </div>
       </section>
+      )}
 
       {/* --- SECTION 4.5 - CONTACT DETAILS --- */}
       <section className="max-w-lg mx-auto px-6 pb-12 w-full relative z-10">
@@ -1194,6 +1108,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
           <div className="overflow-hidden rounded-xl border border-[#E8E4DE] shadow-xs group bg-[#FAFAF8]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               src="/ok1.webp" 
               alt="Oshidhie & Kaveen Moment 1" 
@@ -1201,6 +1116,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
             />
           </div>
           <div className="overflow-hidden rounded-xl border border-[#E8E4DE] shadow-xs group bg-[#FAFAF8] sm:translate-y-4">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               src="/ok2.webp" 
               alt="Oshidhie & Kaveen Moment 2" 
@@ -1208,6 +1124,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
             />
           </div>
           <div className="overflow-hidden rounded-xl border border-[#E8E4DE] shadow-xs group bg-[#FAFAF8]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               src="/ok3.webp" 
               alt="Oshidhie & Kaveen Moment 3" 
@@ -1276,8 +1193,8 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
         <p className="text-[9px] text-gray-500">Made with love for our special day.</p>
         {/* <p className="text-[8px] text-gray-650">Digital Invite created by Pramuditha Nadun.</p> */}
       </footer>
-      </div> {/* <-- Closes Content Wrapper */}
-      </div> {/* <-- Closes Card Container */}
+      </div> 
+      </div>
     </div>
   );
 }

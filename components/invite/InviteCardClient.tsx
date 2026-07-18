@@ -623,7 +623,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
         <div
           className="absolute top-0 left-0 right-0 z-[1] w-full pointer-events-none"
           style={{
-            backgroundImage: 'url("/top%20flowers.png")',
+            backgroundImage: 'url("/top%20flowers.webp")',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'contain',
             backgroundPosition: 'top center',
@@ -710,7 +710,7 @@ export default function InviteCardClient({ guest, weddingDetails }: InviteCardCl
       <div
         className="w-full pointer-events-none relative z-[1] -mt-16 sm:-mt-24 md:-mt-32 -mb-20 sm:-mb-28 md:-mb-36"
         style={{
-          backgroundImage: 'url("/digital%20invitation%20bottomfowers.png")',
+          backgroundImage: 'url("/digital%20invitation%20bottomfowers.webp")',
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'contain',
           backgroundPosition: 'bottom center',

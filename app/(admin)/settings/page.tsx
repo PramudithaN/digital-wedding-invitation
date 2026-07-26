@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Lightbox from '@/components/Lightbox';
 import { 
   Settings, 
   Save, 
@@ -75,6 +76,7 @@ export default function SettingsPage() {
   const [uploadQueue, setUploadQueue] = useState<UploadingItem[]>([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchGallery = async () => {
@@ -604,12 +606,19 @@ export default function SettingsPage() {
               </p>
             </div>
             {/* Default Images Preview */}
-            <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto pt-1 opacity-40">
+            <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto pt-1">
               {['/ok1.webp', '/ok2.webp', '/ok3.webp'].map((url, idx) => (
-                <div key={idx} className="relative aspect-[3/4] rounded-md overflow-hidden border border-gray-200 bg-white">
+                <div 
+                  key={idx} 
+                  onClick={() => setLightboxIndex(idx)}
+                  className="relative aspect-[3/4] rounded-md overflow-hidden border border-gray-200 bg-white cursor-pointer opacity-70 hover:opacity-100 hover:scale-[1.03] transition-all duration-200"
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} alt={`Default ${idx + 1}`} className="w-full h-full object-cover" />
                   <span className="absolute bottom-1 right-1 bg-gray-950/60 text-[7px] text-white px-1 py-0.5 rounded">Default</span>
+                  <div className="absolute inset-0 bg-black/10 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="text-[7px] uppercase tracking-wider text-white bg-black/40 px-1 py-0.5 rounded font-semibold">View</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -629,16 +638,26 @@ export default function SettingsPage() {
             
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
               {/* Actual Uploaded Images */}
-              {galleryImages.map((img) => {
+              {galleryImages.map((img, idx) => {
                 const isConfirming = confirmDeleteId === img.id;
                 return (
                   <div key={img.id} className="relative aspect-[3/4] rounded-lg overflow-hidden border border-gray-200 bg-gray-50 shadow-xs group">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={img.url}
-                      alt="Wedding Moment"
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
+                    {/* Clickable Image Area */}
+                    <div 
+                      onClick={() => setLightboxIndex(idx)}
+                      className="w-full h-full cursor-zoom-in relative"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={img.url}
+                        alt="Wedding Moment"
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      {/* View overlay */}
+                      <div className="absolute inset-0 bg-black/15 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                        <span className="text-[9px] uppercase tracking-wider text-white bg-black/55 px-2 py-1 rounded-md backdrop-blur-xs font-semibold">View</span>
+                      </div>
+                    </div>
                     
                     {/* Top-Right Delete Trigger Button (Always visible / easy touch target) */}
                     {!isConfirming && (
@@ -745,6 +764,14 @@ export default function SettingsPage() {
         </div>
       </div>
     )}
+
+    {/* Photo Lightbox */}
+    <Lightbox
+      images={galleryImages.length > 0 ? galleryImages.map(img => img.url) : ['/ok1.webp', '/ok2.webp', '/ok3.webp']}
+      initialIndex={lightboxIndex !== null ? lightboxIndex : 0}
+      isOpen={lightboxIndex !== null}
+      onClose={() => setLightboxIndex(null)}
+    />
     </>
   );
 }

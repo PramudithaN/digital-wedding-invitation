@@ -13,6 +13,7 @@ import {
   Wine
 } from 'lucide-react';
 import { GuestWithDetails, GalleryImage } from '@/lib/types';
+import Lightbox from '@/components/Lightbox';
 
 interface InviteCardClientProps {
   guest: GuestWithDetails;
@@ -52,6 +53,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
   const [isSuccess, setIsSuccess] = useState(!!(guest.rsvp && guest.rsvp.status && guest.rsvp.status !== 'pending'));
   const [error, setError] = useState('');
   const [envelopeState, setEnvelopeState] = useState<'closed' | 'opening' | 'exiting' | 'open'>('closed');
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Disable scroll when envelope is closed/opening
   useEffect(() => {
@@ -1117,7 +1119,8 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
           {displayImages.map((url, idx) => (
             <div 
               key={idx}
-              className={`w-[262px] h-[350px] sm:w-auto sm:h-auto sm:aspect-[3/4] snap-center overflow-hidden rounded-xl border border-[#E8E4DE] shadow-xs group bg-[#FAFAF8] shrink-0 ${
+              onClick={() => setLightboxIndex(idx)}
+              className={`w-[262px] h-[350px] sm:w-auto sm:h-auto sm:aspect-[3/4] snap-center overflow-hidden rounded-xl border border-[#E8E4DE] shadow-xs group bg-[#FAFAF8] shrink-0 cursor-zoom-in relative ${
                 idx % 3 === 1 ? 'md:translate-y-4' : ''
               }`}
             >
@@ -1128,6 +1131,10 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               />
+              {/* Premium Hover Overlay */}
+              <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                <span className="text-[10px] uppercase tracking-wider text-white bg-black/45 px-2.5 py-1 rounded-md backdrop-blur-xs font-semibold">View Photo</span>
+              </div>
             </div>
           ))}
         </div>
@@ -1195,6 +1202,14 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
       </footer>
       </div> 
       </div>
+
+      {/* Photo Lightbox */}
+      <Lightbox
+        images={displayImages}
+        initialIndex={lightboxIndex !== null ? lightboxIndex : 0}
+        isOpen={lightboxIndex !== null}
+        onClose={() => setLightboxIndex(null)}
+      />
     </div>
   );
 }

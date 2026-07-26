@@ -1167,7 +1167,9 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
         {/* Right Iframe Map Embed */}
         <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl overflow-hidden shadow-xs h-80 relative">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3961.2678685121404!2d79.91978257500913!3d6.858485293140026!2m3!1f0!2f0!3f0!2m2!1i1024!2i768!4f13.1!3m3!1m2!1m1!2sGrand+Monarch!5e0!3m2!1sen!2slk!4v1700000000000!5m2!1sen!2slk"
+            src={`https://maps.google.com/maps?q=${encodeURIComponent(
+              `${weddingDetails.venue}, ${weddingDetails.address}, ${weddingDetails.city}`
+            )}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
             width="100%"
             height="100%"
             style={{ border: 0 }}

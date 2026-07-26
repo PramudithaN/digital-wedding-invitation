@@ -44,3 +44,9 @@ export interface GuestWithDetails extends Guest {
   rsvp?: RSVP | null;
   invite_link?: InviteLink | null;
 }
+
+export interface GalleryImage {
+  id: string;
+  url: string;
+  created_at?: string;
+}

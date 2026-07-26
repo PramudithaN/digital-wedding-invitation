@@ -11,7 +11,10 @@ import {
   MapPin,
   Calendar,
   Gift,
-  X
+  X,
+  Image as ImageIcon,
+  Trash2,
+  Upload
 } from 'lucide-react';
 
 function formatHumanDate(dateStr: string): string {
@@ -57,6 +60,145 @@ export default function SettingsPage() {
   const [address, setAddress] = useState('');
   const [googleMapsUrl, setGoogleMapsUrl] = useState('');
   const [registryUrl, setRegistryUrl] = useState('');
+
+  // Gallery states
+  const [galleryImages, setGalleryImages] = useState<{ id: string; url: string }[]>([]);
+  const [isGalleryLoading, setIsGalleryLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Advanced user-friendly gallery states
+  interface UploadingItem {
+    id: string;
+    previewUrl: string;
+  }
+  const [uploadQueue, setUploadQueue] = useState<UploadingItem[]>([]);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        setIsGalleryLoading(true);
+        const res = await fetch('/api/gallery');
+        if (!res.ok) throw new Error('Failed to load gallery images');
+        const data = await res.json();
+        setGalleryImages(data);
+      } catch (err: any) {
+        console.error('Error fetching gallery:', err);
+      } finally {
+        setIsGalleryLoading(false);
+      }
+    };
+    fetchGallery();
+  }, []);
+
+  const uploadFilesList = async (filesArray: File[]) => {
+    try {
+      setIsUploading(true);
+      setError('');
+
+      // Create preview items
+      const newUploads: UploadingItem[] = [];
+      for (const file of filesArray) {
+        const id = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        const previewUrl = URL.createObjectURL(file);
+        newUploads.push({ id, previewUrl });
+      }
+
+      setUploadQueue((prev) => [...prev, ...newUploads]);
+
+      // Upload files sequentially
+      for (let i = 0; i < filesArray.length; i++) {
+        const file = filesArray[i];
+        const tempItem = newUploads[i];
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+          const res = await fetch('/api/gallery', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.error || 'Failed to upload image');
+          }
+
+          const newImage = await res.json();
+          setGalleryImages((prev) => [...prev, newImage]);
+        } catch (uploadErr: any) {
+          console.error(uploadErr);
+          showToast(`Failed to upload ${file.name}: ${uploadErr.message}`, 'error');
+        } finally {
+          // Remove from upload queue and revoke object URL
+          URL.revokeObjectURL(tempItem.previewUrl);
+          setUploadQueue((prev) => prev.filter((item) => item.id !== tempItem.id));
+        }
+      }
+
+      showToast('Images processed!', 'success');
+    } catch (err: any) {
+      setError(err.message || 'Could not upload image.');
+      showToast(err.message || 'Could not upload image.', 'error');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    await uploadFilesList(Array.from(files));
+    e.target.value = '';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+      if (imageFiles.length === 0) {
+        showToast('Please drop image files only.', 'error');
+        return;
+      }
+      await uploadFilesList(imageFiles);
+    }
+  };
+
+  const handleDeleteImage = async (id: string, url: string) => {
+    try {
+      setDeletingId(id);
+      const res = await fetch(`/api/gallery?id=${encodeURIComponent(id)}&url=${encodeURIComponent(url)}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to delete image');
+      }
+
+      setGalleryImages((prev) => prev.filter((img) => img.id !== id));
+      showToast('Image removed successfully!', 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Could not delete image.', 'error');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
@@ -178,7 +320,7 @@ export default function SettingsPage() {
       )}
 
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form id="settings-form" onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Card Group 1: Couple Names */}
           <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm space-y-5">
@@ -390,27 +532,202 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Form Submit Button */}
-        <div className="flex justify-end pt-4">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded-md py-2.5 px-6 text-xs font-semibold tracking-wide shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4" />
-                Save
-              </>
-            )}
-          </button>
-        </div>
       </form>
+
+      {/* Moments Gallery Section */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm space-y-6 font-sans">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-955 uppercase tracking-wider flex items-center gap-2">
+            <ImageIcon className="w-4.5 h-4.5 text-gray-400" /> Moments Gallery
+          </h2>
+          <p className="text-[10px] text-gray-400 mt-1">
+            Upload and manage pre-wedding photos shown on the guest invitation page.
+          </p>
+        </div>
+
+        {/* Dropzone / Upload Area */}
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 flex flex-col items-center justify-center gap-3 ${
+            isDragging 
+              ? 'border-blue-500 bg-blue-50/50 scale-[0.99]' 
+              : 'border-gray-200 hover:border-gray-300 bg-gray-50/50 hover:bg-gray-50'
+          }`}
+        >
+          <div className={`p-3 rounded-full ${isDragging ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'} transition-colors`}>
+            <Upload className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-gray-800">
+              Drag & drop your moments here, or{' '}
+              <label className="text-blue-500 hover:text-blue-600 cursor-pointer font-bold underline">
+                browse files
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  disabled={isUploading || isGalleryLoading}
+                  onChange={handleUpload}
+                />
+              </label>
+            </p>
+            <p className="text-[10px] text-gray-500">
+              Supports JPG, PNG, WEBP. You can upload multiple files at once.
+            </p>
+          </div>
+          {isUploading && (
+            <div className="text-[10px] text-blue-500 font-semibold flex items-center gap-1.5 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100 animate-pulse">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              Uploading photos...
+            </div>
+          )}
+        </div>
+
+        {/* Gallery Content */}
+        {isGalleryLoading ? (
+          <div className="py-12 flex flex-col items-center justify-center text-gray-400 gap-1.5">
+            <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+            <p className="text-[11px]">Loading gallery images...</p>
+          </div>
+        ) : galleryImages.length === 0 && uploadQueue.length === 0 ? (
+          <div className="border border-dashed border-gray-200 bg-gray-50/30 rounded-lg p-8 text-center space-y-4">
+            <div className="text-gray-350 flex justify-center">
+              <ImageIcon className="w-8 h-8 opacity-50" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-gray-800">No custom moments uploaded yet</p>
+              <p className="text-[10px] text-gray-500 max-w-xs mx-auto">
+                The invitation page is currently displaying the default 3 wedding photos.
+              </p>
+            </div>
+            {/* Default Images Preview */}
+            <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto pt-1 opacity-40">
+              {['/ok1.webp', '/ok2.webp', '/ok3.webp'].map((url, idx) => (
+                <div key={idx} className="relative aspect-[3/4] rounded-md overflow-hidden border border-gray-200 bg-white">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt={`Default ${idx + 1}`} className="w-full h-full object-cover" />
+                  <span className="absolute bottom-1 right-1 bg-gray-950/60 text-[7px] text-white px-1 py-0.5 rounded">Default</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-wider font-semibold text-gray-450">
+                Uploaded Photos ({galleryImages.length})
+              </span>
+              {uploadQueue.length > 0 && (
+                <span className="text-[10px] text-blue-600 font-semibold animate-pulse">
+                  Uploading {uploadQueue.length} file(s)...
+                </span>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
+              {/* Actual Uploaded Images */}
+              {galleryImages.map((img) => {
+                const isConfirming = confirmDeleteId === img.id;
+                return (
+                  <div key={img.id} className="relative aspect-[3/4] rounded-lg overflow-hidden border border-gray-200 bg-gray-50 shadow-xs group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={img.url}
+                      alt="Wedding Moment"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    
+                    {/* Top-Right Delete Trigger Button (Always visible / easy touch target) */}
+                    {!isConfirming && (
+                      <div className="absolute top-2 right-2 z-10">
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteId(img.id)}
+                          className="p-1.5 bg-white/90 hover:bg-red-50 text-gray-500 hover:text-red-600 rounded-full shadow-md backdrop-blur-xs transition-all duration-200 cursor-pointer border border-gray-150"
+                          title="Remove Photo"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Inline Delete Confirmation Overlay */}
+                    {isConfirming && (
+                      <div className="absolute inset-0 bg-red-950/80 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-center text-white z-20 animate-fade-in">
+                        <p className="text-[10px] font-semibold tracking-wide uppercase text-red-200">Delete?</p>
+                        <div className="flex items-center gap-2 mt-3">
+                          <button
+                            type="button"
+                            disabled={deletingId === img.id}
+                            onClick={() => {
+                              handleDeleteImage(img.id, img.url);
+                              setConfirmDeleteId(null);
+                            }}
+                            className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-[10px] font-bold tracking-wider uppercase active:scale-95 transition-all cursor-pointer shadow-xs"
+                          >
+                            {deletingId === img.id ? '...' : 'Yes'}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={deletingId === img.id}
+                            onClick={() => setConfirmDeleteId(null)}
+                            className="px-2.5 py-1 bg-white/20 hover:bg-white/35 text-white rounded text-[10px] font-bold tracking-wider uppercase active:scale-95 transition-all cursor-pointer"
+                          >
+                            No
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* Uploading Skeleton Items (Immediate visual feedback) */}
+              {uploadQueue.map((item) => (
+                <div key={item.id} className="relative aspect-[3/4] rounded-lg overflow-hidden border border-blue-200 bg-gray-50 shadow-xs animate-pulse">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.previewUrl}
+                    alt="Uploading..."
+                    className="w-full h-full object-cover opacity-60 blur-xs"
+                  />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-blue-950/20 text-white gap-2 z-10">
+                    <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                    <span className="text-[9px] font-bold tracking-wider uppercase bg-blue-500/80 px-1.5 py-0.5 rounded shadow-xs">
+                      Uploading
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Form Submit Button */}
+      <div className="flex justify-end pt-4">
+        <button
+          type="submit"
+          form="settings-form"
+          disabled={isSubmitting}
+          className="bg-blue-500 hover:bg-blue-600 text-white rounded-md py-2.5 px-6 text-xs font-semibold tracking-wide shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4" />
+              Save
+            </>
+          )}
+        </button>
+      </div>
     </div>
     {toast && (
       <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] w-[90%] sm:w-auto max-w-sm animate-fade-in select-none">

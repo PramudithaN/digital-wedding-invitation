@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
-import { Category, Guest, RSVP, InviteLink, GuestWithDetails } from './types';
+import { Category, Guest, RSVP, InviteLink, GuestWithDetails, GalleryImage } from './types';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -14,7 +14,7 @@ export const isSupabaseConfigured = !!(
   supabaseUrl.trim() !== ''
 );
 
-const supabase = isSupabaseConfigured 
+export const supabase = isSupabaseConfigured 
   ? createClient(supabaseUrl!, supabaseServiceKey || supabaseAnonKey!) 
   : null;
 
@@ -26,6 +26,7 @@ function readMockDB(): {
   guests: Guest[];
   rsvps: RSVP[];
   invite_links: InviteLink[];
+  gallery_images: GalleryImage[];
 } {
   if (!fs.existsSync(MOCK_DB_PATH)) {
     const defaultData = {
@@ -103,15 +104,21 @@ function readMockDB(): {
         }
       ]
     };
-    fs.writeFileSync(MOCK_DB_PATH, JSON.stringify(defaultData, null, 2), 'utf-8');
-    return defaultData;
+    const defaultDataWithGallery = {
+      ...defaultData,
+      gallery_images: []
+    };
+    fs.writeFileSync(MOCK_DB_PATH, JSON.stringify(defaultDataWithGallery, null, 2), 'utf-8');
+    return defaultDataWithGallery;
   }
   try {
     const content = fs.readFileSync(MOCK_DB_PATH, 'utf-8');
-    return JSON.parse(content);
+    const db = JSON.parse(content);
+    db.gallery_images = db.gallery_images || [];
+    return db;
   } catch (e) {
     console.error('Error reading mock db:', e);
-    return { categories: [], guests: [], rsvps: [], invite_links: [] };
+    return { categories: [], guests: [], rsvps: [], invite_links: [], gallery_images: [] };
   }
 }
 
@@ -702,4 +709,68 @@ export async function saveWeddingDetails(details: any): Promise<void> {
     }
   }
 }
+
+// GALLERY IMAGES API HELPERS
+
+export async function getGalleryImages(): Promise<GalleryImage[]> {
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase!
+        .from('gallery_images')
+        .select('*')
+        .order('created_at', { ascending: true });
+      
+      if (error) throw error;
+      return data || [];
+    } catch (e) {
+      console.error('Error fetching gallery images from Supabase:', e);
+      return [];
+    }
+  }
+
+  const db = readMockDB();
+  return db.gallery_images || [];
+}
+
+export async function addGalleryImage(url: string): Promise<GalleryImage> {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase!
+      .from('gallery_images')
+      .insert({ url })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  const db = readMockDB();
+  const newImage: GalleryImage = {
+    id: `img-${Date.now()}`,
+    url,
+    created_at: new Date().toISOString()
+  };
+  db.gallery_images = db.gallery_images || [];
+  db.gallery_images.push(newImage);
+  writeMockDB(db);
+  return newImage;
+}
+
+export async function deleteGalleryImage(id: string): Promise<void> {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase!
+      .from('gallery_images')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+    return;
+  }
+
+  const db = readMockDB();
+  db.gallery_images = db.gallery_images || [];
+  db.gallery_images = db.gallery_images.filter((img) => img.id !== id);
+  writeMockDB(db);
+}
+
 

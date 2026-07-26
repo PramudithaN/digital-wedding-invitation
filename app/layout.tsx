@@ -24,6 +24,9 @@ const cormorant = Cormorant_Garamond({
 export const metadata: Metadata = {
   title: "Digital Wedding Invitation Manager",
   description: "Manage guest registries, digital invites, RSVPs, and seat tables.",
+  icons: {
+    icon: "/logo.webp",
+  },
 };
 
 export default function RootLayout({

@@ -1,6 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { getGuestByToken, markInviteOpened, getWeddingDetails } from '@/lib/db';
+import { getGuestByToken, markInviteOpened, getWeddingDetails, getGalleryImages } from '@/lib/db';
 import InviteCardClient from '@/components/invite/InviteCardClient';
 
 export const dynamic = 'force-dynamic';
@@ -70,11 +70,13 @@ export default async function InvitePage({ params }: InvitePageProps) {
 
   // 3. Fetch current wedding configurations
   const weddingDetails = await getWeddingDetails();
+  const galleryImages = await getGalleryImages();
 
   return (
     <InviteCardClient 
       guest={guest} 
       weddingDetails={weddingDetails} 
+      galleryImages={galleryImages}
     />
   );
 }

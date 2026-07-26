@@ -97,3 +97,30 @@ INSERT INTO wedding_details (
 ALTER TABLE wedding_details ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read access to wedding_details" ON wedding_details FOR SELECT USING (true);
 CREATE POLICY "Allow admin write access to wedding_details" ON wedding_details FOR ALL USING (true);
+
+-- Create gallery_images table for Moments Gallery
+CREATE TABLE IF NOT EXISTS gallery_images (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  url         TEXT NOT NULL,
+  created_at  TIMESTAMPTZ DEFAULT now()
+);
+
+-- Enable RLS for gallery_images
+ALTER TABLE gallery_images ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access to gallery_images" ON gallery_images FOR SELECT USING (true);
+CREATE POLICY "Allow admin write access to gallery_images" ON gallery_images FOR ALL USING (true); -- In prod, restrict to authenticated users
+
+-- Supabase Storage Bucket configuration setup (run in SQL editor)
+-- Note: Supabase projects require bucket creation before policies can be applied to them
+-- Create gallery bucket if not exists
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('gallery', 'gallery', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage policies for the gallery bucket
+CREATE POLICY "Allow public read access to gallery storage" ON storage.objects
+  FOR SELECT USING (bucket_id = 'gallery');
+
+CREATE POLICY "Allow admin write access to gallery storage" ON storage.objects
+  FOR ALL USING (bucket_id = 'gallery');
+

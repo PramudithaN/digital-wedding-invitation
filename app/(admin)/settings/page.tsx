@@ -692,10 +692,15 @@ export default function SettingsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase tracking-wider font-semibold text-gray-450">
-                Uploaded Photos ({galleryImages.length})
-              </span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-gray-450">
+                  Uploaded Photos ({galleryImages.length})
+                </span>
+                <span className="text-[9px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full select-none border border-blue-100">
+                  💡 Click & hold or drag handles to reorder images
+                </span>
+              </div>
               {uploadQueue.length > 0 && (
                 <span className="text-[10px] text-blue-600 font-semibold animate-pulse">
                   Uploading {uploadQueue.length} file(s)...

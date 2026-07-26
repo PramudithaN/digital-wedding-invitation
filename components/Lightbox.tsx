@@ -118,11 +118,28 @@ export default function Lightbox({ images, initialIndex, isOpen, onClose }: Ligh
       <div className="relative max-w-[90vw] max-h-[80vh] flex items-center justify-center z-52 select-none pointer-events-none">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          key={currentIndex}
           src={currentImage}
           alt={`Wedding Moment ${currentIndex + 1}`}
-          className="max-w-full max-h-[80vh] object-contain rounded-md shadow-2xl animate-fade-in pointer-events-auto"
+          className="max-w-full max-h-[80vh] object-contain rounded-md shadow-2xl animate-lightbox-image pointer-events-auto"
         />
       </div>
+
+      <style>{`
+        @keyframes lightboxFadeScale {
+          from {
+            opacity: 0;
+            transform: scale(0.96);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        .animate-lightbox-image {
+          animation: lightboxFadeScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
 
       {/* Navigation Controls */}
       {images.length > 1 && (

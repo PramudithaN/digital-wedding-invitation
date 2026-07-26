@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   title: "Digital Wedding Invitation Manager",
   description: "Manage guest registries, digital invites, RSVPs, and seat tables.",
   icons: {
-    icon: "/logo.webp",
+    icon: "/Logo.webp",
   },
 };
 

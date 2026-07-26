@@ -32,6 +32,10 @@ interface InviteCardClientProps {
 }
 
 export default function InviteCardClient({ guest, weddingDetails, galleryImages }: InviteCardClientProps) {
+  const displayImages = galleryImages && galleryImages.length > 0
+    ? galleryImages.map(img => img.url)
+    : ['/ok1.webp', '/ok2.webp', '/ok3.webp'];
+
   // RSVP Form States
   const [attending, setAttending] = useState<'attending' | 'declined' | null>(
     (guest.rsvp?.status === 'attending' || guest.rsvp?.status === 'declined') 
@@ -1106,18 +1110,14 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
       <section className="max-w-3xl mx-auto px-6 py-12 w-full text-center space-y-6">
         <h2 className="text-xl font-serif text-gray-900 font-light">Moments Gallery</h2>
         <div className="h-[1px] w-12 bg-[#D38A99] mx-auto" />
-
         <div 
-          className="flex sm:grid sm:grid-cols-2 md:grid-cols-3 gap-4 pt-4 overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory pb-4 sm:pb-0"
+          className="flex flex-row items-center justify-start sm:grid sm:grid-cols-2 md:grid-cols-3 gap-4 pt-4 overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory pb-4 sm:pb-0"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {(galleryImages && galleryImages.length > 0
-            ? galleryImages.map(img => img.url)
-            : ['/ok1.webp', '/ok2.webp', '/ok3.webp']
-          ).map((url, idx) => (
+          {displayImages.map((url, idx) => (
             <div 
               key={idx}
-              className={`min-w-[80vw] sm:min-w-0 snap-center overflow-hidden rounded-xl border border-[#E8E4DE] shadow-xs group bg-[#FAFAF8] shrink-0 ${
+              className={`w-[262px] h-[350px] sm:w-auto sm:h-auto sm:aspect-[3/4] snap-center overflow-hidden rounded-xl border border-[#E8E4DE] shadow-xs group bg-[#FAFAF8] shrink-0 ${
                 idx % 3 === 1 ? 'md:translate-y-4' : ''
               }`}
             >
@@ -1125,7 +1125,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
               <img 
                 src={url} 
                 alt={`${weddingDetails.bride_name} & ${weddingDetails.groom_name} Moment ${idx + 1}`} 
-                className="w-full h-full object-cover aspect-[3/4] transition-transform duration-500 group-hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               />
             </div>

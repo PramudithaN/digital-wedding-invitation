@@ -48,5 +48,6 @@ export interface GuestWithDetails extends Guest {
 export interface GalleryImage {
   id: string;
   url: string;
+  position?: number;
   created_at?: string;
 }

@@ -4,7 +4,8 @@ import {
   addGalleryImage, 
   deleteGalleryImage, 
   isSupabaseConfigured,
-  supabase 
+  supabase,
+  updateGalleryImagesOrder
 } from '@/lib/db';
 import fs from 'fs';
 import path from 'path';
@@ -122,6 +123,21 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Error deleting gallery image:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const { orderedIds } = await request.json();
+    if (!orderedIds || !Array.isArray(orderedIds)) {
+      return NextResponse.json({ error: 'orderedIds array is required' }, { status: 400 });
+    }
+
+    await updateGalleryImagesOrder(orderedIds);
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Error updating gallery order:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

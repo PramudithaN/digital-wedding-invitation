@@ -718,9 +718,22 @@ export async function getGalleryImages(): Promise<GalleryImage[]> {
       const { data, error } = await supabase!
         .from('gallery_images')
         .select('*')
+        .order('position', { ascending: true })
         .order('created_at', { ascending: true });
       
-      if (error) throw error;
+      if (error) {
+        // If "position" column does not exist (SQL code 42703 or message indicates undefined column)
+        if (error.code === '42703' || error.message?.includes('position')) {
+          const { data: fallbackData, error: fallbackError } = await supabase!
+            .from('gallery_images')
+            .select('*')
+            .order('created_at', { ascending: true });
+          
+          if (fallbackError) throw fallbackError;
+          return fallbackData || [];
+        }
+        throw error;
+      }
       return data || [];
     } catch (e) {
       console.error('Error fetching gallery images from Supabase:', e);
@@ -770,6 +783,47 @@ export async function deleteGalleryImage(id: string): Promise<void> {
   const db = readMockDB();
   db.gallery_images = db.gallery_images || [];
   db.gallery_images = db.gallery_images.filter((img) => img.id !== id);
+  writeMockDB(db);
+}
+
+export async function updateGalleryImagesOrder(orderedIds: string[]): Promise<void> {
+  if (isSupabaseConfigured) {
+    try {
+      const promises = orderedIds.map((id, index) => 
+        supabase!
+          .from('gallery_images')
+          .update({ position: index })
+          .eq('id', id)
+      );
+      await Promise.all(promises);
+    } catch (e) {
+      console.error('Error updating gallery images order in Supabase:', e);
+      throw e;
+    }
+    return;
+  }
+
+  const db = readMockDB();
+  db.gallery_images = db.gallery_images || [];
+  
+  const imageMap = new Map(db.gallery_images.map(img => [img.id, img]));
+  const newOrderedImages: GalleryImage[] = [];
+  
+  orderedIds.forEach(id => {
+    const img = imageMap.get(id);
+    if (img) {
+      newOrderedImages.push(img);
+    }
+  });
+
+  // Re-add any items that were not present in the orderedIds list
+  db.gallery_images.forEach(img => {
+    if (!orderedIds.includes(img.id)) {
+      newOrderedImages.push(img);
+    }
+  });
+
+  db.gallery_images = newOrderedImages;
   writeMockDB(db);
 }
 

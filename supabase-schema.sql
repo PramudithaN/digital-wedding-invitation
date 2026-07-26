@@ -102,6 +102,7 @@ CREATE POLICY "Allow admin write access to wedding_details" ON wedding_details F
 CREATE TABLE IF NOT EXISTS gallery_images (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   url         TEXT NOT NULL,
+  position    INT DEFAULT 0,
   created_at  TIMESTAMPTZ DEFAULT now()
 );
 

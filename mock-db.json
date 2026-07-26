@@ -130,24 +130,24 @@
   ],
   "gallery_images": [
     {
-      "id": "img-1785076787844",
-      "url": "/uploads/1785076787834-otv5fu6dmzc.jpeg",
-      "created_at": "2026-07-26T14:39:47.844Z"
-    },
-    {
       "id": "img-1785076788222",
       "url": "/uploads/1785076788218-o47971rp41.jpg",
       "created_at": "2026-07-26T14:39:48.222Z"
     },
     {
-      "id": "img-1785076788312",
-      "url": "/uploads/1785076788310-6e7bqjzh83f.jpg",
-      "created_at": "2026-07-26T14:39:48.312Z"
-    },
-    {
       "id": "img-1785076788415",
       "url": "/uploads/1785076788410-ebx5iikopyp.jpg",
       "created_at": "2026-07-26T14:39:48.415Z"
+    },
+    {
+      "id": "img-1785076787844",
+      "url": "/uploads/1785076787834-otv5fu6dmzc.jpeg",
+      "created_at": "2026-07-26T14:39:47.844Z"
+    },
+    {
+      "id": "img-1785076788312",
+      "url": "/uploads/1785076788310-6e7bqjzh83f.jpg",
+      "created_at": "2026-07-26T14:39:48.312Z"
     },
     {
       "id": "img-1785076788489",

@@ -15,7 +15,8 @@ import {
   X,
   Image as ImageIcon,
   Trash2,
-  Upload
+  Upload,
+  Menu
 } from 'lucide-react';
 
 function formatHumanDate(dateStr: string): string {
@@ -77,6 +78,8 @@ export default function SettingsPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchGallery = async () => {
@@ -94,6 +97,70 @@ export default function SettingsPage() {
     };
     fetchGallery();
   }, []);
+
+  const handleImageDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleImageDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === index) return;
+    setDragOverIndex(index);
+  };
+
+  const handleImageDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleImageDrop = async (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    const updatedImages = [...galleryImages];
+    const [draggedItem] = updatedImages.splice(draggedIndex, 1);
+    updatedImages.splice(targetIndex, 0, draggedItem);
+
+    // Optimistic UI update
+    setGalleryImages(updatedImages);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+
+    try {
+      const orderedIds = updatedImages.map(img => img.id);
+      const res = await fetch('/api/gallery', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderedIds }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to update gallery image order');
+      }
+      showToast('Gallery order updated successfully', 'success');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to update order', 'error');
+      
+      // Revert on error
+      const fetchRes = await fetch('/api/gallery');
+      if (fetchRes.ok) {
+        const data = await fetchRes.json();
+        setGalleryImages(data);
+      }
+    }
+  };
+
+  const handleImageDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
 
   const uploadFilesList = async (filesArray: File[]) => {
     try {
@@ -641,7 +708,22 @@ export default function SettingsPage() {
               {galleryImages.map((img, idx) => {
                 const isConfirming = confirmDeleteId === img.id;
                 return (
-                  <div key={img.id} className="relative aspect-[3/4] rounded-lg overflow-hidden border border-gray-200 bg-gray-50 shadow-xs group">
+                  <div 
+                    key={img.id} 
+                    draggable={!isConfirming && !isUploading}
+                    onDragStart={(e) => handleImageDragStart(e, idx)}
+                    onDragOver={(e) => handleImageDragOver(e, idx)}
+                    onDragLeave={handleImageDragLeave}
+                    onDrop={(e) => handleImageDrop(e, idx)}
+                    onDragEnd={handleImageDragEnd}
+                    className={`relative aspect-[3/4] rounded-lg overflow-hidden border bg-gray-50 shadow-xs group transition-all duration-200 ${
+                      draggedIndex === idx 
+                        ? 'opacity-40 border-dashed border-blue-400 scale-95' 
+                        : dragOverIndex === idx 
+                          ? 'border-solid border-blue-500 scale-[1.03] shadow-md z-30' 
+                          : 'border-gray-200 hover:shadow-sm'
+                    }`}
+                  >
                     {/* Clickable Image Area */}
                     <div 
                       onClick={() => setLightboxIndex(idx)}
@@ -658,6 +740,18 @@ export default function SettingsPage() {
                         <span className="text-[9px] uppercase tracking-wider text-white bg-black/55 px-2 py-1 rounded-md backdrop-blur-xs font-semibold">View</span>
                       </div>
                     </div>
+
+                    {/* Top-Left Drag Grip Handle */}
+                    {!isConfirming && (
+                      <div className="absolute top-2 left-2 z-10 cursor-grab active:cursor-grabbing">
+                        <div 
+                          className="p-1.5 bg-white/95 text-gray-450 hover:text-gray-700 rounded-full shadow-md backdrop-blur-xs transition-all duration-200 border border-gray-150 flex items-center justify-center"
+                          title="Drag to reorder"
+                        >
+                          <Menu className="w-3.5 h-3.5" />
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Top-Right Delete Trigger Button (Always visible / easy touch target) */}
                     {!isConfirming && (

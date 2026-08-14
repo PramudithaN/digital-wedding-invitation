@@ -102,7 +102,7 @@ export default function RSVPTrackerPage() {
       g.rsvp?.status || 'pending',
       g.rsvp?.meal_choice || '-',
       g.rsvp?.alcohol_choice || '-',
-      g.rsvp?.responded_at ? new Date(g.rsvp.responded_at).toLocaleDateString() : '-',
+      g.rsvp?.responded_at ? new Date(g.rsvp.responded_at).toISOString().split('T')[0] : '-',
       g.notes || ''
     ]);
     

@@ -43,20 +43,26 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const fetchData = async (silent = false) => {
+    try {
+      if (!silent) setIsLoading(true);
+      const [gR, cR] = await Promise.all([fetch('/api/guests'), fetch('/api/categories')]);
+      if (!gR.ok || !cR.ok) throw new Error('Failed to load dashboard metrics');
+      setGuests(await gR.json());
+      setCategories(await cR.json());
+    } catch (err: any) {
+      setError(err.message || 'Error loading dashboard');
+    } finally {
+      if (!silent) setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        setIsLoading(true);
-        const [gR, cR] = await Promise.all([fetch('/api/guests'), fetch('/api/categories')]);
-        if (!gR.ok || !cR.ok) throw new Error('Failed to load dashboard metrics');
-        setGuests(await gR.json());
-        setCategories(await cR.json());
-      } catch (err: any) {
-        setError(err.message || 'Error loading dashboard');
-      } finally {
-        setIsLoading(false);
-      }
-    })();
+    fetchData();
+    const interval = setInterval(() => {
+      fetchData(true);
+    }, 15000); // Polling every 15 seconds
+    return () => clearInterval(interval);
   }, []);
 
   if (isLoading) {

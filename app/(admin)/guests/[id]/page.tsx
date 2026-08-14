@@ -45,6 +45,7 @@ export default function EditGuestPage() {
   const [side, setSide] = useState<'bride' | 'groom'>('bride');
   const [categoryId, setCategoryId] = useState('');
   const [notes, setNotes] = useState('');
+  const [plusOne, setPlusOne] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,6 +76,7 @@ export default function EditGuestPage() {
         setSide(guestData.side || 'bride');
         setCategoryId(guestData.category_id || '');
         setNotes(guestData.notes || '');
+        setPlusOne(guestData.rsvp?.plus_one || false);
       } catch (err: any) {
         setError(err.message || 'Error loading guest');
       } finally {
@@ -104,7 +106,8 @@ export default function EditGuestPage() {
           email: email.trim(),
           side,
           category_id: categoryId || null,
-          notes: notes.trim()
+          notes: notes.trim(),
+          plus_one: plusOne
         }),
       });
 
@@ -288,6 +291,22 @@ export default function EditGuestPage() {
                     {cat.name}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            {/* Guest Count */}
+            <div>
+              <label htmlFor="edit-count" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                Guest Count (Optional)
+              </label>
+              <select
+                id="edit-count"
+                value={plusOne ? '2' : '1'}
+                onChange={(e) => setPlusOne(e.target.value === '2')}
+                className="w-full bg-white border border-gray-200 text-gray-700 text-xs rounded-md py-2.5 px-3 focus:outline-none focus:border-blue-500 cursor-pointer"
+              >
+                <option value="1">1 Guest (Single)</option>
+                <option value="2">2 Guests (with Plus One)</option>
               </select>
             </div>
 

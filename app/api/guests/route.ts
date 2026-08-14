@@ -25,7 +25,8 @@ export async function POST(request: Request) {
           email: item.email || '',
           side: item.side || null,
           category_id: item.category_id || null,
-          notes: item.notes || ''
+          notes: item.notes || '',
+          plus_one: item.plus_one
         });
         results.push(guest);
       }
@@ -41,7 +42,8 @@ export async function POST(request: Request) {
         email: body.email || '',
         side: body.side || null,
         category_id: body.category_id || null,
-        notes: body.notes || ''
+        notes: body.notes || '',
+        plus_one: body.plus_one
       });
       return NextResponse.json(guest);
     }

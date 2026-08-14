@@ -79,9 +79,9 @@ export default function RSVPTrackerPage() {
   const [mealFilter, setMealFilter] = useState('all');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  const fetchGuests = async () => {
+  const fetchGuests = async (silent = false) => {
     try {
-      setIsLoading(true);
+      if (!silent) setIsLoading(true);
       const res = await fetch('/api/guests');
       if (!res.ok) throw new Error('Failed to fetch guests');
       const data = await res.json();
@@ -89,12 +89,16 @@ export default function RSVPTrackerPage() {
     } catch (err: any) {
       setError(err.message || 'Error loading guest RSVP data.');
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   };
 
   useEffect(() => {
     fetchGuests();
+    const interval = setInterval(() => {
+      fetchGuests(true);
+    }, 15000); // Polling every 15 seconds
+    return () => clearInterval(interval);
   }, []);
 
   const handleStatusChange = async (guestId: string, newStatus: 'attending' | 'declined' | 'pending') => {

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Mail, Phone, Edit2, Trash2, MessageCircle, Loader2, AlertCircle, X, CheckCircle2, Copy, ExternalLink, Upload } from 'lucide-react';
+import { Plus, Search, Mail, Phone, Edit2, Trash2, MessageCircle, Loader2, AlertCircle, X, CheckCircle2, Copy, ExternalLink, Upload, Download } from 'lucide-react';
 import { GuestWithDetails, Category } from '@/lib/types';
 import { normalizePhoneNumber } from '@/lib/whatsapp';
 
@@ -128,6 +128,7 @@ export default function GuestsPage() {
   const [side, setSide] = useState<'bride' | 'groom'>('bride');
   const [categoryId, setCategoryId] = useState('');
   const [notes, setNotes] = useState('');
+  const [plusOne, setPlusOne] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedGuest, setSelectedGuest] = useState<GuestWithDetails | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
@@ -143,7 +144,13 @@ export default function GuestsPage() {
     finally { if (!silent) setIsLoading(false); }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(() => {
+      fetchData(true);
+    }, 15000); // Polling every 15 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   const handleAddGuest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,13 +159,36 @@ export default function GuestsPage() {
       const res = await fetch('/api/guests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), phone: normalizePhoneNumber(phone.trim()), email: email.trim(), side, category_id: categoryId || null, notes: notes.trim() }),
+        body: JSON.stringify({ name: name.trim(), phone: normalizePhoneNumber(phone.trim()), email: email.trim(), side, category_id: categoryId || null, notes: notes.trim(), plus_one: plusOne }),
       });
       await fetchData(true);
-      setName(''); setPhone(''); setEmail(''); setSide('bride'); setCategoryId(''); setNotes(''); setIsAddOpen(false);
+      setName(''); setPhone(''); setEmail(''); setSide('bride'); setCategoryId(''); setNotes(''); setPlusOne(false); setIsAddOpen(false);
       showToast('Guest added successfully!', 'success');
     } catch (err: any) { showToast(err.message || 'Could not add', 'error'); }
     finally { setIsSubmitting(false); }
+  };
+
+  const handleDownloadTemplate = () => {
+    const headers = ['Name', 'Phone', 'Email', 'Side', 'Count', 'Notes'];
+    const sampleRows = [
+      ['Sarah Karunaratne', '+94771234567', 'sarah@example.com', 'bride', '2', "Bride's sister"],
+      ['James Wijesinghe', '+94777654321', 'james@example.com', 'groom', '1', "Groom's roommate"]
+    ];
+    
+    const csvContent = [
+      headers.join(','),
+      ...sampleRows.map(row => row.map(val => `"${val.replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'wedding_guests_template.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleCSVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -184,6 +214,7 @@ export default function GuestsPage() {
           const rawSide = getVal(['side', 'wedding side', 'bride/groom']).toLowerCase();
           const rawCategory = getVal(['category', 'group']);
           const rawNotes = getVal(['notes', 'note', 'private notes']);
+          const rawCount = getVal(['count', 'guest count', 'size', 'plus_one', 'plus one']);
           
           let side = 'bride';
           if (rawSide.includes('groom') || rawSide === 'g') side = 'groom';
@@ -193,6 +224,8 @@ export default function GuestsPage() {
             const matchedCat = categories.find(c => c.name.toLowerCase().trim() === rawCategory.toLowerCase().trim());
             if (matchedCat) matchedCategoryId = matchedCat.id;
           }
+
+          const plusOne = rawCount === '2' || rawCount.toLowerCase() === 'true' || rawCount.toLowerCase() === 'yes';
           
           return {
             name: rawName.trim(),
@@ -200,7 +233,8 @@ export default function GuestsPage() {
             email: rawEmail.trim(),
             side,
             category_id: matchedCategoryId,
-            notes: rawNotes.trim()
+            notes: rawNotes.trim(),
+            plus_one: plusOne
           };
         }).filter(g => g.name);
         
@@ -276,6 +310,9 @@ export default function GuestsPage() {
           <Typography variant="caption" color="text.secondary">Track invited guests, RSVP states and send invitations.</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button variant="outlined" onClick={handleDownloadTemplate} startIcon={<Download size={16} />} sx={{ whiteSpace: 'nowrap' }}>
+            Download Template
+          </Button>
           <Button variant="outlined" component="label" startIcon={<Upload size={16} />} sx={{ whiteSpace: 'nowrap' }}>
             Upload CSV
             <input type="file" accept=".csv" onChange={handleCSVUpload} hidden />
@@ -338,7 +375,7 @@ export default function GuestsPage() {
                 <TableRow>
                   <TableCell>Guest Name</TableCell>
                   <TableCell>Side</TableCell>
-                  <TableCell>Category</TableCell>
+                  <TableCell>Count</TableCell>
                   <TableCell>Contact</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell align="right">Actions</TableCell>
@@ -353,12 +390,9 @@ export default function GuestsPage() {
                     </TableCell>
                     <TableCell><SideChip side={g.side || 'bride'} /></TableCell>
                     <TableCell>
-                      {g.category ? (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: g.category.colour }} />
-                          <Typography variant="caption">{g.category.name}</Typography>
-                        </Box>
-                      ) : <Typography variant="caption" color="text.disabled">–</Typography>}
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {g.rsvp?.plus_one ? 2 : 1}
+                      </Typography>
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3 }}>
@@ -410,10 +444,7 @@ export default function GuestsPage() {
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>{g.name}</Typography>
                       <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
                         <SideChip side={g.side || 'bride'} />
-                        {g.category && (
-                          <Chip size="small" label={g.category.name} sx={{ height: 18, fontSize: '0.65rem',
-                            bgcolor: g.category.colour + '22', color: g.category.colour }} />
-                        )}
+                        <Chip size="small" label={`Count: ${g.rsvp?.plus_one ? 2 : 1}`} sx={{ height: 18, fontSize: '0.65rem', bgcolor: '#F3F4F6', color: '#374151', fontWeight: 600 }} />
                       </Box>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }} onClick={e => e.stopPropagation()}>
@@ -500,7 +531,7 @@ export default function GuestsPage() {
               <Grid container spacing={1.5} sx={{ mb: 2 }}>
                 {[
                   { label: 'Side', value: selectedGuest.side },
-                  { label: 'Category', value: selectedGuest.category?.name || '–' },
+                  { label: 'Count', value: selectedGuest.rsvp?.plus_one ? '2' : '1' },
                   { label: 'Phone', value: selectedGuest.phone || '–' },
                   { label: 'Email', value: selectedGuest.email || '–' },
                 ].map(({ label, value }) => (
@@ -550,6 +581,13 @@ export default function GuestsPage() {
             <Select value={categoryId} label="Category" onChange={e => setCategoryId(e.target.value)}>
               <MenuItem value="">No Category</MenuItem>
               {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+            </Select>
+          </FormControl>
+          <FormControl size="small" fullWidth>
+            <InputLabel>Guest Count</InputLabel>
+            <Select value={plusOne ? '2' : '1'} label="Guest Count" onChange={e => setPlusOne(e.target.value === '2')}>
+              <MenuItem value="1">1 Guest (Single)</MenuItem>
+              <MenuItem value="2">2 Guests (with Plus One)</MenuItem>
             </Select>
           </FormControl>
           <TextField label="Private Notes" value={notes} onChange={e => setNotes(e.target.value)} size="small" fullWidth multiline rows={3} />

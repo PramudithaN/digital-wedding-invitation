@@ -903,38 +903,6 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                 {/* Conditional Fields if Attending */}
                 {attending === 'attending' && (
                   <div className="space-y-5 pt-4 border-t border-[#E8E4DE] animate-fade-in">
-                    {/* Plus One Toggle */}
-                    <div className="bg-[#FAFAF8] p-4 rounded border border-[#E8E4DE] space-y-4">
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={plusOne}
-                          onChange={(e) => setPlusOne(e.target.checked)}
-                          className="w-4 h-4 rounded border-gray-300 text-[#D38A99] focus:ring-0 bg-white cursor-pointer"
-                        />
-                        <div className="flex items-center gap-1.5 text-xs text-gray-700 font-semibold">
-                          <UserPlus className="w-4 h-4 text-[#C8A882]" />
-                          <span>I will be bringing a +1</span>
-                        </div>
-                      </label>
-
-                      {plusOne && (
-                        <div className="animate-slide-down">
-                          <label htmlFor="plusone-name" className="block text-[9px] font-bold uppercase tracking-wider text-gray-500 mb-1">
-                            Plus One Guest Name
-                          </label>
-                          <input
-                            id="plusone-name"
-                            type="text"
-                            value={plusOneName}
-                            onChange={(e) => setPlusOneName(e.target.value)}
-                            placeholder="Full name of your guest"
-                            required={plusOne}
-                            className="w-full bg-white border border-gray-200 rounded py-2 px-3 text-xs text-gray-900 focus:outline-none focus:border-[#D38A99]"
-                          />
-                        </div>
-                      )}
-                    </div>
 
                     {/* Meal Preference */}
                     <div className="space-y-2">

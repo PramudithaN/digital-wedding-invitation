@@ -12,7 +12,8 @@ import {
   Loader2, 
   AlertCircle,
   Edit2,
-  Calendar
+  Calendar,
+  Download
 } from 'lucide-react';
 import { GuestWithDetails } from '@/lib/types';
 
@@ -93,6 +94,34 @@ export default function RSVPTrackerPage() {
     }
   };
 
+  const handleDownloadRSVPs = () => {
+    const headers = ['Guest Name', 'Side', 'Status', 'Meal Preference', 'Alcohol Preference', 'Responded Date', 'Notes'];
+    const rows = filteredGuests.map(g => [
+      g.name,
+      g.side || 'bride',
+      g.rsvp?.status || 'pending',
+      g.rsvp?.meal_choice || '—',
+      g.rsvp?.alcohol_choice || '—',
+      g.rsvp?.responded_at ? new Date(g.rsvp.responded_at).toLocaleDateString() : '—',
+      g.notes || ''
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(val => `"${val.replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'wedding_rsvps.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   useEffect(() => {
     fetchGuests();
     const interval = setInterval(() => {
@@ -163,11 +192,18 @@ export default function RSVPTrackerPage() {
     <>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Header */}
-      <Box sx={{ pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-        <Typography variant="h5" sx={{ fontWeight: 700 }} color="text.primary">RSVP Registry</Typography>
-        <Typography variant="caption" color="text.secondary">
-          Monitor response counts, filter dietary requirements, meal requests, and manually override attendance statuses.
-        </Typography>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'space-between', alignItems: 'flex-start', pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700 }} color="text.primary">RSVP Registry</Typography>
+          <Typography variant="caption" color="text.secondary">
+            Monitor response counts, filter dietary requirements, meal requests, and manually override attendance statuses.
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button variant="outlined" onClick={handleDownloadRSVPs} startIcon={<Download size={16} />} sx={{ whiteSpace: 'nowrap' }}>
+            Download RSVPs
+          </Button>
+        </Box>
       </Box>
 
       {error && <Alert severity="error" icon={<AlertCircle size={16} />}>{error}</Alert>}
@@ -236,13 +272,13 @@ export default function RSVPTrackerPage() {
           {/* Desktop Table View */}
           <TableContainer component={Paper} elevation={1} sx={{ display: { xs: 'none', md: 'block' } }}>
             <Table size="small">
-              <TableHead>
+               <TableHead>
                 <TableRow>
                   <TableCell>Guest</TableCell>
                   <TableCell>Side</TableCell>
                   <TableCell>RSVP Status</TableCell>
-                  <TableCell>Meal Choice</TableCell>
-                  <TableCell>Plus One</TableCell>
+                  <TableCell>Meal Preference</TableCell>
+                  <TableCell>Alcohol Preference</TableCell>
                   <TableCell>Responded</TableCell>
                   <TableCell align="right">Actions</TableCell>
                 </TableRow>
@@ -302,46 +338,28 @@ export default function RSVPTrackerPage() {
                         )}
                       </TableCell>
                       <TableCell>
-                        {rsvpStatus === 'attending' ? (
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                            {meal && (
-                              <Chip
-                                icon={<UtensilsCrossed size={12} />}
-                                label={meal}
-                                size="small"
-                                variant="outlined"
-                                sx={{ textTransform: 'capitalize', fontSize: '0.7rem' }}
-                              />
-                            )}
-                            {guest.rsvp?.alcohol_choice && guest.rsvp?.alcohol_choice !== 'none' && (
-                              <Chip
-                                label={guest.rsvp.alcohol_choice}
-                                size="small"
-                                variant="outlined"
-                                sx={{ textTransform: 'capitalize', fontSize: '0.7rem', borderColor: '#D38A99', color: '#D38A99', fontWeight: 650 }}
-                              />
-                            )}
-                            {!meal && (!guest.rsvp?.alcohol_choice || guest.rsvp?.alcohol_choice === 'none') && (
-                              <Typography variant="caption" color="text.disabled">—</Typography>
-                            )}
-                          </Box>
+                        {rsvpStatus === 'attending' && meal ? (
+                          <Chip
+                            icon={<UtensilsCrossed size={12} />}
+                            label={meal}
+                            size="small"
+                            variant="outlined"
+                            sx={{ textTransform: 'capitalize', fontSize: '0.7rem' }}
+                          />
                         ) : (
                           <Typography variant="caption" color="text.disabled">—</Typography>
                         )}
                       </TableCell>
                       <TableCell>
-                        {rsvpStatus === 'attending' && hasPlusOne ? (
-                          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <UserPlus size={12} style={{ color: '#9CA3AF' }} />
-                              <Typography variant="caption" sx={{ fontWeight: 600 }}>Yes</Typography>
-                            </Box>
-                            {plusOneName && (
-                              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{plusOneName}</Typography>
-                            )}
-                          </Box>
+                        {rsvpStatus === 'attending' && guest.rsvp?.alcohol_choice && guest.rsvp?.alcohol_choice !== 'none' ? (
+                          <Chip
+                            label={guest.rsvp.alcohol_choice}
+                            size="small"
+                            variant="outlined"
+                            sx={{ textTransform: 'capitalize', fontSize: '0.7rem', borderColor: '#D38A99', color: '#D38A99', fontWeight: 650 }}
+                          />
                         ) : (
-                          <Typography variant="caption" color="text.secondary">No</Typography>
+                          <Typography variant="caption" color="text.disabled">—</Typography>
                         )}
                       </TableCell>
                       <TableCell>
@@ -414,8 +432,8 @@ export default function RSVPTrackerPage() {
                       <StatusChip guest={guest} />
                     </Box>
 
-                    {/* Meal / Plus One / Alcohol details */}
-                    {(rsvpStatus === 'attending' && (meal || hasPlusOne || (guest.rsvp?.alcohol_choice && guest.rsvp.alcohol_choice !== 'none'))) && (
+                    {/* Meal / Alcohol details */}
+                    {(rsvpStatus === 'attending' && (meal || (guest.rsvp?.alcohol_choice && guest.rsvp.alcohol_choice !== 'none'))) && (
                       <Box sx={{ display: 'flex', gap: 2, mt: 1.5, pt: 1.5, borderTop: '1px solid', borderColor: 'divider', flexWrap: 'wrap' }}>
                         {meal && (
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -427,14 +445,6 @@ export default function RSVPTrackerPage() {
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <span style={{ fontSize: '11px' }}>🍷</span>
                             <Typography variant="caption" sx={{ textTransform: 'capitalize', color: '#D38A99', fontWeight: 600 }}>{guest.rsvp.alcohol_choice}</Typography>
-                          </Box>
-                        )}
-                        {hasPlusOne && (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <UserPlus size={12} style={{ color: '#9CA3AF' }} />
-                            <Typography variant="caption">
-                              Plus One {plusOneName ? `(${plusOneName})` : ''}
-                            </Typography>
                           </Box>
                         )}
                       </Box>

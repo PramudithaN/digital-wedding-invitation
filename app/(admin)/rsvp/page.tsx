@@ -100,9 +100,9 @@ export default function RSVPTrackerPage() {
       g.name,
       g.side || 'bride',
       g.rsvp?.status || 'pending',
-      g.rsvp?.meal_choice || '—',
-      g.rsvp?.alcohol_choice || '—',
-      g.rsvp?.responded_at ? new Date(g.rsvp.responded_at).toLocaleDateString() : '—',
+      g.rsvp?.meal_choice || '-',
+      g.rsvp?.alcohol_choice || '-',
+      g.rsvp?.responded_at ? new Date(g.rsvp.responded_at).toLocaleDateString() : '-',
       g.notes || ''
     ]);
     
@@ -111,7 +111,7 @@ export default function RSVPTrackerPage() {
       ...rows.map(row => row.map(val => `"${val.replace(/"/g, '""')}"`).join(','))
     ].join('\n');
     
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);

@@ -12,16 +12,16 @@ export const WEDDING_DETAILS = {
 };
 
 export const DEFAULT_WHATSAPP_TEMPLATE = 
-`Hi {name} 👋,
+`Hi {name} \u{1F44B},
 
 You're warmly invited to celebrate the wedding of
 
-  ✨ {bride} & {groom} ✨
+  \u{2728} {bride} & {groom} \u{2728}
 
-📅 {date}
-📍 {venue}, {city}
+\u{1F4C5} {date}
+\u{1F4CD} {venue}, {city}
 
 Please let us know if you can make it:
-👉 {url}
+\u{1F449} {url}
 
-We hope to celebrate this special day with you! 💍`;
+We hope to celebrate this special day with you! \u{1F48D}`;

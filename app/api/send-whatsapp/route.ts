@@ -17,37 +17,54 @@ function getRequestBaseUrl(request: Request): string | undefined {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { guestId, method } = body; // method: 'manual' | 'twilio'
+    const { guestId, guestIds, method } = body; // method: 'manual' | 'twilio'
 
-    if (!guestId || !method) {
-      return NextResponse.json({ error: 'Guest ID and sending method are required' }, { status: 400 });
+    if ((!guestId && !guestIds) || !method) {
+      return NextResponse.json({ error: 'Guest ID(s) and sending method are required' }, { status: 400 });
     }
 
-    const guest = await getGuest(guestId);
-    if (!guest) {
-      return NextResponse.json({ error: 'Guest not found' }, { status: 404 });
-    }
-
-    if (!guest.phone) {
-      return NextResponse.json({ error: 'Guest does not have a phone number configured' }, { status: 400 });
-    }
-
+    const ids = guestIds ? guestIds : [guestId];
+    const results = [];
     const weddingDetails = await getWeddingDetails();
     const baseUrl = getRequestBaseUrl(request);
 
-    if (method === 'twilio') {
-      const response = await sendWhatsAppInviteViaTwilio(guest.phone, guest.name, guest.invite_token, weddingDetails, baseUrl);
-      if (response.success) {
-        await logInviteSent(guest.id, 'whatsapp');
-        return NextResponse.json({ success: true, sid: response.sid });
-      } else {
-        return NextResponse.json({ error: response.error || 'Failed to send via Twilio' }, { status: 500 });
+    for (const id of ids) {
+      const guest = await getGuest(id);
+      if (!guest) {
+        results.push({ id, success: false, error: 'Guest not found' });
+        continue;
       }
+
+      if (!guest.phone) {
+        results.push({ id, success: false, error: 'Guest does not have a phone number configured' });
+        continue;
+      }
+
+      if (method === 'twilio') {
+        const response = await sendWhatsAppInviteViaTwilio(guest.phone, guest.name, guest.invite_token, weddingDetails, baseUrl);
+        if (response.success) {
+          await logInviteSent(guest.id, 'whatsapp');
+          results.push({ id, success: true, sid: response.sid });
+        } else {
+          results.push({ id, success: false, error: response.error || 'Failed to send via Twilio' });
+        }
+      } else {
+        // Manual wa.me link
+        const link = buildWhatsAppLink(guest.phone, guest.name, guest.invite_token, weddingDetails, baseUrl);
+        await logInviteSent(guest.id, 'whatsapp');
+        results.push({ id, success: true, url: link });
+      }
+    }
+
+    if (guestIds) {
+      return NextResponse.json({ success: true, results });
     } else {
-      // Manual wa.me link
-      const link = buildWhatsAppLink(guest.phone, guest.name, guest.invite_token, weddingDetails, baseUrl);
-      await logInviteSent(guest.id, 'whatsapp');
-      return NextResponse.json({ success: true, url: link });
+      const res = results[0];
+      if (res.success) {
+        return NextResponse.json({ success: true, url: res.url, sid: res.sid });
+      } else {
+        return NextResponse.json({ error: res.error }, { status: 500 });
+      }
     }
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

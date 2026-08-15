@@ -99,6 +99,24 @@ function parseCSV(text: string) {
   return parsedRows;
 }
 
+const WhatsappIcon = ({ size = 16, className }: { size?: number; className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+    <path d="M17 14c-.3-.1-1.7-.8-2-1-.3-.1-.5-.1-.7.2l-1 1.2c-.2.2-.5.3-.8.1a9 9 0 0 1-3.8-3.8c-.2-.3-.1-.6.1-.8l1.2-1c.3-.2.3-.5.2-.7l-1-2c-.2-.5-.5-.5-.7-.5h-.7c-.2 0-.6.1-.9.4C8 6.5 7 7.5 7 9.5c0 4 3.5 7.5 7.5 7.5 2 0 3-1 3.5-1.5.3-.3.4-.7.4-.9 0-.2-.1-.3-.2-.5z" />
+  </svg>
+);
+
 export default function GuestsPage() {
   const [guests, setGuests] = useState<GuestWithDetails[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -133,6 +151,15 @@ export default function GuestsPage() {
   const [selectedGuest, setSelectedGuest] = useState<GuestWithDetails | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Bulk sending states
+  const [isBulkOpen, setIsBulkOpen] = useState(false);
+  const [bulkFilter, setBulkFilter] = useState<'pending' | 'all'>('pending');
+  const [bulkMethod, setBulkMethod] = useState<'manual' | 'twilio'>('manual');
+  const [isBulkWizardOpen, setIsBulkWizardOpen] = useState(false);
+  const [bulkList, setBulkList] = useState<GuestWithDetails[]>([]);
+  const [bulkIndex, setBulkIndex] = useState(0);
+  const [isBulkSendingTwilio, setIsBulkSendingTwilio] = useState(false);
 
   const fetchData = async (silent = false) => {
     try {
@@ -292,6 +319,78 @@ export default function GuestsPage() {
     finally { setSendingId(null); }
   };
 
+  const handleStartBulk = async () => {
+    const targets = guests.filter(g => {
+      if (!g.phone) return false;
+      if (bulkFilter === 'pending') {
+        return !g.rsvp?.status || g.rsvp.status === 'pending';
+      }
+      return true;
+    });
+
+    if (targets.length === 0) {
+      showToast('No eligible guests found with phone numbers.', 'error');
+      return;
+    }
+
+    setBulkList(targets);
+    setBulkIndex(0);
+    setIsBulkOpen(false);
+
+    if (bulkMethod === 'twilio') {
+      setIsBulkSendingTwilio(true);
+      try {
+        const res = await fetch('/api/send-whatsapp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ guestIds: targets.map(t => t.id), method: 'twilio' }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Successfully sent ${targets.length} invites via Twilio!`, 'success');
+          await fetchData(true);
+        } else {
+          showToast(data.error || 'Failed to send bulk invites', 'error');
+        }
+      } catch (err: any) {
+        showToast(err.message || 'Error sending bulk invites', 'error');
+      } finally {
+        setIsBulkSendingTwilio(false);
+      }
+    } else {
+      setIsBulkWizardOpen(true);
+    }
+  };
+
+  const handleManualSendNext = async (skip = false) => {
+    const currentGuest = bulkList[bulkIndex];
+    if (!currentGuest) return;
+
+    if (!skip) {
+      try {
+        const res = await fetch('/api/send-whatsapp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ guestId: currentGuest.id, method: 'manual' }),
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.open(data.url, '_blank');
+        }
+      } catch (err) {
+        console.error('Error sending manual invite link:', err);
+      }
+    }
+
+    if (bulkIndex < bulkList.length - 1) {
+      setBulkIndex(prev => prev + 1);
+    } else {
+      setIsBulkWizardOpen(false);
+      showToast('Bulk manual sending completed!', 'success');
+      await fetchData(true);
+    }
+  };
+
   const filtered = guests.filter(g => {
     const s = search.toLowerCase();
     return (
@@ -316,6 +415,9 @@ export default function GuestsPage() {
           <Button variant="outlined" component="label" startIcon={<Upload size={16} />} sx={{ whiteSpace: 'nowrap' }}>
             Upload CSV
             <input type="file" accept=".csv" onChange={handleCSVUpload} hidden />
+          </Button>
+          <Button variant="contained" color="success" startIcon={<WhatsappIcon />} onClick={() => setIsBulkOpen(true)} sx={{ whiteSpace: 'nowrap', bgcolor: '#16A34A', '&:hover': { bgcolor: '#15803D' } }}>
+            Bulk Invite
           </Button>
           <Button variant="contained" startIcon={<Plus size={16} />} onClick={() => setIsAddOpen(true)} sx={{ whiteSpace: 'nowrap' }}>
             Add Guest
@@ -406,7 +508,7 @@ export default function GuestsPage() {
                         {g.phone && (
                           <Tooltip title="Send WhatsApp">
                             <IconButton size="small" color="primary" disabled={sendingId !== null} onClick={() => handleSendWhatsApp(g)}>
-                              {sendingId === g.id ? <CircularProgress size={14} /> : <MessageCircle size={16} />}
+                              {sendingId === g.id ? <CircularProgress size={14} /> : <WhatsappIcon size={16} />}
                             </IconButton>
                           </Tooltip>
                         )}
@@ -492,7 +594,7 @@ export default function GuestsPage() {
                           color="primary" 
                           onClick={() => handleSendWhatsApp(g)} 
                           disabled={sendingId !== null} 
-                          startIcon={sendingId === g.id ? <CircularProgress size={16} /> : <MessageCircle size={16} />} 
+                          startIcon={sendingId === g.id ? <CircularProgress size={16} /> : <WhatsappIcon size={16} />} 
                           sx={{ 
                             fontSize: '0.7rem', 
                             fontWeight: 700, 
@@ -599,6 +701,105 @@ export default function GuestsPage() {
           </Box>
         </Box>
       </Drawer>
+
+      {/* Bulk Send Selection Dialog */}
+      <Dialog open={isBulkOpen} onClose={() => setIsBulkOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <WhatsappIcon size={20} className="text-[#16A34A]" />
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>Send Bulk Invites</Typography>
+          </Box>
+          <IconButton size="small" onClick={() => setIsBulkOpen(false)}><X size={18} /></IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, py: 3 }}>
+          <FormControl fullWidth size="small">
+            <InputLabel>Target Guests</InputLabel>
+            <Select value={bulkFilter} label="Target Guests" onChange={e => setBulkFilter(e.target.value as any)}>
+              <MenuItem value="pending">Only Pending RSVP Guests</MenuItem>
+              <MenuItem value="all">All Guests (with Phone Number)</MenuItem>
+            </Select>
+          </FormControl>
+          
+          <FormControl fullWidth size="small">
+            <InputLabel>Sending Method</InputLabel>
+            <Select value={bulkMethod} label="Sending Method" onChange={e => setBulkMethod(e.target.value as any)}>
+              <MenuItem value="manual">Manual (Open WhatsApp Web/App chats)</MenuItem>
+              <MenuItem value="twilio">Automatic (Via Twilio SMS Gateway)</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Box sx={{ display: 'flex', gap: 1.5, pt: 1 }}>
+            <Button variant="outlined" fullWidth onClick={() => setIsBulkOpen(false)}>Cancel</Button>
+            <Button variant="contained" color="success" fullWidth onClick={handleStartBulk} sx={{ bgcolor: '#16A34A', '&:hover': { bgcolor: '#15803D' } }}>
+              Start Sending
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Twilio sending loading overlay */}
+      <Dialog open={isBulkSendingTwilio} keepMounted={false}>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4, gap: 2 }}>
+          <CircularProgress size={40} color="success" />
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>Sending invitations in background...</Typography>
+          <Typography variant="caption" color="text.secondary">Please do not close this window.</Typography>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Manual Sending Wizard Dialog */}
+      <Dialog open={isBulkWizardOpen} keepMounted={false}>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <WhatsappIcon size={20} className="text-[#16A34A]" />
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>WhatsApp Wizard</Typography>
+          </Box>
+          <Typography variant="caption" sx={{ bgcolor: '#F3F4F6', px: 1.5, py: 0.5, borderRadius: 10, fontWeight: 700 }}>
+            {bulkIndex + 1} / {bulkList.length}
+          </Typography>
+        </DialogTitle>
+        <DialogContent dividers sx={{ minWidth: 320, py: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Inviting Guest</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 800, mt: 0.5, color: '#111827' }}>
+              {bulkList[bulkIndex]?.name}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              Phone: {bulkList[bulkIndex]?.phone}
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+            <Button 
+              variant="contained" 
+              color="success" 
+              fullWidth 
+              startIcon={<WhatsappIcon size={18} />}
+              onClick={() => handleManualSendNext(false)}
+              sx={{ py: 1.2, fontWeight: 700, bgcolor: '#16A34A', '&:hover': { bgcolor: '#15803D' } }}
+            >
+              Open Chat & Next
+            </Button>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button 
+                variant="outlined" 
+                fullWidth 
+                onClick={() => handleManualSendNext(true)}
+                sx={{ textTransform: 'none', color: '#6B7280', borderColor: '#E5E7EB', '&:hover': { borderColor: '#D1D5DB' } }}
+              >
+                Skip / Next
+              </Button>
+              <Button 
+                variant="outlined" 
+                color="error" 
+                onClick={() => setIsBulkWizardOpen(false)}
+                sx={{ textTransform: 'none' }}
+              >
+                Cancel
+              </Button>
+            </Box>
+          </Box>
+        </DialogContent>
+      </Dialog>
 
       {/* Toast */}
       <Snackbar open={toast !== null} autoHideDuration={3000} onClose={() => setToast(null)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }} sx={{ zIndex: 9999 }}>

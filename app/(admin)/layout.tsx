@@ -81,13 +81,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         })}
       </List>
       <Divider sx={{ mx: 2, mt: 1 }} />
-      <Box sx={{ px: 1, py: 1.5 }}>
+      <Box sx={{ px: 1, py: 1.5, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         <form action={logoutAction}>
           <ListItemButton component="button" type="submit" sx={{ borderRadius: 2, width: '100%', color: '#FCA5A5', '&:hover': { backgroundColor: 'rgba(239,68,68,0.12)' } }}>
             <ListItemIcon sx={{ color: '#FCA5A5' }}><LogOut size={18} /></ListItemIcon>
             <ListItemText primary="Sign Out" slotProps={{ primary: { sx: { fontSize: '0.82rem', fontWeight: 600 } } }} />
           </ListItemButton>
         </form>
+        {process.env.NEXT_PUBLIC_APP_VERSION && (
+          <Box sx={{ px: 1.5, textAlign: 'center' }}>
+            <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.7rem', fontFamily: 'monospace', display: 'block', opacity: 0.8 }}>
+              {process.env.NEXT_PUBLIC_APP_VERSION}
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Box>
   );

@@ -110,6 +110,17 @@ const WhatsappIcon = ({ size = 16, className }: { size?: number; className?: str
   />
 );
 
+const WhatsappWhiteIcon = ({ size = 16, className }: { size?: number; className?: string }) => (
+  <img
+    src="/whatsapp-svgrepo-com.svg"
+    alt="WhatsApp"
+    width={size}
+    height={size}
+    className={className}
+    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+  />
+);
+
 export default function GuestsPage() {
   const [guests, setGuests] = useState<GuestWithDetails[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -409,7 +420,7 @@ export default function GuestsPage() {
             Upload CSV
             <input type="file" accept=".csv" onChange={handleCSVUpload} hidden />
           </Button>
-          <Button variant="contained" color="success" startIcon={<WhatsappIcon />} onClick={() => setIsBulkOpen(true)} sx={{ whiteSpace: 'nowrap', bgcolor: '#16A34A', '&:hover': { bgcolor: '#15803D' } }}>
+          <Button variant="contained" color="success" startIcon={<WhatsappWhiteIcon />} onClick={() => setIsBulkOpen(true)} sx={{ whiteSpace: 'nowrap', bgcolor: '#16A34A', '&:hover': { bgcolor: '#15803D' } }}>
             Bulk Invite
           </Button>
           <Button variant="contained" startIcon={<Plus size={16} />} onClick={() => setIsAddOpen(true)} sx={{ whiteSpace: 'nowrap' }}>
@@ -766,7 +777,7 @@ export default function GuestsPage() {
               variant="contained" 
               color="success" 
               fullWidth 
-              startIcon={<WhatsappIcon size={18} />}
+              startIcon={<WhatsappWhiteIcon size={18} />}
               onClick={() => handleManualSendNext(false)}
               sx={{ py: 1.2, fontWeight: 700, bgcolor: '#16A34A', '&:hover': { bgcolor: '#15803D' } }}
             >

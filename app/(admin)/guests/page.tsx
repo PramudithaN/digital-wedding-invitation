@@ -101,7 +101,7 @@ function parseCSV(text: string) {
 
 const WhatsappIcon = ({ size = 16, className }: { size?: number; className?: string }) => (
   <img
-    src="/WAicon.svg"
+    src="/newwhatsapp-svgrepo-com.svg"
     alt="WhatsApp"
     width={size}
     height={size}

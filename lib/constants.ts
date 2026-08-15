@@ -11,17 +11,23 @@ export const WEDDING_DETAILS = {
   registry_url: 'https://weddingregistry.com',
 };
 
+const emojiWave = String.fromCodePoint(0x1F44B);
+const emojiCalendar = String.fromCodePoint(0x1F4C5);
+const emojiPin = String.fromCodePoint(0x1F4CD);
+const emojiFinger = String.fromCodePoint(0x1F449);
+const emojiRing = String.fromCodePoint(0x1F48D);
+
 export const DEFAULT_WHATSAPP_TEMPLATE = 
-`Hi {name} \u{1F44B},
+`Hi {name} ${emojiWave},
 
 You're warmly invited to celebrate the wedding of
 
   *{bride} & {groom}*
 
-\u{1F4C5} {date}
-\u{1F4CD} {venue}, {city}
+${emojiCalendar} {date}
+${emojiPin} {venue}, {city}
 
 Please let us know if you can make it:
-\u{1F449} _{url}_
+${emojiFinger} _{url}_
 
-We hope to celebrate this special day with you! \u{1F48D}`;
+We hope to celebrate this special day with you! ${emojiRing}`;

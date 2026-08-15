@@ -79,7 +79,7 @@ export function buildWhatsAppLink(
     .replace('{url}', inviteUrl);
     
   const cleanPhone = formatPhoneNumber(phone);
-  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+  return `https://api.whatsapp.com/send/?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
 }
 
 export async function sendWhatsAppInviteViaTwilio(

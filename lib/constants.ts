@@ -16,12 +16,12 @@ export const DEFAULT_WHATSAPP_TEMPLATE =
 
 You're warmly invited to celebrate the wedding of
 
-  \u{2728} {bride} & {groom} \u{2728}
+  *{bride} & {groom}*
 
 \u{1F4C5} {date}
 \u{1F4CD} {venue}, {city}
 
 Please let us know if you can make it:
-\u{1F449} {url}
+\u{1F449} _{url}_
 
 We hope to celebrate this special day with you! \u{1F48D}`;

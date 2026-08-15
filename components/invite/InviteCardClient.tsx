@@ -674,7 +674,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
               </div>
             )}
             
-            <p className="text-sm sm:text-base md:text-lg font-bold tracking-wide leading-relaxed max-w-sm mx-auto text-[#6B6B6B]" style={{ fontFamily: invitationTypography.body }}>
+            <p className="text-xs sm:text-sm tracking-wide leading-relaxed max-w-sm mx-auto text-[#6B6B6B]" style={{ fontFamily: invitationTypography.body }}>
               on their wedding day
             </p>
           </div>

@@ -100,21 +100,14 @@ function parseCSV(text: string) {
 }
 
 const WhatsappIcon = ({ size = 16, className }: { size?: number; className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
+  <img
+    src="/whatsapp-color-svgrepo-com.svg"
+    alt="WhatsApp"
     width={size}
     height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
     className={className}
-  >
-    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-    <path d="M17 14c-.3-.1-1.7-.8-2-1-.3-.1-.5-.1-.7.2l-1 1.2c-.2.2-.5.3-.8.1a9 9 0 0 1-3.8-3.8c-.2-.3-.1-.6.1-.8l1.2-1c.3-.2.3-.5.2-.7l-1-2c-.2-.5-.5-.5-.7-.5h-.7c-.2 0-.6.1-.9.4C8 6.5 7 7.5 7 9.5c0 4 3.5 7.5 7.5 7.5 2 0 3-1 3.5-1.5.3-.3.4-.7.4-.9 0-.2-.1-.3-.2-.5z" />
-  </svg>
+    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+  />
 );
 
 export default function GuestsPage() {

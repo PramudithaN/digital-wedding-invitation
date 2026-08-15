@@ -668,7 +668,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
 
             {guest.name !== 'general' && (
               <div className="py-2">
-                <p className="text-base sm:text-lg md:text-xl font-bold italic text-[#4A4A4A]" style={{ fontFamily: invitationTypography.body }}>
+                <p className="text-lg sm:text-xl md:text-2xl font-bold italic text-[#4A4A4A]" style={{ fontFamily: invitationTypography.body }}>
                   {guest.name},
                 </p>
               </div>

@@ -315,8 +315,8 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
   };
 
   const invitationTypography = {
-    mainNames: '"Miracle World Personal use regular", "Miracle World Personal Use Regular", "Miracle World", "Playfair Display", serif',
-    ampersand: '"Boheme Floral", "Great Vibes", cursive',
+    mainNames: 'var(--font-miracle-world), "Miracle World Personal use regular", "Miracle World Personal Use Regular", "Miracle World", "Playfair Display", serif',
+    ampersand: 'var(--font-boheme-floral), "Boheme Floral", "Great Vibes", cursive',
     body: '"Playfair Display", serif',
     nameColor: '#2D312E',
     ampColor: '#D38A99',

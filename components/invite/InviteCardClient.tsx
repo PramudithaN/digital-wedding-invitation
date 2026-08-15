@@ -683,10 +683,10 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
           <div className="pb-4 space-y-6 flex flex-col items-center">
             {/* Date & Time block (Pink, Serif, Uppercase) */}
             <div className="space-y-2 py-2">
-              <p className="text-[13px] sm:text-lg md:text-xl uppercase tracking-[0.1em] sm:tracking-[0.15em] font-medium whitespace-nowrap" style={{ fontFamily: invitationTypography.body, color: invitationTypography.ampColor }}>
+              <p className="text-lg sm:text-xl md:text-2xl uppercase tracking-[0.15em] font-medium" style={{ fontFamily: invitationTypography.body, color: invitationTypography.ampColor }}>
                 {weddingDetails.date.toUpperCase()}
               </p>
-              <p className="text-xs sm:text-md md:text-lg uppercase tracking-[0.15em] font-medium" style={{ fontFamily: invitationTypography.body, color: invitationTypography.ampColor }}>
+              <p className="text-md sm:text-lg md:text-xl uppercase tracking-[0.15em] font-medium" style={{ fontFamily: invitationTypography.body, color: invitationTypography.ampColor }}>
                 AT {weddingDetails.time.toUpperCase()}
               </p>
             </div>

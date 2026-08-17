@@ -45,7 +45,7 @@ export default function EditGuestPage() {
   const [side, setSide] = useState<'bride' | 'groom'>('bride');
   const [categoryId, setCategoryId] = useState('');
   const [notes, setNotes] = useState('');
-  const [plusOne, setPlusOne] = useState(false);
+  const [guestCount, setGuestCount] = useState<number>(1);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,7 +76,7 @@ export default function EditGuestPage() {
         setSide(guestData.side || 'bride');
         setCategoryId(guestData.category_id || '');
         setNotes(guestData.notes || '');
-        setPlusOne(guestData.rsvp?.plus_one || false);
+        setGuestCount(guestData.rsvp?.plus_one || 1);
       } catch (err: any) {
         setError(err.message || 'Error loading guest');
       } finally {
@@ -107,7 +107,7 @@ export default function EditGuestPage() {
           side,
           category_id: categoryId || null,
           notes: notes.trim(),
-          plus_one: plusOne
+          plus_one: guestCount
         }),
       });
 
@@ -297,17 +297,20 @@ export default function EditGuestPage() {
             {/* Guest Count */}
             <div>
               <label htmlFor="edit-count" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-                Guest Count (Optional)
+                Guest Count
               </label>
-              <select
+              <input
                 id="edit-count"
-                value={plusOne ? '2' : '1'}
-                onChange={(e) => setPlusOne(e.target.value === '2')}
-                className="w-full bg-white border border-gray-200 text-gray-700 text-xs rounded-md py-2.5 px-3 focus:outline-none focus:border-blue-500 cursor-pointer"
-              >
-                <option value="1">1 Guest (Single)</option>
-                <option value="2">2 Guests (with Plus One)</option>
-              </select>
+                type="number"
+                min="1"
+                required
+                value={guestCount}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  setGuestCount(isNaN(val) ? 1 : Math.max(1, val));
+                }}
+                className="w-full bg-white border border-gray-200 text-gray-900 text-xs rounded-md py-2.5 px-3 focus:outline-none focus:border-blue-500"
+              />
             </div>
 
             {/* Notes */}
@@ -377,7 +380,7 @@ export default function EditGuestPage() {
                   <input
                     type="text"
                     readOnly
-                    value={`${window.location.origin}/invite/${guest?.invite_token}`}
+                    value={`${process.env.NEXT_PUBLIC_HOSTED_URL || window.location.origin}/invite/${guest?.invite_token}`}
                     onClick={(e) => (e.target as HTMLInputElement).select()}
                     className="flex-1 bg-gray-50 border border-gray-250 rounded py-2 px-3 text-[10px] text-blue-605 font-mono focus:outline-none cursor-pointer"
                     title="Click to copy invite link"
@@ -385,7 +388,7 @@ export default function EditGuestPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      const inviteUrl = `${window.location.origin}/invite/${guest?.invite_token}`;
+                      const inviteUrl = `${process.env.NEXT_PUBLIC_HOSTED_URL || window.location.origin}/invite/${guest?.invite_token}`;
                       navigator.clipboard.writeText(inviteUrl);
                       showToast("Invitation URL copied to clipboard!", "success");
                     }}
@@ -450,7 +453,7 @@ export default function EditGuestPage() {
 
                 <div className="border-t border-gray-100 pt-3 space-y-3.5 text-xs text-gray-700">
                   {/* Plus One Details */}
-                  {guest.rsvp.plus_one && (
+                  {guest.rsvp.plus_one > 1 && (
                     <div className="flex gap-2 text-gray-600">
                       <UserPlus className="w-4.5 h-4.5 text-gray-400 shrink-0 mt-0.5" />
                       <div>

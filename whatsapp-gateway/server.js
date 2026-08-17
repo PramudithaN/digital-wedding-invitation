@@ -81,6 +81,21 @@ app.post('/send', async (req, res) => {
   res.json({ success: true, message: 'Sending started' });
 });
 
+const fs = require('fs');
+
+function getExecutablePath() {
+  const paths = [
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe'
+  ];
+  for (const p of paths) {
+    if (fs.existsSync(p)) return p;
+  }
+  return undefined;
+}
+
 function initializeClient() {
   status = { state: 'initializing' };
 
@@ -88,7 +103,7 @@ function initializeClient() {
     authStrategy: new LocalAuth({ clientId: 'gateway-session' }),
     puppeteer: {
       headless: true,
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || getExecutablePath(),
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',

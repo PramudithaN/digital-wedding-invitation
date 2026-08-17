@@ -4,6 +4,9 @@ import { getGuests, getWeddingDetails } from '@/lib/db';
 import { DEFAULT_WHATSAPP_TEMPLATE } from '@/lib/constants';
 
 function getRequestBaseUrl(request: Request): string | undefined {
+  if (process.env.NEXT_PUBLIC_HOSTED_URL) {
+    return process.env.NEXT_PUBLIC_HOSTED_URL;
+  }
   const host = request.headers.get('host');
   if (!host) return undefined;
   const protocol = host.includes('localhost') ? 'http' : 'https';

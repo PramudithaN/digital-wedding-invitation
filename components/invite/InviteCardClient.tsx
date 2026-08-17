@@ -904,6 +904,16 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                 {attending === 'attending' && (
                   <div className="space-y-5 pt-4 border-t border-[#E8E4DE] animate-fade-in">
 
+                    {/* Guest Count Seat Message */}
+                    <div className="p-3.5 bg-[#FAF8F5] border border-[#EAE3DB] rounded-lg text-center space-y-1">
+                      <p className="text-xs font-semibold text-gray-800">
+                        {guest.rsvp?.plus_one || 1} {(guest.rsvp?.plus_one || 1) === 1 ? 'guest is' : 'guests are'} confirmed.
+                      </p>
+                      <p className="text-[10px] leading-relaxed text-gray-600">
+                        Are all of you coming? If not, please mention how many are attending in the text box below.
+                      </p>
+                    </div>
+
                     {/* Meal Preference */}
                     <div className="space-y-2">
                       <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] flex items-center gap-1.5">
@@ -984,7 +994,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                     id="rsvp-msg"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Write a message to the couple (optional)"
+                    placeholder="Write a message to the couple, or mention if the guest count is different (optional)"
                     rows={4}
                     className="w-full bg-white border border-gray-200 rounded py-3 px-4 text-xs text-gray-900 focus:outline-none focus:border-[#D38A99] resize-none"
                   />

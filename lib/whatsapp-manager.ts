@@ -197,7 +197,7 @@ export async function startBulkSend(targetFilter: 'pending' | 'all') {
         }
         
         const whatsappId = `${phoneClean}@c.us`;
-        const inviteUrl = `${globalThis.location?.origin || 'https://digital-wedding-invitation-beige.vercel.app'}/invite/${guest.invite_token}`;
+        const inviteUrl = `${process.env.NEXT_PUBLIC_HOSTED_URL || globalThis.location?.origin || 'https://digital-wedding-invitation-beige.vercel.app'}/invite/${guest.invite_token}`;
         
         const message = DEFAULT_WHATSAPP_TEMPLATE
           .replace('{name}', guest.name)

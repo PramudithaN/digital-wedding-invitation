@@ -133,7 +133,7 @@ export default function GuestsPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const getInviteUrl = (guest: GuestWithDetails) => `${globalThis.location?.origin || ''}/invite/${guest.invite_token}`;
+  const getInviteUrl = (guest: GuestWithDetails) => `${process.env.NEXT_PUBLIC_HOSTED_URL || globalThis.location?.origin || ''}/invite/${guest.invite_token}`;
   const openInviteLink = (g: GuestWithDetails) => globalThis.open(getInviteUrl(g), '_blank', 'noopener,noreferrer');
   const handleCopyLink = (g: GuestWithDetails) => {
     navigator.clipboard.writeText(getInviteUrl(g));
@@ -150,7 +150,7 @@ export default function GuestsPage() {
   const [side, setSide] = useState<'bride' | 'groom'>('bride');
   const [categoryId, setCategoryId] = useState('');
   const [notes, setNotes] = useState('');
-  const [plusOne, setPlusOne] = useState(false);
+  const [guestCount, setGuestCount] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedGuest, setSelectedGuest] = useState<GuestWithDetails | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
@@ -159,7 +159,7 @@ export default function GuestsPage() {
   // Bulk sending states
   const [isBulkOpen, setIsBulkOpen] = useState(false);
   const [bulkFilter, setBulkFilter] = useState<'pending' | 'all'>('pending');
-  const [bulkMethod, setBulkMethod] = useState<'manual' | 'twilio' | 'automated'>('twilio');
+  const [bulkMethod, setBulkMethod] = useState<'manual' | 'twilio' | 'automated'>('automated');
   const [isBulkWizardOpen, setIsBulkWizardOpen] = useState(false);
   const [bulkList, setBulkList] = useState<GuestWithDetails[]>([]);
   const [bulkIndex, setBulkIndex] = useState(0);
@@ -223,10 +223,10 @@ export default function GuestsPage() {
       const res = await fetch('/api/guests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), phone: normalizePhoneNumber(phone.trim()), email: email.trim(), side, category_id: categoryId || null, notes: notes.trim(), plus_one: plusOne }),
+        body: JSON.stringify({ name: name.trim(), phone: normalizePhoneNumber(phone.trim()), email: email.trim(), side, category_id: categoryId || null, notes: notes.trim(), plus_one: guestCount }),
       });
       await fetchData(true);
-      setName(''); setPhone(''); setEmail(''); setSide('bride'); setCategoryId(''); setNotes(''); setPlusOne(false); setIsAddOpen(false);
+      setName(''); setPhone(''); setEmail(''); setSide('bride'); setCategoryId(''); setNotes(''); setGuestCount(1); setIsAddOpen(false);
       showToast('Guest added successfully!', 'success');
     } catch (err: any) { showToast(err.message || 'Could not add', 'error'); }
     finally { setIsSubmitting(false); }
@@ -289,7 +289,10 @@ export default function GuestsPage() {
             if (matchedCat) matchedCategoryId = matchedCat.id;
           }
 
-          const plusOne = rawCount === '2' || rawCount.toLowerCase() === 'true' || rawCount.toLowerCase() === 'yes';
+          let parsedCount = parseInt(rawCount.replace(/[^\d]/g, ''), 10);
+          if (isNaN(parsedCount)) {
+            parsedCount = (rawCount.toLowerCase() === 'true' || rawCount.toLowerCase() === 'yes') ? 2 : 1;
+          }
           
           return {
             name: rawName.trim(),
@@ -298,7 +301,7 @@ export default function GuestsPage() {
             side,
             category_id: matchedCategoryId,
             notes: rawNotes.trim(),
-            plus_one: plusOne
+            plus_one: parsedCount
           };
         }).filter(g => g.name);
         
@@ -565,7 +568,7 @@ export default function GuestsPage() {
                     <TableCell><SideChip side={g.side || 'bride'} /></TableCell>
                     <TableCell>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {g.rsvp?.plus_one ? 2 : 1}
+                        {g.rsvp?.plus_one || 1}
                       </Typography>
                     </TableCell>
                     <TableCell>
@@ -618,7 +621,7 @@ export default function GuestsPage() {
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>{g.name}</Typography>
                       <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
                         <SideChip side={g.side || 'bride'} />
-                        <Chip size="small" label={`Count: ${g.rsvp?.plus_one ? 2 : 1}`} sx={{ height: 18, fontSize: '0.65rem', bgcolor: '#F3F4F6', color: '#374151', fontWeight: 600 }} />
+                        <Chip size="small" label={`Count: ${g.rsvp?.plus_one || 1}`} sx={{ height: 18, fontSize: '0.65rem', bgcolor: '#F3F4F6', color: '#374151', fontWeight: 600 }} />
                       </Box>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }} onClick={e => e.stopPropagation()}>
@@ -705,7 +708,7 @@ export default function GuestsPage() {
               <Grid container spacing={1.5} sx={{ mb: 2 }}>
                 {[
                   { label: 'Side', value: selectedGuest.side },
-                  { label: 'Count', value: selectedGuest.rsvp?.plus_one ? '2' : '1' },
+                  { label: 'Count', value: String(selectedGuest.rsvp?.plus_one || 1) },
                   { label: 'Phone', value: selectedGuest.phone || '–' },
                   { label: 'Email', value: selectedGuest.email || '–' },
                 ].map(({ label, value }) => (
@@ -757,13 +760,19 @@ export default function GuestsPage() {
               {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
             </Select>
           </FormControl>
-          <FormControl size="small" fullWidth>
-            <InputLabel>Guest Count</InputLabel>
-            <Select value={plusOne ? '2' : '1'} label="Guest Count" onChange={e => setPlusOne(e.target.value === '2')}>
-              <MenuItem value="1">1 Guest (Single)</MenuItem>
-              <MenuItem value="2">2 Guests (with Plus One)</MenuItem>
-            </Select>
-          </FormControl>
+          <TextField
+            label="Guest Count *"
+            type="number"
+            value={guestCount}
+            onChange={e => {
+              const val = parseInt(e.target.value, 10);
+              setGuestCount(isNaN(val) ? 1 : Math.max(1, val));
+            }}
+            slotProps={{ htmlInput: { min: 1 } }}
+            size="small"
+            fullWidth
+            required
+          />
           <TextField label="Private Notes" value={notes} onChange={e => setNotes(e.target.value)} size="small" fullWidth multiline rows={3} />
           <Box sx={{ display: 'flex', gap: 1.5, pt: 1 }}>
             <Button variant="outlined" fullWidth onClick={() => setIsAddOpen(false)}>Cancel</Button>
@@ -792,12 +801,10 @@ export default function GuestsPage() {
             </Select>
           </FormControl>
           
-          <FormControl fullWidth size="small">
+          <FormControl fullWidth size="small" disabled>
             <InputLabel>Sending Method</InputLabel>
             <Select value={bulkMethod} label="Sending Method" onChange={e => setBulkMethod(e.target.value as any)}>
-              <MenuItem value="twilio">Automatic (Via Twilio Gateway)</MenuItem>
               <MenuItem value="automated">Automated (Scan QR Code - Free)</MenuItem>
-              <MenuItem value="manual">Manual (Open WhatsApp Web/App chats)</MenuItem>
             </Select>
           </FormControl>
 

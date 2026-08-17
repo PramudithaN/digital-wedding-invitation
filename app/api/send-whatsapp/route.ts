@@ -3,6 +3,9 @@ import { getGuest, logInviteSent, getWeddingDetails } from '@/lib/db';
 import { buildWhatsAppLink, sendWhatsAppInviteViaTwilio } from '@/lib/whatsapp';
 
 function getRequestBaseUrl(request: Request): string | undefined {
+  if (process.env.NEXT_PUBLIC_HOSTED_URL) {
+    return process.env.NEXT_PUBLIC_HOSTED_URL;
+  }
   const forwardedHost = request.headers.get('x-forwarded-host');
   const host = forwardedHost || request.headers.get('host');
   if (!host) {

@@ -21,7 +21,7 @@ export interface RSVP {
   id: string;
   guest_id: string;
   status: 'attending' | 'declined' | 'pending';
-  plus_one: boolean;
+  plus_one: number;
   plus_one_name?: string;
   meal_choice?: string;
   dietary_notes?: string;

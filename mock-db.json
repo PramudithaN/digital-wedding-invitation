@@ -34,7 +34,7 @@
     {
       "id": "guest-2",
       "name": "James Wijesinghe",
-      "phone": "+94777654321",
+      "phone": "+94757918077",
       "email": "james@example.com",
       "side": "groom",
       "category_id": "cat-2",
@@ -44,8 +44,8 @@
     },
     {
       "id": "guest-3",
-      "name": "Maya Lee",
-      "phone": "+94772345678",
+      "name": "Nipuni",
+      "phone": "+94750503864",
       "email": "maya@example.com",
       "side": "bride",
       "category_id": "cat-3",
@@ -108,6 +108,18 @@
       "message": "",
       "alcohol_choice": "hard liquor",
       "responded_at": "2026-07-15T13:41:29.028Z"
+    },
+    {
+      "id": "rsvp-1786683635660",
+      "guest_id": "guest-3",
+      "status": "attending",
+      "plus_one": false,
+      "plus_one_name": "",
+      "meal_choice": "non-veg",
+      "dietary_notes": "",
+      "message": "",
+      "alcohol_choice": "wine",
+      "responded_at": "2026-08-14T05:00:35.660Z"
     }
   ],
   "invite_links": [
@@ -116,7 +128,7 @@
       "guest_id": "guest-1",
       "short_code": "sarahk",
       "channel": "whatsapp",
-      "sent_at": "2026-06-28T05:32:07.273Z",
+      "sent_at": "2026-08-15T10:53:52.264Z",
       "opened_at": "2026-06-28T05:32:07.273Z"
     },
     {
@@ -124,8 +136,23 @@
       "guest_id": "guest-1782624785258",
       "short_code": "guest-",
       "channel": "whatsapp",
-      "sent_at": "2026-06-28T05:39:42.783Z",
+      "sent_at": "2026-08-15T10:53:00.996Z",
       "opened_at": "2026-07-15T07:51:32.436Z"
+    },
+    {
+      "id": "link-1786683617993",
+      "guest_id": "guest-3",
+      "short_code": "guest-",
+      "channel": "whatsapp",
+      "opened_at": "2026-08-14T05:00:17.993Z",
+      "sent_at": "2026-08-15T10:53:30.908Z"
+    },
+    {
+      "id": "link-1786788453998",
+      "guest_id": "guest-2",
+      "short_code": "guest-",
+      "channel": "whatsapp",
+      "sent_at": "2026-08-15T10:53:21.990Z"
     }
   ],
   "gallery_images": [

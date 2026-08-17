@@ -75,7 +75,7 @@ function readMockDB(): {
           id: 'rsvp-1', 
           guest_id: 'guest-1', 
           status: 'attending' as const, 
-          plus_one: true, 
+          plus_one: 2, 
           plus_one_name: 'Tom', 
           meal_choice: 'veg', 
           dietary_notes: 'Gluten free', 
@@ -86,7 +86,8 @@ function readMockDB(): {
           id: 'rsvp-2', 
           guest_id: 'guest-2', 
           status: 'declined' as const, 
-          plus_one: false, 
+          plus_one: 1, 
+          plus_one_name: '', 
           meal_choice: '', 
           dietary_notes: '', 
           message: 'Sorry I cannot make it, I will be out of the country. Wishing you the best!', 
@@ -283,10 +284,10 @@ export async function getGuestByToken(token: string): Promise<GuestWithDetails |
 }
 
 export async function addGuest(
-  guest: Omit<Guest, 'id' | 'created_at' | 'invite_token'> & { plus_one?: boolean }
+  guest: Omit<Guest, 'id' | 'created_at' | 'invite_token'> & { plus_one?: number }
 ): Promise<Guest> {
   const inviteToken = generateUUID();
-  const { plus_one, ...guestData } = guest;
+  const { plus_one = 1, ...guestData } = guest;
   let newGuest;
   if (isSupabaseConfigured) {
     const { data, error } = await supabase!
@@ -297,16 +298,14 @@ export async function addGuest(
     if (error) throw error;
     newGuest = data;
 
-    if (plus_one) {
-      const { error: rsvpError } = await supabase!
-        .from('rsvps')
-        .insert([{
-          guest_id: newGuest.id,
-          status: 'pending',
-          plus_one: true
-        }]);
-      if (rsvpError) console.error('Error creating initial RSVP:', rsvpError);
-    }
+    const { error: rsvpError } = await supabase!
+      .from('rsvps')
+      .insert([{
+        guest_id: newGuest.id,
+        status: 'pending',
+        plus_one: plus_one
+      }]);
+    if (rsvpError) console.error('Error creating initial RSVP:', rsvpError);
     return newGuest;
   } else {
     const db = readMockDB();
@@ -317,15 +316,13 @@ export async function addGuest(
       created_at: new Date().toISOString()
     };
     db.guests.push(newGuest);
-    if (plus_one) {
-      db.rsvps.push({
-        id: 'rsvp-' + Date.now(),
-        guest_id: newGuest.id,
-        status: 'pending',
-        plus_one: true,
-        responded_at: new Date().toISOString()
-      });
-    }
+    db.rsvps.push({
+      id: 'rsvp-' + Date.now(),
+      guest_id: newGuest.id,
+      status: 'pending',
+      plus_one: plus_one,
+      responded_at: new Date().toISOString()
+    });
     writeMockDB(db);
     return newGuest;
   }
@@ -333,7 +330,7 @@ export async function addGuest(
 
 export async function updateGuest(
   id: string, 
-  guestUpdates: Partial<Guest> & { plus_one?: boolean }
+  guestUpdates: Partial<Guest> & { plus_one?: number }
 ): Promise<Guest> {
   const { plus_one, ...updates } = guestUpdates;
   if (isSupabaseConfigured) {
@@ -514,7 +511,7 @@ export async function updateRSVPStatus(guestId: string, status: 'attending' | 'd
         .insert([{ 
           guest_id: guestId, 
           status, 
-          plus_one: false, 
+          plus_one: 1, 
           responded_at: new Date().toISOString() 
         }]);
       if (error) throw error;
@@ -533,7 +530,7 @@ export async function updateRSVPStatus(guestId: string, status: 'attending' | 'd
         id: 'rsvp-' + Date.now(),
         guest_id: guestId,
         status,
-        plus_one: false,
+        plus_one: 1,
         responded_at: new Date().toISOString()
       });
     }

@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getWhatsAppStatus } from '@/lib/whatsapp-manager';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const session = searchParams.get('session') || 'bride';
     const gatewayUrl = process.env.WHATSAPP_GATEWAY_URL;
     if (gatewayUrl) {
-      const res = await fetch(`${gatewayUrl}/status`, { cache: 'no-store' });
+      const res = await fetch(`${gatewayUrl}/status?session=${session}`, { cache: 'no-store' });
       const data = await res.json();
       return NextResponse.json(data);
     }

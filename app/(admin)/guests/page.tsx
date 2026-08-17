@@ -163,6 +163,7 @@ export default function GuestsPage() {
   const [isBulkWizardOpen, setIsBulkWizardOpen] = useState(false);
   const [bulkList, setBulkList] = useState<GuestWithDetails[]>([]);
   const [bulkIndex, setBulkIndex] = useState(0);
+  const [whatsappSession, setWhatsappSession] = useState<'bride' | 'groom'>('bride');
   const [isBulkSendingTwilio, setIsBulkSendingTwilio] = useState(false);
 
   // Automated WhatsApp states
@@ -175,7 +176,7 @@ export default function GuestsPage() {
     if (isAutomatedWizardOpen) {
       const fetchStatus = async () => {
         try {
-          const res = await fetch('/api/whatsapp/status');
+          const res = await fetch(`/api/whatsapp/status?session=${whatsappSession}`);
           const data = await res.json();
           setAutoStatus(data);
           
@@ -196,7 +197,7 @@ export default function GuestsPage() {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [isAutomatedWizardOpen]);
+  }, [isAutomatedWizardOpen, whatsappSession]);
 
   const fetchData = async (silent = false) => {
     try {
@@ -362,6 +363,7 @@ export default function GuestsPage() {
   const handleStartBulk = async () => {
     const targets = guests.filter(g => {
       if (!g.phone) return false;
+      if (whatsappSession && g.side !== whatsappSession) return false;
       if (bulkFilter === 'pending') {
         return !g.rsvp?.status || g.rsvp.status === 'pending';
       }
@@ -403,6 +405,7 @@ export default function GuestsPage() {
         await fetch('/api/whatsapp/connect', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'connect', session: whatsappSession })
         });
       } catch (err: any) {
         showToast(err.message || 'Failed to start WhatsApp connection.', 'error');
@@ -417,7 +420,7 @@ export default function GuestsPage() {
       await fetch('/api/whatsapp/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filter: bulkFilter }),
+        body: JSON.stringify({ filter: bulkFilter, session: whatsappSession }),
       });
     } catch (err: any) {
       showToast(err.message || 'Failed to start automated sending.', 'error');
@@ -429,7 +432,7 @@ export default function GuestsPage() {
       await fetch('/api/whatsapp/connect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'disconnect' }),
+        body: JSON.stringify({ action: 'disconnect', session: whatsappSession }),
       });
       setIsAutomatedWizardOpen(false);
     } catch (err: any) {
@@ -821,6 +824,14 @@ export default function GuestsPage() {
               <MenuItem value="all">All Guests (with Phone Number)</MenuItem>
             </Select>
           </FormControl>
+
+          <FormControl fullWidth size="small">
+            <InputLabel>Sender Account / Side</InputLabel>
+            <Select value={whatsappSession} label="Sender Account / Side" onChange={e => setWhatsappSession(e.target.value as any)}>
+              <MenuItem value="bride">Bride's Side (Sends to Bride's guests)</MenuItem>
+              <MenuItem value="groom">Groom's Side (Sends to Groom's guests)</MenuItem>
+            </Select>
+          </FormControl>
           
           <FormControl fullWidth size="small" disabled>
             <InputLabel>Sending Method</InputLabel>
@@ -924,7 +935,11 @@ export default function GuestsPage() {
                 color="success" 
                 size="small" 
                 onClick={() => {
-                  fetch('/api/whatsapp/connect', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+                  fetch('/api/whatsapp/connect', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'connect', session: whatsappSession })
+                  });
                 }}
                 sx={{ mt: 1, textTransform: 'none' }}
               >

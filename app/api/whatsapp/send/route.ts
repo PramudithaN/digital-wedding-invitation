@@ -16,7 +16,7 @@ function getRequestBaseUrl(request: Request): string | undefined {
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { filter } = body; // 'pending' | 'all'
+    const { filter, session } = body; // 'pending' | 'all', 'bride' | 'groom'
 
     if (!filter || (filter !== 'pending' && filter !== 'all')) {
       return NextResponse.json({ error: 'Invalid filter option. Must be pending or all.' }, { status: 400 });
@@ -30,6 +30,7 @@ export async function POST(request: Request) {
       
       const targets = guests.filter(g => {
         if (!g.phone) return false;
+        if (session && g.side !== session) return false;
         if (filter === 'pending') {
           return !g.rsvp?.status || g.rsvp.status === 'pending';
         }
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
       const res = await fetch(`${gatewayUrl}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ targets: payload })
+        body: JSON.stringify({ targets: payload, session })
       });
       const data = await res.json();
       return NextResponse.json(data);

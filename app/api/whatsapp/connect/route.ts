@@ -29,14 +29,16 @@ export async function POST(request: Request) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const session = searchParams.get('session') || 'bride';
     const gatewayUrl = process.env.WHATSAPP_GATEWAY_URL;
     if (gatewayUrl) {
       const res = await fetch(`${gatewayUrl}/connect`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'disconnect' })
+        body: JSON.stringify({ action: 'disconnect', session })
       });
       const data = await res.json();
       return NextResponse.json(data);

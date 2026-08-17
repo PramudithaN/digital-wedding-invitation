@@ -11,7 +11,9 @@ import {
   ChevronDown,
   AlertCircle,
   Wine,
-  Users
+  Users,
+  Minus,
+  Plus
 } from 'lucide-react';
 import { GuestWithDetails, GalleryImage } from '@/lib/types';
 import Lightbox from '@/components/Lightbox';
@@ -38,6 +40,10 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
     ? galleryImages.map(img => img.url)
     : ['/ok1.webp', '/ok2.webp', '/ok3.webp'];
 
+  const maxGuests = typeof guest.rsvp?.plus_one === 'number'
+    ? guest.rsvp.plus_one
+    : (guest.rsvp?.plus_one ? 2 : 1);
+
   // RSVP Form States
   const [attending, setAttending] = useState<'attending' | 'declined' | null>(
     (guest.rsvp?.status === 'attending' || guest.rsvp?.status === 'declined') 
@@ -46,7 +52,11 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
   );
   const [plusOne, setPlusOne] = useState(guest.rsvp?.plus_one || false);
   const [plusOneName, setPlusOneName] = useState(guest.rsvp?.plus_one_name || '');
-  const [attendingCount, setAttendingCount] = useState<number>(guest.rsvp?.attending_count || guest.rsvp?.plus_one || 1);
+  const [attendingCount, setAttendingCount] = useState<number | ''>(
+    guest.rsvp?.attending_count && guest.rsvp.attending_count > 0 
+      ? guest.rsvp.attending_count 
+      : maxGuests
+  );
   const [mealChoice, setMealChoice] = useState(guest.rsvp?.meal_choice || '');
   const [dietaryNotes, setDietaryNotes] = useState(guest.rsvp?.dietary_notes || '');
   const [message, setMessage] = useState(guest.rsvp?.message || '');
@@ -124,6 +134,9 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
       return;
     }
 
+    const finalAttendingCount = attending === 'attending'
+      ? (typeof attendingCount !== 'number' || isNaN(attendingCount) ? 1 : Math.max(1, Math.min(maxGuests, attendingCount)))
+      : 0;
 
     try {
       setIsSubmitting(true);
@@ -141,7 +154,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
           dietary_notes: attending === 'attending' ? dietaryNotes.trim() : '',
           message: message.trim(),
           alcohol_choice: attending === 'attending' ? alcoholChoice : '',
-          attending_count: attending === 'attending' ? attendingCount : 0,
+          attending_count: finalAttendingCount,
         }),
       });
 
@@ -912,25 +925,52 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                       <label htmlFor="attending-count" className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] flex items-center gap-1.5">
                         <Users className="w-3.5 h-3.5 text-[#C8A882]" /> Number of Guests Attending
                       </label>
-                      <div className="relative">
-                        <input
-                          id="attending-count"
-                          type="number"
-                          min="1"
-                          max={guest.rsvp?.plus_one || 10}
-                          value={attendingCount}
-                          onChange={(e) => {
-                            const val = parseInt(e.target.value, 10);
-                            setAttendingCount(isNaN(val) ? 1 : Math.max(1, Math.min(guest.rsvp?.plus_one || 10, val)));
-                          }}
-                          className="w-full bg-white border border-gray-200 rounded py-2.5 px-3.5 text-xs text-gray-900 focus:outline-none focus:border-[#D38A99]"
-                        />
-                        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
-                          Max: {guest.rsvp?.plus_one || 1}
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center border border-gray-200 rounded bg-white overflow-hidden h-10 w-32 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => setAttendingCount(prev => Math.max(1, (typeof prev === 'number' ? prev : 1) - 1))}
+                            disabled={typeof attendingCount === 'number' && attendingCount <= 1}
+                            className="w-10 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed border-none outline-none"
+                          >
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                          <input
+                            id="attending-count"
+                            type="number"
+                            min="1"
+                            max={maxGuests}
+                            value={attendingCount}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value, 10);
+                              if (e.target.value === '') {
+                                setAttendingCount('');
+                              } else if (!isNaN(val)) {
+                                setAttendingCount(Math.max(1, Math.min(maxGuests, val)));
+                              }
+                            }}
+                            onBlur={() => {
+                              if (attendingCount === '') {
+                                setAttendingCount(1);
+                              }
+                            }}
+                            className="w-full h-full text-center text-xs font-semibold text-gray-900 bg-transparent focus:outline-none border-x border-gray-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setAttendingCount(prev => Math.min(maxGuests, (typeof prev === 'number' ? prev : 1) + 1))}
+                            disabled={typeof attendingCount === 'number' && attendingCount >= maxGuests}
+                            className="w-10 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed border-none outline-none"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
+                          Max: {maxGuests} {maxGuests === 1 ? 'Guest' : 'Guests'}
                         </span>
                       </div>
                       <p className="text-[10px] text-gray-400 leading-normal">
-                        We have confirmed {guest.rsvp?.plus_one || 1} seats for your invitation. Please adjust if fewer guests are attending.
+                        We have confirmed {maxGuests} {maxGuests === 1 ? 'seat' : 'seats'} for your invitation. Please adjust if fewer guests are attending.
                       </p>
                     </div>
 

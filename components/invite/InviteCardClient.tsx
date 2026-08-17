@@ -925,16 +925,16 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                       <label htmlFor="attending-count" className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] flex items-center gap-1.5">
                         <Users className="w-3.5 h-3.5 text-[#C8A882]" /> Number of Guests Attending
                       </label>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center border border-gray-200 rounded bg-white overflow-hidden h-10 w-32 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => setAttendingCount(prev => Math.max(1, (typeof prev === 'number' ? prev : 1) - 1))}
-                            disabled={typeof attendingCount === 'number' && attendingCount <= 1}
-                            className="w-10 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed border-none outline-none"
-                          >
-                            <Minus className="w-3.5 h-3.5" />
-                          </button>
+                      <div className="flex items-center border border-gray-200 rounded bg-white overflow-hidden h-10 w-full">
+                        <button
+                          type="button"
+                          onClick={() => setAttendingCount(prev => Math.max(1, (typeof prev === 'number' ? prev : 1) - 1))}
+                          disabled={typeof attendingCount === 'number' && attendingCount <= 1}
+                          className="w-12 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed border-r border-gray-200 outline-none shrink-0"
+                        >
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <div className="flex-1 h-full relative">
                           <input
                             id="attending-count"
                             type="number"
@@ -954,20 +954,20 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                                 setAttendingCount(1);
                               }
                             }}
-                            className="w-full h-full text-center text-xs font-semibold text-gray-900 bg-transparent focus:outline-none border-x border-gray-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full h-full text-center text-xs font-semibold text-gray-900 bg-transparent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
-                          <button
-                            type="button"
-                            onClick={() => setAttendingCount(prev => Math.min(maxGuests, (typeof prev === 'number' ? prev : 1) + 1))}
-                            disabled={typeof attendingCount === 'number' && attendingCount >= maxGuests}
-                            className="w-10 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed border-none outline-none"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
+                          <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-semibold uppercase tracking-wider pointer-events-none select-none">
+                            Max: {maxGuests} {maxGuests === 1 ? 'Guest' : 'Guests'}
+                          </span>
                         </div>
-                        <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
-                          Max: {maxGuests} {maxGuests === 1 ? 'Guest' : 'Guests'}
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setAttendingCount(prev => Math.min(maxGuests, (typeof prev === 'number' ? prev : 1) + 1))}
+                          disabled={typeof attendingCount === 'number' && attendingCount >= maxGuests}
+                          className="w-12 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed border-l border-gray-200 outline-none shrink-0"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                       <p className="text-[10px] text-gray-400 leading-normal">
                         We have confirmed {maxGuests} {maxGuests === 1 ? 'seat' : 'seats'} for your invitation. Please adjust if fewer guests are attending.

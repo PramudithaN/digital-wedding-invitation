@@ -883,6 +883,27 @@ export default function GuestsPage() {
           <IconButton size="small" onClick={handleDisconnectAuto}><X size={18} /></IconButton>
         </DialogTitle>
         <DialogContent dividers sx={{ py: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2.5, minHeight: 320 }}>
+          {autoStatus.state === 'idle' && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 4, textAlign: 'center' }}>
+              <CircularProgress size={40} color="success" />
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>Connecting to WhatsApp Gateway...</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 280 }}>
+                Please wait while your free Render server wakes up from sleep. This can take up to a minute on the first load.
+              </Typography>
+              <Button 
+                variant="outlined" 
+                color="success" 
+                size="small" 
+                onClick={() => {
+                  fetch('/api/whatsapp/connect', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+                }}
+                sx={{ mt: 1, textTransform: 'none' }}
+              >
+                Force Reconnect
+              </Button>
+            </Box>
+          )}
+
           {autoStatus.state === 'initializing' && (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 4, textAlign: 'center' }}>
               <CircularProgress size={40} color="success" />

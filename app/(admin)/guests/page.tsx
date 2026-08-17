@@ -159,11 +159,44 @@ export default function GuestsPage() {
   // Bulk sending states
   const [isBulkOpen, setIsBulkOpen] = useState(false);
   const [bulkFilter, setBulkFilter] = useState<'pending' | 'all'>('pending');
-  const [bulkMethod, setBulkMethod] = useState<'manual' | 'twilio'>('manual');
+  const [bulkMethod, setBulkMethod] = useState<'manual' | 'twilio' | 'automated'>('manual');
   const [isBulkWizardOpen, setIsBulkWizardOpen] = useState(false);
   const [bulkList, setBulkList] = useState<GuestWithDetails[]>([]);
   const [bulkIndex, setBulkIndex] = useState(0);
   const [isBulkSendingTwilio, setIsBulkSendingTwilio] = useState(false);
+
+  // Automated WhatsApp states
+  const [isAutomatedWizardOpen, setIsAutomatedWizardOpen] = useState(false);
+  const [autoStatus, setAutoStatus] = useState<any>({ state: 'idle' });
+
+  // Poll automated status
+  useEffect(() => {
+    let intervalId: any = null;
+    if (isAutomatedWizardOpen) {
+      const fetchStatus = async () => {
+        try {
+          const res = await fetch('/api/whatsapp/status');
+          const data = await res.json();
+          setAutoStatus(data);
+          
+          if (data.state === 'completed') {
+            await fetchData(true);
+          }
+        } catch (err) {
+          console.error('Error fetching automated status:', err);
+        }
+      };
+      
+      fetchStatus();
+      intervalId = setInterval(fetchStatus, 1500);
+    } else {
+      setAutoStatus({ state: 'idle' });
+    }
+    
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isAutomatedWizardOpen]);
 
   const fetchData = async (silent = false) => {
     try {
@@ -361,8 +394,43 @@ export default function GuestsPage() {
       } finally {
         setIsBulkSendingTwilio(false);
       }
+    } else if (bulkMethod === 'automated') {
+      setIsAutomatedWizardOpen(true);
+      try {
+        await fetch('/api/whatsapp/connect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } catch (err: any) {
+        showToast(err.message || 'Failed to start WhatsApp connection.', 'error');
+      }
     } else {
       setIsBulkWizardOpen(true);
+    }
+  };
+
+  const handleStartAutoSending = async () => {
+    try {
+      await fetch('/api/whatsapp/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filter: bulkFilter }),
+      });
+    } catch (err: any) {
+      showToast(err.message || 'Failed to start automated sending.', 'error');
+    }
+  };
+
+  const handleDisconnectAuto = async () => {
+    try {
+      await fetch('/api/whatsapp/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'disconnect' }),
+      });
+      setIsAutomatedWizardOpen(false);
+    } catch (err: any) {
+      showToast(err.message || 'Failed to disconnect.', 'error');
     }
   };
 
@@ -728,6 +796,7 @@ export default function GuestsPage() {
             <InputLabel>Sending Method</InputLabel>
             <Select value={bulkMethod} label="Sending Method" onChange={e => setBulkMethod(e.target.value as any)}>
               <MenuItem value="manual">Manual (Open WhatsApp Web/App chats)</MenuItem>
+              <MenuItem value="automated">Automated (Scan QR Code locally - Free)</MenuItem>
               <MenuItem value="twilio">Automatic (Via Twilio SMS Gateway)</MenuItem>
             </Select>
           </FormControl>
@@ -802,6 +871,133 @@ export default function GuestsPage() {
               </Button>
             </Box>
           </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Automated WhatsApp Sender Wizard Dialog */}
+      <Dialog open={isAutomatedWizardOpen} keepMounted={false} onClose={handleDisconnectAuto} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <WhatsappIcon size={20} />
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>Local Auto Sender</Typography>
+          </Box>
+          <IconButton size="small" onClick={handleDisconnectAuto}><X size={18} /></IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ py: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2.5, minHeight: 320 }}>
+          {autoStatus.state === 'initializing' && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 4, textAlign: 'center' }}>
+              <CircularProgress size={40} color="success" />
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>Starting WhatsApp Engine...</Typography>
+              <Typography variant="caption" color="text.secondary">This may take up to a minute to launch the local browser instance.</Typography>
+            </Box>
+          )}
+
+          {autoStatus.state === 'qr' && autoStatus.qrCode && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, textAlign: 'center' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>Scan QR Code with WhatsApp</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 280 }}>
+                Go to WhatsApp &gt; Settings &gt; Linked Devices &gt; Link a Device on your phone and scan the code below.
+              </Typography>
+              <Box sx={{ p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 2, bgcolor: 'white', display: 'inline-block', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={autoStatus.qrCode} alt="WhatsApp QR Code" width={220} height={220} style={{ display: 'block' }} />
+              </Box>
+            </Box>
+          )}
+
+          {autoStatus.state === 'ready' && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 3, textAlign: 'center' }}>
+              <Box sx={{ display: 'inline-flex', p: 2, bgcolor: '#F0FDF4', color: '#16A34A', borderRadius: '50%' }}>
+                <CheckCircle2 size={40} />
+              </Box>
+              <Typography variant="body2" sx={{ fontWeight: 700, color: '#15803D' }}>Connected Successfully!</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 260 }}>
+                WhatsApp is linked. Ready to send invitations to {bulkList.length} guests.
+              </Typography>
+              <Button 
+                variant="contained" 
+                color="success" 
+                onClick={handleStartAutoSending} 
+                sx={{ mt: 1, px: 4, py: 1.2, fontWeight: 700, bgcolor: '#16A34A', '&:hover': { bgcolor: '#15803D' } }}
+                fullWidth
+              >
+                Start Automated Sending
+              </Button>
+            </Box>
+          )}
+
+          {autoStatus.state === 'sending' && autoStatus.progress && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2, py: 2 }}>
+              <Box sx={{ textAlign: 'center' }}>
+                <CircularProgress size={32} color="success" sx={{ mb: 1.5 }} />
+                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sending invitation</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 800, mt: 0.5, color: '#111827' }}>
+                  {autoStatus.progress.currentGuestName}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Guest {autoStatus.progress.current} of {autoStatus.progress.total}
+                </Typography>
+              </Box>
+              
+              <Box sx={{ width: '100%', mt: 1 }}>
+                <Box sx={{ height: 8, width: '100%', bgcolor: '#E2E8F0', borderRadius: 4, overflow: 'hidden' }}>
+                  <Box 
+                    sx={{ 
+                      height: '100%', 
+                      bgcolor: '#16A34A', 
+                      borderRadius: 4, 
+                      width: `${(autoStatus.progress.current / autoStatus.progress.total) * 100}%`,
+                      transition: 'width 0.4s ease'
+                    }} 
+                  />
+                </Box>
+              </Box>
+            </Box>
+          )}
+
+          {autoStatus.state === 'completed' && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 3, textAlign: 'center' }}>
+              <Box sx={{ display: 'inline-flex', p: 2, bgcolor: '#F0FDF4', color: '#16A34A', borderRadius: '50%' }}>
+                <CheckCircle2 size={40} />
+              </Box>
+              <Typography variant="body2" sx={{ fontWeight: 700, color: '#15803D' }}>Bulk Sending Completed!</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 260 }}>
+                All wedding invitations have been successfully sent automatically to the guest list.
+              </Typography>
+              <Button variant="outlined" fullWidth onClick={() => setIsAutomatedWizardOpen(false)} sx={{ mt: 2 }}>
+                Close Panel
+              </Button>
+            </Box>
+          )}
+
+          {autoStatus.state === 'error' && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 2, textAlign: 'center' }}>
+              <Box sx={{ display: 'inline-flex', p: 2, bgcolor: '#FEF2F2', color: '#DC2626', borderRadius: '50%' }}>
+                <AlertCircle size={40} />
+              </Box>
+              <Typography variant="body2" sx={{ fontWeight: 700, color: '#DC2626' }}>Engine Error</Typography>
+              <Typography variant="caption" color="error" sx={{ maxWidth: 280, wordBreak: 'break-word' }}>
+                {autoStatus.error || 'An unexpected error occurred.'}
+              </Typography>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                onClick={() => {
+                  fetch('/api/whatsapp/connect', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+                }} 
+                sx={{ mt: 1 }}
+                fullWidth
+              >
+                Retry Connection
+              </Button>
+            </Box>
+          )}
+
+          {autoStatus.state !== 'sending' && autoStatus.state !== 'completed' && (
+            <Button variant="text" size="small" color="error" onClick={handleDisconnectAuto} sx={{ textTransform: 'none', mt: 1 }}>
+              Disconnect & Stop Session
+            </Button>
+          )}
         </DialogContent>
       </Dialog>
 

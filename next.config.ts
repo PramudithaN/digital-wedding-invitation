@@ -34,6 +34,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  serverExternalPackages: ['whatsapp-web.js', 'puppeteer'],
 };
 
 export default nextConfig;

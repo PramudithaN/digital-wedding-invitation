@@ -935,6 +935,9 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                           <Minus className="w-3.5 h-3.5" />
                         </button>
                         <div className="flex-1 h-full relative">
+                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-semibold uppercase tracking-wider pointer-events-none select-none">
+                            Min: 1
+                          </span>
                           <input
                             id="attending-count"
                             type="number"

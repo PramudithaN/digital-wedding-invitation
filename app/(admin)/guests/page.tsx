@@ -847,7 +847,7 @@ export default function GuestsPage() {
           <IconButton size="small" onClick={() => setIsAddOpen(false)}><X size={18} /></IconButton>
         </Box>
         <Box component="form" onSubmit={handleAddGuest} sx={{ flex: 1, overflowY: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-          <TextField label="Guest Name *" value={name} onChange={e => setName(e.target.value)} size="small" fullWidth required />
+          <TextField label="Guest Name" value={name} onChange={e => setName(e.target.value)} size="small" fullWidth required />
           <TextField label="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} size="small" fullWidth type="tel" helperText="Local numbers saved with +94 automatically." />
           <TextField label="Email Address" value={email} onChange={e => setEmail(e.target.value)} size="small" fullWidth type="email" />
           <Box>
@@ -865,7 +865,7 @@ export default function GuestsPage() {
             </Select>
           </FormControl>
           <TextField
-            label="Guest Count *"
+            label="Guest Count"
             type="number"
             value={guestCount}
             onChange={e => {

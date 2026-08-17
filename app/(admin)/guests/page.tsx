@@ -159,7 +159,7 @@ export default function GuestsPage() {
   // Bulk sending states
   const [isBulkOpen, setIsBulkOpen] = useState(false);
   const [bulkFilter, setBulkFilter] = useState<'pending' | 'all'>('pending');
-  const [bulkMethod, setBulkMethod] = useState<'manual' | 'automated'>('automated');
+  const [bulkMethod, setBulkMethod] = useState<'manual' | 'twilio' | 'automated'>('twilio');
   const [isBulkWizardOpen, setIsBulkWizardOpen] = useState(false);
   const [bulkList, setBulkList] = useState<GuestWithDetails[]>([]);
   const [bulkIndex, setBulkIndex] = useState(0);
@@ -795,6 +795,7 @@ export default function GuestsPage() {
           <FormControl fullWidth size="small">
             <InputLabel>Sending Method</InputLabel>
             <Select value={bulkMethod} label="Sending Method" onChange={e => setBulkMethod(e.target.value as any)}>
+              <MenuItem value="twilio">Automatic (Via Twilio Gateway)</MenuItem>
               <MenuItem value="automated">Automated (Scan QR Code - Free)</MenuItem>
               <MenuItem value="manual">Manual (Open WhatsApp Web/App chats)</MenuItem>
             </Select>

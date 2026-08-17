@@ -308,15 +308,55 @@ export default function RSVPTrackerPage() {
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>{guest.name}</Typography>
-                          {guest.rsvp?.plus_one && (
-                            <Chip 
-                              size="small" 
-                              label={guest.rsvp.status === 'attending' 
-                                ? `${guest.rsvp.attending_count ?? guest.rsvp.plus_one} / ${guest.rsvp.plus_one} Attending` 
-                                : `Seats: ${guest.rsvp.plus_one}`} 
-                              sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: 'rgba(211,138,153,0.1)', color: '#D38A99' }} 
-                            />
-                          )}
+                          {guest.rsvp?.plus_one && (() => {
+                            const status = guest.rsvp.status || 'pending';
+                            const confirmed = guest.rsvp.plus_one;
+                            const attending = guest.rsvp.attending_count ?? confirmed;
+
+                            if (status === 'attending') {
+                              if (attending === confirmed) {
+                                return (
+                                  <Chip
+                                    size="small"
+                                    label={`All ${confirmed} Attending`}
+                                    sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: '#E8F5E9', color: '#2E7D32' }}
+                                  />
+                                );
+                              } else if (attending > 0) {
+                                return (
+                                  <Chip
+                                    size="small"
+                                    label={`${attending} of ${confirmed} Coming`}
+                                    sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: '#FFF3E0', color: '#E65100' }}
+                                  />
+                                );
+                              } else {
+                                return (
+                                  <Chip
+                                    size="small"
+                                    label={`0 of ${confirmed} Attending`}
+                                    sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: '#FFEBEE', color: '#C62828' }}
+                                  />
+                                );
+                              }
+                            } else if (status === 'declined') {
+                              return (
+                                <Chip
+                                  size="small"
+                                  label={`Declined (${confirmed})`}
+                                  sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: '#FFEBEE', color: '#C62828' }}
+                                />
+                              );
+                            } else {
+                              return (
+                                <Chip
+                                  size="small"
+                                  label={`${confirmed} Seats Pending`}
+                                  sx={{ height: 16, fontSize: '0.6rem', fontWeight: 500, bgcolor: '#F5F5F5', color: '#616161' }}
+                                />
+                              );
+                            }
+                          })()}
                         </Box>
                         {guest.category && (
                           <Typography
@@ -436,15 +476,55 @@ export default function RSVPTrackerPage() {
                       <Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                           <Typography variant="body2" sx={{ fontWeight: 700 }}>{guest.name}</Typography>
-                          {guest.rsvp?.plus_one && (
-                            <Chip 
-                              size="small" 
-                              label={guest.rsvp.status === 'attending' 
-                                ? `${guest.rsvp.attending_count ?? guest.rsvp.plus_one} / ${guest.rsvp.plus_one} Attending` 
-                                : `Seats: ${guest.rsvp.plus_one}`} 
-                              sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: 'rgba(211,138,153,0.1)', color: '#D38A99' }} 
-                            />
-                          )}
+                          {guest.rsvp?.plus_one && (() => {
+                            const status = guest.rsvp.status || 'pending';
+                            const confirmed = guest.rsvp.plus_one;
+                            const attending = guest.rsvp.attending_count ?? confirmed;
+
+                            if (status === 'attending') {
+                              if (attending === confirmed) {
+                                return (
+                                  <Chip
+                                    size="small"
+                                    label={`All ${confirmed} Attending`}
+                                    sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: '#E8F5E9', color: '#2E7D32' }}
+                                  />
+                                );
+                              } else if (attending > 0) {
+                                return (
+                                  <Chip
+                                    size="small"
+                                    label={`${attending} of ${confirmed} Coming`}
+                                    sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: '#FFF3E0', color: '#E65100' }}
+                                  />
+                                );
+                              } else {
+                                return (
+                                  <Chip
+                                    size="small"
+                                    label={`0 of ${confirmed} Attending`}
+                                    sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: '#FFEBEE', color: '#C62828' }}
+                                  />
+                                );
+                              }
+                            } else if (status === 'declined') {
+                              return (
+                                <Chip
+                                  size="small"
+                                  label={`Declined (${confirmed})`}
+                                  sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: '#FFEBEE', color: '#C62828' }}
+                                />
+                              );
+                            } else {
+                              return (
+                                <Chip
+                                  size="small"
+                                  label={`${confirmed} Seats Pending`}
+                                  sx={{ height: 16, fontSize: '0.6rem', fontWeight: 500, bgcolor: '#F5F5F5', color: '#616161' }}
+                                />
+                              );
+                            }
+                          })()}
                         </Box>
                         <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
                           <SideChip side={guest.side || 'bride'} />

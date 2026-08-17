@@ -570,13 +570,55 @@ export default function GuestsPage() {
                     </TableCell>
                     <TableCell><SideChip side={g.side || 'bride'} /></TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {g.rsvp?.status === 'attending' 
-                          ? `${g.rsvp.attending_count ?? g.rsvp.plus_one} / ${g.rsvp.plus_one}` 
-                          : g.rsvp?.status === 'declined' 
-                            ? `0 / ${g.rsvp.plus_one}` 
-                            : `– / ${g.rsvp?.plus_one || 1}`}
-                      </Typography>
+                      {(() => {
+                        const status = g.rsvp?.status || 'pending';
+                        const confirmed = g.rsvp?.plus_one || 1;
+                        const attending = g.rsvp?.attending_count ?? confirmed;
+
+                        if (status === 'attending') {
+                          if (attending === confirmed) {
+                            return (
+                              <Chip
+                                size="small"
+                                label={`All ${confirmed} Attending`}
+                                sx={{ bgcolor: '#E8F5E9', color: '#2E7D32', fontWeight: 600, fontSize: '0.7rem' }}
+                              />
+                            );
+                          } else if (attending > 0) {
+                            return (
+                              <Chip
+                                size="small"
+                                label={`${attending} of ${confirmed} Coming`}
+                                sx={{ bgcolor: '#FFF3E0', color: '#E65100', fontWeight: 600, fontSize: '0.7rem' }}
+                              />
+                            );
+                          } else {
+                            return (
+                              <Chip
+                                size="small"
+                                label={`0 of ${confirmed} Attending`}
+                                sx={{ bgcolor: '#FFEBEE', color: '#C62828', fontWeight: 600, fontSize: '0.7rem' }}
+                              />
+                            );
+                          }
+                        } else if (status === 'declined') {
+                          return (
+                            <Chip
+                              size="small"
+                              label={`Declined (${confirmed})`}
+                              sx={{ bgcolor: '#FFEBEE', color: '#C62828', fontWeight: 600, fontSize: '0.7rem' }}
+                            />
+                          );
+                        } else {
+                          return (
+                            <Chip
+                              size="small"
+                              label={`${confirmed} Seats Pending`}
+                              sx={{ bgcolor: '#F5F5F5', color: '#616161', fontWeight: 500, fontSize: '0.7rem' }}
+                            />
+                          );
+                        }
+                      })()}
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3 }}>
@@ -628,17 +670,55 @@ export default function GuestsPage() {
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>{g.name}</Typography>
                       <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
                         <SideChip side={g.side || 'bride'} />
-                        <Chip 
-                          size="small" 
-                          label={`Attending: ${
-                            g.rsvp?.status === 'attending' 
-                              ? `${g.rsvp.attending_count ?? g.rsvp.plus_one} / ${g.rsvp.plus_one}` 
-                              : g.rsvp?.status === 'declined' 
-                                ? `0 / ${g.rsvp.plus_one}` 
-                                : `– / ${g.rsvp?.plus_one || 1}`
-                          }`} 
-                          sx={{ height: 18, fontSize: '0.65rem', bgcolor: '#F3F4F6', color: '#374151', fontWeight: 600 }} 
-                        />
+                        {(() => {
+                          const status = g.rsvp?.status || 'pending';
+                          const confirmed = g.rsvp?.plus_one || 1;
+                          const attending = g.rsvp?.attending_count ?? confirmed;
+
+                          if (status === 'attending') {
+                            if (attending === confirmed) {
+                              return (
+                                <Chip
+                                  size="small"
+                                  label={`All ${confirmed} Attending`}
+                                  sx={{ height: 18, fontSize: '0.65rem', bgcolor: '#E8F5E9', color: '#2E7D32', fontWeight: 600 }}
+                                />
+                              );
+                            } else if (attending > 0) {
+                              return (
+                                <Chip
+                                  size="small"
+                                  label={`${attending} of ${confirmed} Coming`}
+                                  sx={{ height: 18, fontSize: '0.65rem', bgcolor: '#FFF3E0', color: '#E65100', fontWeight: 600 }}
+                                />
+                              );
+                            } else {
+                              return (
+                                <Chip
+                                  size="small"
+                                  label={`0 of ${confirmed} Attending`}
+                                  sx={{ height: 18, fontSize: '0.65rem', bgcolor: '#FFEBEE', color: '#C62828', fontWeight: 600 }}
+                                />
+                              );
+                            }
+                          } else if (status === 'declined') {
+                            return (
+                              <Chip
+                                size="small"
+                                label={`Declined (${confirmed})`}
+                                sx={{ height: 18, fontSize: '0.65rem', bgcolor: '#FFEBEE', color: '#C62828', fontWeight: 600 }}
+                              />
+                            );
+                          } else {
+                            return (
+                              <Chip
+                                size="small"
+                                label={`${confirmed} Seats Pending`}
+                                sx={{ height: 18, fontSize: '0.65rem', bgcolor: '#F5F5F5', color: '#616161', fontWeight: 500 }}
+                              />
+                            );
+                          }
+                        })()}
                       </Box>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }} onClick={e => e.stopPropagation()}>

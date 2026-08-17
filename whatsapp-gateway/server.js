@@ -113,7 +113,7 @@ function initializeClient() {
 
   client.on('auth_failure', (msg) => {
     status = { state: 'error', error: `Auth failed: ${msg}` };
-    disconnectClient();
+    disconnectClient(true);
   });
 
   client.on('disconnected', () => {
@@ -123,16 +123,18 @@ function initializeClient() {
 
   client.initialize().catch(err => {
     status = { state: 'error', error: err.message };
-    disconnectClient();
+    disconnectClient(true);
   });
 }
 
-function disconnectClient() {
+function disconnectClient(keepErrorState = false) {
   if (client) {
     client.destroy().catch(() => {});
     client = null;
   }
-  status = { state: 'idle' };
+  if (!keepErrorState) {
+    status = { state: 'idle' };
+  }
   isSending = false;
 }
 

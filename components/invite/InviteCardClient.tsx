@@ -366,7 +366,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
 
 
   return (
-    <div className="min-h-screen bg-[#F2F1EB] text-[#1A1A1A] flex flex-col font-sans relative overflow-x-hidden selection:bg-amber-100 selection:text-gray-900 px-4 py-4 sm:py-8">
+    <div className="min-h-screen bg-[#F2F1EB] text-[#1A1A1A] flex flex-col font-sans relative overflow-x-hidden selection:bg-amber-100 selection:text-gray-900 px-2 sm:px-4 py-4 sm:py-8">
       
       {/* 3D Envelope Overlay */}
       {envelopeState !== 'open' && (
@@ -746,7 +746,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
 
       {/* --- SECTION 2 - COUNTDOWN TIMER --- */}
       <section ref={timelineRef} className="max-w-3xl mx-auto px-6 pt-2 pb-12 w-full text-center relative z-10">
-        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-8 shadow-sm max-w-lg mx-auto space-y-6 relative z-10">
+        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-5 sm:p-8 shadow-sm max-w-lg mx-auto space-y-6 relative z-10">
           <div>
             <span className="text-xs sm:text-sm uppercase tracking-widest text-[#6B6B6B] font-semibold block">Counting down the moments</span>
             <p className="text-base sm:text-lg font-serif text-[#D38A99] font-medium tracking-wide mt-1">Wednesday, September 23, 2026</p>
@@ -755,22 +755,22 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
           {isExpired ? (
             <p className="font-serif italic text-[#C8A882] text-xl">Today is the day! 🎉</p>
           ) : (
-            <div className="grid grid-cols-4 gap-2 text-center divide-x divide-[#E8E4DE]">
-              <div className="px-1">
-                <span className="block text-4xl sm:text-5xl font-light text-gray-900 font-serif">{timeLeft.days}</span>
-                <span className="block text-[10px] sm:text-xs uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Days</span>
+            <div className="grid grid-cols-4 gap-1 sm:gap-2 text-center divide-x divide-[#E8E4DE]">
+              <div className="px-0.5 sm:px-1">
+                <span className="block text-3xl sm:text-5xl font-light text-gray-900 font-serif">{timeLeft.days}</span>
+                <span className="block text-[9px] sm:text-xs uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Days</span>
               </div>
-              <div className="px-1">
-                <span className="block text-4xl sm:text-5xl font-light text-gray-900 font-serif">{timeLeft.hours}</span>
-                <span className="block text-[10px] sm:text-xs uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Hrs</span>
+              <div className="px-0.5 sm:px-1">
+                <span className="block text-3xl sm:text-5xl font-light text-gray-900 font-serif">{timeLeft.hours}</span>
+                <span className="block text-[9px] sm:text-xs uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Hrs</span>
               </div>
-              <div className="px-1">
-                <span className="block text-4xl sm:text-5xl font-light text-gray-900 font-serif">{timeLeft.minutes}</span>
-                <span className="block text-[10px] sm:text-xs uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Min</span>
+              <div className="px-0.5 sm:px-1">
+                <span className="block text-3xl sm:text-5xl font-light text-gray-900 font-serif">{timeLeft.minutes}</span>
+                <span className="block text-[9px] sm:text-xs uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Min</span>
               </div>
-              <div className="px-1">
-                <span className="block text-4xl sm:text-5xl font-light text-gray-900 font-serif">{timeLeft.seconds}</span>
-                <span className="block text-[10px] sm:text-xs uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Sec</span>
+              <div className="px-0.5 sm:px-1">
+                <span className="block text-3xl sm:text-5xl font-light text-gray-900 font-serif">{timeLeft.seconds}</span>
+                <span className="block text-[9px] sm:text-xs uppercase tracking-widest text-[#6B6B6B] font-semibold mt-1">Sec</span>
               </div>
             </div>
           )}
@@ -799,24 +799,41 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
 
           <div className="relative py-4 flex flex-col items-center">
             {/* Timeline vertical line */}
-            <div className="absolute left-1/2 top-10 bottom-10 w-[1.5px] bg-[#D38A99]/20 -translate-x-1/2 z-0" />
+            <div className="absolute left-[39px] sm:left-1/2 top-10 bottom-10 w-[1.5px] bg-[#D38A99]/20 -translate-x-1/2 z-0" />
 
             <div className="w-full space-y-8 sm:space-y-10">
               {itineraryItems.map((item, idx) => (
-                <div key={idx} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6 w-full relative z-10">
-                  {/* Left side: Time */}
-                  <div className="text-right">
-                    <p className="font-serif text-sm sm:text-base font-semibold tracking-wider text-[#D38A99] uppercase">{item.time}</p>
+                <div key={idx} className="relative z-10">
+                  {/* Desktop Layout (centered) */}
+                  <div className="hidden sm:grid grid-cols-[1fr_auto_1fr] items-center gap-6 w-full">
+                    {/* Left side: Time */}
+                    <div className="text-right">
+                      <p className="font-serif text-base font-semibold tracking-wider text-[#D38A99] uppercase">{item.time}</p>
+                    </div>
+                    
+                    {/* Centered Large Icon circle */}
+                    <div className="w-20 h-20 rounded-full bg-[#FCFAF5] border border-[#E8DCC7] flex items-center justify-center overflow-hidden shadow-md hover:scale-110 transition-transform duration-300 relative z-10">
+                      <ItineraryIcon src={item.iconSrc} />
+                    </div>
+                    
+                    {/* Right side: Title */}
+                    <div className="text-left">
+                      <h4 className="font-serif text-base text-[#2D312E] font-medium leading-snug max-w-[200px]">{item.title}</h4>
+                    </div>
                   </div>
-                  
-                  {/* Centered Large Icon circle */}
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#FCFAF5] border border-[#E8DCC7] flex items-center justify-center overflow-hidden shadow-md hover:scale-110 transition-transform duration-300 relative z-10">
-                    <ItineraryIcon src={item.iconSrc} />
-                  </div>
-                  
-                  {/* Right side: Title */}
-                  <div className="text-left">
-                    <h4 className="font-serif text-sm sm:text-base text-[#2D312E] font-medium leading-snug max-w-[160px] sm:max-w-[200px]">{item.title}</h4>
+
+                  {/* Mobile Layout (left-aligned) */}
+                  <div className="flex sm:hidden items-center gap-4 w-full pl-2">
+                    {/* Left-aligned Icon circle */}
+                    <div className="w-12 h-12 rounded-full bg-[#FCFAF5] border border-[#E8DCC7] flex items-center justify-center overflow-hidden shadow-sm shrink-0 relative z-10">
+                      <ItineraryIcon src={item.iconSrc} className="scale-[0.8]" />
+                    </div>
+                    
+                    {/* Right side: Details */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-serif text-xs font-semibold tracking-wider text-[#D38A99] uppercase">{item.time}</p>
+                      <h4 className="font-serif text-sm text-[#2D312E] font-medium leading-tight mt-0.5">{item.title}</h4>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -828,7 +845,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
       {/* --- SECTION 4 - RSVP FORM --- */}
       {guest.name !== 'general' && (
 <section id="rsvp-section" ref={rsvpRef} className="max-w-lg mx-auto px-6 py-12 w-full relative z-10">
-        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-8 shadow-sm space-y-6">
+        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-5 sm:p-8 shadow-sm space-y-6">
           {isSuccess ? (
             /* Success screen */
             <div className="text-center py-8 space-y-5 animate-scale-up">
@@ -884,14 +901,14 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                   <span className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] text-center">
                     Attendance
                   </span>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-4">
                     <button
                       type="button"
                       onClick={() => {
                         setAttending('attending');
                         setError('');
                       }}
-                      className={`py-3 rounded border text-xs font-semibold tracking-wide transition-all cursor-pointer ${
+                      className={`py-3 px-1 rounded border text-[11px] sm:text-xs font-semibold tracking-wide transition-all cursor-pointer text-center ${
                         attending === 'attending'
                           ? 'bg-[#FAF0F2] text-[#D38A99] border-[#D38A99] shadow-xs'
                           : 'bg-white border-gray-200 text-gray-500'
@@ -905,7 +922,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                         setAttending('declined');
                         setError('');
                       }}
-                      className={`py-3 rounded border text-xs font-semibold tracking-wide transition-all cursor-pointer ${
+                      className={`py-3 px-1 rounded border text-[11px] sm:text-xs font-semibold tracking-wide transition-all cursor-pointer text-center ${
                         attending === 'declined'
                           ? 'bg-red-50 text-red-700 border-red-300 shadow-xs'
                           : 'bg-white border-gray-200 text-gray-500'
@@ -925,19 +942,16 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                       <label htmlFor="attending-count" className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] flex items-center gap-1.5">
                         <Users className="w-3.5 h-3.5 text-[#C8A882]" /> Number of Guests Attending
                       </label>
-                      <div className="flex items-center border border-gray-200 rounded bg-white overflow-hidden h-10 w-full">
-                        <button
-                          type="button"
-                          onClick={() => setAttendingCount(prev => Math.max(1, (typeof prev === 'number' ? prev : 1) - 1))}
-                          disabled={typeof attendingCount === 'number' && attendingCount <= 1}
-                          className="w-12 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed border-r border-gray-200 outline-none shrink-0"
-                        >
-                          <Minus className="w-3.5 h-3.5" />
-                        </button>
-                        <div className="flex-1 h-full relative">
-                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-semibold uppercase tracking-wider pointer-events-none select-none">
-                            Min: 1
-                          </span>
+                      <div className="space-y-1 w-full">
+                        <div className="flex items-center border border-gray-200 rounded bg-white overflow-hidden h-10 w-full">
+                          <button
+                            type="button"
+                            onClick={() => setAttendingCount(prev => Math.max(1, (typeof prev === 'number' ? prev : 1) - 1))}
+                            disabled={typeof attendingCount === 'number' && attendingCount <= 1}
+                            className="w-12 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed border-r border-gray-200 outline-none shrink-0"
+                          >
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
                           <input
                             id="attending-count"
                             type="number"
@@ -957,20 +971,21 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                                 setAttendingCount(1);
                               }
                             }}
-                            className="w-full h-full text-center text-xs font-semibold text-gray-900 bg-transparent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="flex-1 w-full h-full text-center text-sm font-semibold text-gray-900 bg-transparent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
-                          <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-semibold uppercase tracking-wider pointer-events-none select-none">
-                            Max: {maxGuests} {maxGuests === 1 ? 'Guest' : 'Guests'}
-                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setAttendingCount(prev => Math.min(maxGuests, (typeof prev === 'number' ? prev : 1) + 1))}
+                            disabled={typeof attendingCount === 'number' && attendingCount >= maxGuests}
+                            className="w-12 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed border-l border-gray-200 outline-none shrink-0"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setAttendingCount(prev => Math.min(maxGuests, (typeof prev === 'number' ? prev : 1) + 1))}
-                          disabled={typeof attendingCount === 'number' && attendingCount >= maxGuests}
-                          className="w-12 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed border-l border-gray-200 outline-none shrink-0"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex justify-between text-[10px] text-gray-400 font-semibold uppercase tracking-wider px-1">
+                          <span>Min: 1</span>
+                          <span>Max: {maxGuests} {maxGuests === 1 ? 'Guest' : 'Guests'}</span>
+                        </div>
                       </div>
                       <p className="text-[10px] text-gray-400 leading-normal">
                         We have confirmed {maxGuests} {maxGuests === 1 ? 'seat' : 'seats'} for your invitation. Please adjust if fewer guests are attending.
@@ -982,7 +997,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                       <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] flex items-center gap-1.5">
                         <UtensilsCrossed className="w-3.5 h-3.5 text-[#C8A882]" /> Meal Selection
                       </label>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                         {[
                           { value: 'non-veg', label: 'Non-Veg' },
                           { value: 'veg', label: 'Veg' },
@@ -992,7 +1007,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                             key={m.value}
                             type="button"
                             onClick={() => setMealChoice(m.value)}
-                            className={`py-2 px-3 border rounded text-xs font-semibold capitalize transition-all cursor-pointer ${
+                            className={`py-2.5 px-1 sm:px-3 border rounded text-[11px] sm:text-xs font-semibold capitalize transition-all cursor-pointer ${
                               mealChoice === m.value
                                 ? 'bg-[#FAF0F2] text-[#D38A99] border-[#D38A99]'
                                 : 'bg-white border-gray-200 text-gray-500'
@@ -1009,7 +1024,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                       <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] flex items-center gap-1.5">
                         <Wine className="w-3.5 h-3.5 text-[#C8A882]" /> Alcohol Selection
                       </label>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                         {[
                           { value: 'hard liquor', label: 'Hard Liquor' },
                           { value: 'wine', label: 'Wine' },
@@ -1019,7 +1034,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                             key={alc.value}
                             type="button"
                             onClick={() => setAlcoholChoice(alc.value)}
-                            className={`py-2 px-3 border rounded text-xs font-semibold capitalize transition-all cursor-pointer ${
+                            className={`py-2.5 px-1 sm:px-3 border rounded text-[11px] sm:text-xs font-semibold capitalize transition-all cursor-pointer ${
                               alcoholChoice === alc.value
                                 ? 'bg-[#FAF0F2] text-[#D38A99] border-[#D38A99]'
                                 : 'bg-white border-gray-200 text-gray-500'
@@ -1087,7 +1102,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
 
       {/* --- SECTION 4.5 - CONTACT DETAILS --- */}
       <section className="max-w-lg mx-auto px-6 pb-12 w-full relative z-10">
-        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-8 shadow-sm space-y-6 text-center">
+        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-5 sm:p-8 shadow-sm space-y-6 text-center">
           <h3 className="text-2xl font-serif text-gray-950 font-light tracking-wide" style={{ fontFamily: invitationTypography.body, color: invitationTypography.nameColor }}>Contact Details</h3>
           <div className="h-[1px] w-12 bg-[#D38A99] mx-auto" />
           
@@ -1127,7 +1142,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
 
       {/* --- SECTION 5 - ADD TO CALENDAR --- */}
       <section className="max-w-md mx-auto px-6 py-6 w-full text-center">
-        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-8 shadow-xs space-y-5">
+        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-5 sm:p-8 shadow-xs space-y-5">
           <h3 className="text-lg font-serif text-gray-900 font-light">Save the Date</h3>
           <div className="flex flex-wrap justify-center gap-3 pt-1">
             <a
@@ -1154,7 +1169,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
         <h2 className="text-xl font-serif text-gray-900 font-light">Moments Gallery</h2>
         <div className="h-[1px] w-12 bg-[#D38A99] mx-auto" />
         <div 
-          className="flex flex-row items-center justify-start sm:grid sm:grid-cols-2 md:grid-cols-3 gap-4 pt-4 overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory pb-4 sm:pb-0"
+          className="flex flex-row items-center justify-start sm:grid sm:grid-cols-2 md:grid-cols-3 gap-4 pt-4 px-2 sm:px-0 overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory pb-4 sm:pb-0"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {displayImages.map((url, idx) => (
@@ -1185,7 +1200,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
       {/* --- SECTION 7 - VENUE DETAILS & MAP --- */}
       <section className="max-w-3xl mx-auto px-6 py-16 w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
         {/* Left Venue Information */}
-        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-8 space-y-6 shadow-xs h-full flex flex-col justify-between">
+        <div className="bg-white/70 backdrop-blur-xs border border-[#E8E4DE] rounded-xl p-5 sm:p-8 space-y-6 shadow-xs h-full flex flex-col justify-between">
           <div className="space-y-4">
             <h3 className="text-2xl font-serif text-gray-950 font-light">{weddingDetails.venue}</h3>
             <p className="text-xs text-[#6B6B6B]">{weddingDetails.city}</p>

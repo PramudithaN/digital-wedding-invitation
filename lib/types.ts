@@ -28,6 +28,7 @@ export interface RSVP {
   message?: string;
   alcohol_choice?: string;
   responded_at?: string;
+  attending_count?: number;
 }
 
 export interface InviteLink {

@@ -568,7 +568,11 @@ export default function GuestsPage() {
                     <TableCell><SideChip side={g.side || 'bride'} /></TableCell>
                     <TableCell>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {g.rsvp?.plus_one || 1}
+                        {g.rsvp?.status === 'attending' 
+                          ? `${g.rsvp.attending_count ?? g.rsvp.plus_one} / ${g.rsvp.plus_one}` 
+                          : g.rsvp?.status === 'declined' 
+                            ? `0 / ${g.rsvp.plus_one}` 
+                            : `– / ${g.rsvp?.plus_one || 1}`}
                       </Typography>
                     </TableCell>
                     <TableCell>
@@ -621,7 +625,17 @@ export default function GuestsPage() {
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>{g.name}</Typography>
                       <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
                         <SideChip side={g.side || 'bride'} />
-                        <Chip size="small" label={`Count: ${g.rsvp?.plus_one || 1}`} sx={{ height: 18, fontSize: '0.65rem', bgcolor: '#F3F4F6', color: '#374151', fontWeight: 600 }} />
+                        <Chip 
+                          size="small" 
+                          label={`Attending: ${
+                            g.rsvp?.status === 'attending' 
+                              ? `${g.rsvp.attending_count ?? g.rsvp.plus_one} / ${g.rsvp.plus_one}` 
+                              : g.rsvp?.status === 'declined' 
+                                ? `0 / ${g.rsvp.plus_one}` 
+                                : `– / ${g.rsvp?.plus_one || 1}`
+                          }`} 
+                          sx={{ height: 18, fontSize: '0.65rem', bgcolor: '#F3F4F6', color: '#374151', fontWeight: 600 }} 
+                        />
                       </Box>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }} onClick={e => e.stopPropagation()}>
@@ -708,7 +722,14 @@ export default function GuestsPage() {
               <Grid container spacing={1.5} sx={{ mb: 2 }}>
                 {[
                   { label: 'Side', value: selectedGuest.side },
-                  { label: 'Count', value: String(selectedGuest.rsvp?.plus_one || 1) },
+                  { 
+                    label: 'Count (Attending / Confirmed)', 
+                    value: selectedGuest.rsvp?.status === 'attending' 
+                      ? `${selectedGuest.rsvp.attending_count ?? selectedGuest.rsvp.plus_one} / ${selectedGuest.rsvp.plus_one}` 
+                      : selectedGuest.rsvp?.status === 'declined' 
+                        ? `0 / ${selectedGuest.rsvp.plus_one}` 
+                        : `– / ${selectedGuest.rsvp?.plus_one || 1}` 
+                  },
                   { label: 'Phone', value: selectedGuest.phone || '–' },
                   { label: 'Email', value: selectedGuest.email || '–' },
                 ].map(({ label, value }) => (

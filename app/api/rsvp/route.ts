@@ -13,6 +13,7 @@ export async function POST(request: Request) {
       dietary_notes, 
       message, 
       alcohol_choice,
+      attending_count,
       general_guest_name,
       general_guest_side
     } = body;
@@ -37,14 +38,20 @@ export async function POST(request: Request) {
       targetGuestId = newGuest.id;
     }
     
+    const parsedPlusOne = typeof plus_one === 'number' ? plus_one : (plus_one ? 2 : 1);
+    const parsedAttendingCount = typeof attending_count === 'number' 
+      ? attending_count 
+      : (status === 'attending' ? parsedPlusOne : 0);
+
     const rsvp = await saveRSVP(targetGuestId, {
       status,
-      plus_one: !!plus_one,
+      plus_one: parsedPlusOne,
       plus_one_name: plus_one_name || '',
       meal_choice: meal_choice || '',
       dietary_notes: dietary_notes || '',
       message: message || '',
-      alcohol_choice: alcohol_choice || 'none'
+      alcohol_choice: alcohol_choice || 'none',
+      attending_count: parsedAttendingCount
     });
     
     return NextResponse.json(rsvp);

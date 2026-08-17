@@ -10,7 +10,8 @@ import {
   CheckCircle2,
   ChevronDown,
   AlertCircle,
-  Wine
+  Wine,
+  Users
 } from 'lucide-react';
 import { GuestWithDetails, GalleryImage } from '@/lib/types';
 import Lightbox from '@/components/Lightbox';
@@ -45,6 +46,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
   );
   const [plusOne, setPlusOne] = useState(guest.rsvp?.plus_one || false);
   const [plusOneName, setPlusOneName] = useState(guest.rsvp?.plus_one_name || '');
+  const [attendingCount, setAttendingCount] = useState<number>(guest.rsvp?.attending_count || guest.rsvp?.plus_one || 1);
   const [mealChoice, setMealChoice] = useState(guest.rsvp?.meal_choice || '');
   const [dietaryNotes, setDietaryNotes] = useState(guest.rsvp?.dietary_notes || '');
   const [message, setMessage] = useState(guest.rsvp?.message || '');
@@ -133,12 +135,13 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
         body: JSON.stringify({
           guest_id: guest.id,
           status: attending,
-          plus_one: attending === 'attending' ? plusOne : false,
+          plus_one: guest.rsvp?.plus_one || 1,
           plus_one_name: attending === 'attending' ? plusOneName.trim() : '',
           meal_choice: attending === 'attending' ? mealChoice : '',
           dietary_notes: attending === 'attending' ? dietaryNotes.trim() : '',
           message: message.trim(),
           alcohol_choice: attending === 'attending' ? alcoholChoice : '',
+          attending_count: attending === 'attending' ? attendingCount : 0,
         }),
       });
 
@@ -904,13 +907,30 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                 {attending === 'attending' && (
                   <div className="space-y-5 pt-4 border-t border-[#E8E4DE] animate-fade-in">
 
-                    {/* Guest Count Seat Message */}
-                    <div className="p-3.5 bg-[#FAF8F5] border border-[#EAE3DB] rounded-lg text-center space-y-1">
-                      <p className="text-xs font-semibold text-gray-800">
-                        {guest.rsvp?.plus_one || 1} {(guest.rsvp?.plus_one || 1) === 1 ? 'guest is' : 'guests are'} confirmed.
-                      </p>
-                      <p className="text-[10px] leading-relaxed text-gray-600">
-                        Are all of you coming? If not, please mention how many are attending in the text box below.
+                    {/* Attending Guest Count Input */}
+                    <div className="space-y-2">
+                      <label htmlFor="attending-count" className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5 text-[#C8A882]" /> Number of Guests Attending
+                      </label>
+                      <div className="relative">
+                        <input
+                          id="attending-count"
+                          type="number"
+                          min="1"
+                          max={guest.rsvp?.plus_one || 10}
+                          value={attendingCount}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value, 10);
+                            setAttendingCount(isNaN(val) ? 1 : Math.max(1, Math.min(guest.rsvp?.plus_one || 10, val)));
+                          }}
+                          className="w-full bg-white border border-gray-200 rounded py-2.5 px-3.5 text-xs text-gray-900 focus:outline-none focus:border-[#D38A99]"
+                        />
+                        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
+                          Max: {guest.rsvp?.plus_one || 1}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-gray-400 leading-normal">
+                        We have confirmed {guest.rsvp?.plus_one || 1} seats for your invitation. Please adjust if fewer guests are attending.
                       </p>
                     </div>
 
@@ -994,7 +1014,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                     id="rsvp-msg"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Write a message to the couple, or mention if the guest count is different (optional)"
+                    placeholder="Write a message to the couple (optional)"
                     rows={4}
                     className="w-full bg-white border border-gray-200 rounded py-3 px-4 text-xs text-gray-900 focus:outline-none focus:border-[#D38A99] resize-none"
                   />

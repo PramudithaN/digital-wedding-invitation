@@ -154,8 +154,20 @@ export default function RSVPTrackerPage() {
             return {
               ...g,
               rsvp: g.rsvp 
-                ? { ...g.rsvp, status: newStatus, responded_at: new Date().toISOString() } 
-                : { id: 'new-rsvp', guest_id: guestId, status: newStatus, plus_one: false, responded_at: new Date().toISOString() }
+                ? { 
+                    ...g.rsvp, 
+                    status: newStatus, 
+                    responded_at: new Date().toISOString(),
+                    attending_count: newStatus === 'attending' ? (g.rsvp.attending_count ?? g.rsvp.plus_one) : 0
+                  } 
+                : { 
+                    id: 'new-rsvp', 
+                    guest_id: guestId, 
+                    status: newStatus, 
+                    plus_one: 1, 
+                    attending_count: newStatus === 'attending' ? 1 : 0, 
+                    responded_at: new Date().toISOString() 
+                  }
             };
           }
           return g;
@@ -294,7 +306,18 @@ export default function RSVPTrackerPage() {
                   return (
                     <TableRow key={guest.id} hover>
                       <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{guest.name}</Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{guest.name}</Typography>
+                          {guest.rsvp?.plus_one && (
+                            <Chip 
+                              size="small" 
+                              label={guest.rsvp.status === 'attending' 
+                                ? `${guest.rsvp.attending_count ?? guest.rsvp.plus_one} / ${guest.rsvp.plus_one} Attending` 
+                                : `Seats: ${guest.rsvp.plus_one}`} 
+                              sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: 'rgba(211,138,153,0.1)', color: '#D38A99' }} 
+                            />
+                          )}
+                        </Box>
                         {guest.category && (
                           <Typography
                             variant="caption"
@@ -411,7 +434,18 @@ export default function RSVPTrackerPage() {
                   <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
                       <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 700 }}>{guest.name}</Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>{guest.name}</Typography>
+                          {guest.rsvp?.plus_one && (
+                            <Chip 
+                              size="small" 
+                              label={guest.rsvp.status === 'attending' 
+                                ? `${guest.rsvp.attending_count ?? guest.rsvp.plus_one} / ${guest.rsvp.plus_one} Attending` 
+                                : `Seats: ${guest.rsvp.plus_one}`} 
+                              sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: 'rgba(211,138,153,0.1)', color: '#D38A99' }} 
+                            />
+                          )}
+                        </Box>
                         <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
                           <SideChip side={guest.side || 'bride'} />
                           {guest.category && (

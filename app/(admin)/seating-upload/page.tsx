@@ -12,46 +12,52 @@ import {
   ExternalLink,
   Download,
   Search,
-  Check,
-  X
+  Check
 } from 'lucide-react';
 import { GuestWithDetails } from '@/lib/types';
 
-function SideBadge({ side }: { side?: string }) {
-  if (side === 'bride') {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-100 uppercase tracking-wide">
-        Bride
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100 uppercase tracking-wide">
-      Groom
-    </span>
-  );
+// MUI Imports to match Guest List style exactly
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+import Chip from '@mui/material/Chip';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import TableContainer from '@mui/material/TableContainer';
+import Table from '@mui/material/Table';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+import TableBody from '@mui/material/TableBody';
+import InputAdornment from '@mui/material/InputAdornment';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+
+function StatusChip({ guest }: { guest: GuestWithDetails }) {
+  const status = guest.rsvp?.status;
+  if (status === 'attending') return <Chip label="Attending" size="small" sx={{ bgcolor: '#F0FDF4', color: '#16A34A', fontWeight: 700, fontSize: '0.7rem' }} />;
+  if (status === 'declined')  return <Chip label="Declined"  size="small" sx={{ bgcolor: '#FEF2F2', color: '#DC2626', fontWeight: 700, fontSize: '0.7rem' }} />;
+  if (guest.invite_link?.opened_at) return <Chip label="Opened" size="small" sx={{ bgcolor: '#FFFBEB', color: '#D97706', fontWeight: 700, fontSize: '0.7rem' }} />;
+  if (guest.invite_link?.sent_at)   return <Chip label="Sent"   size="small" sx={{ bgcolor: '#EFF6FF', color: '#2563EB', fontWeight: 700, fontSize: '0.7rem' }} />;
+  return <Chip label="Pending" size="small" sx={{ bgcolor: '#F9FAFB', color: '#6B7280', fontWeight: 700, fontSize: '0.7rem' }} />;
 }
 
-function RSVPBadge({ guest }: { guest: GuestWithDetails }) {
-  const status = guest.rsvp?.status;
-  if (status === 'attending') {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100 uppercase tracking-wide">
-        Attending
-      </span>
-    );
-  }
-  if (status === 'declined') {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-100 uppercase tracking-wide">
-        Declined
-      </span>
-    );
-  }
+function SideChip({ side }: { side: string }) {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-50 text-gray-500 border border-gray-150 uppercase tracking-wide">
-      Pending
-    </span>
+    <Chip
+      label={side}
+      size="small"
+      sx={{
+        bgcolor: side === 'bride' ? '#FAF5FF' : '#EFF6FF',
+        color:   side === 'bride' ? '#9333EA'  : '#2563EB',
+        fontWeight: 700, fontSize: '0.7rem',
+      }}
+    />
   );
 }
 
@@ -74,7 +80,7 @@ export default function SeatingUploadPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [sideFilter, setSideFilter] = useState('all');
   const [savingId, setSavingId] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const fetchGuests = async (silent = false) => {
     try {
@@ -111,11 +117,10 @@ export default function SeatingUploadPage() {
       setGuests(prev => prev.map(g => g.id === guestId ? { ...g, table_no: value } : g));
       
       // Show toast confirmation
-      setToast('Table assignment updated');
-      setTimeout(() => setToast(null), 2500);
+      setToast({ message: 'Table assignment updated successfully!', type: 'success' });
     } catch (err: any) {
       console.error(err);
-      alert('Error saving table number: ' + err.message);
+      setToast({ message: 'Error saving table number: ' + err.message, type: 'error' });
     } finally {
       setSavingId(null);
     }
@@ -205,45 +210,51 @@ export default function SeatingUploadPage() {
   });
 
   return (
-    <div className="space-y-6 animate-fade-in font-sans pb-12">
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pb: 6 }}>
+      
       {/* Toast Notification */}
-      {toast && (
-        <div className="fixed bottom-5 right-5 z-[9999] animate-fade-in select-none">
-          <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-lg shadow-lg text-xs font-semibold border border-gray-800">
-            <Check className="w-4 h-4 text-green-400" />
-            <span>{toast}</span>
-          </div>
-        </div>
-      )}
+      <Snackbar 
+        open={toast !== null} 
+        autoHideDuration={2500} 
+        onClose={() => setToast(null)} 
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }} 
+        sx={{ zIndex: 9999 }}
+      >
+        <Alert severity={toast?.type || 'success'} onClose={() => setToast(null)} sx={{ width: '100%' }}>
+          {toast?.message}
+        </Alert>
+      </Snackbar>
 
       {/* Header */}
-      <div className="border-b border-gray-200 pb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl tracking-tight font-semibold text-gray-900 flex items-center gap-2">
-            <FileSpreadsheet className="w-6 h-6 text-emerald-500" /> Seating Assignment Center
-          </h1>
-          <p className="text-xs text-gray-500 mt-1">
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'space-between', alignItems: 'flex-start', pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700 }} color="text.primary">Seating Assignment Center</Typography>
+          <Typography variant="caption" color="text.secondary">
             Upload guest seating spreadsheets or edit assignments directly in the table below.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Link 
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button 
+            variant="outlined" 
+            component={Link} 
             href="/rsvp" 
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 hover:border-gray-400 bg-white text-xs font-semibold text-gray-700 rounded-md transition-colors shadow-xs"
+            startIcon={<Download size={16} />}
+            sx={{ whiteSpace: 'nowrap' }}
           >
-            <Download className="w-3.5 h-3.5" />
             Download RSVPs
-          </Link>
-          <Link 
+          </Button>
+          <Button 
+            variant="contained" 
+            component={Link} 
             href="/find-table" 
             target="_blank"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-xs font-semibold text-white rounded-md transition-colors shadow-xs"
+            startIcon={<ExternalLink size={16} />}
+            sx={{ whiteSpace: 'nowrap' }}
           >
             Seating Lookup View
-            <ExternalLink className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-      </div>
+          </Button>
+        </Box>
+      </Box>
 
       {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -252,10 +263,7 @@ export default function SeatingUploadPage() {
         <div className="lg:col-span-2 space-y-6">
           
           {error && (
-            <div className="bg-red-50 border border-red-150 text-red-705 text-xs px-4 py-3.5 rounded-lg flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
-              <span>{error}</span>
-            </div>
+            <Alert severity="error" icon={<AlertCircle size={16} />}>{error}</Alert>
           )}
 
           {successResult && (
@@ -287,7 +295,7 @@ export default function SeatingUploadPage() {
                       <li key={i}>{err}</li>
                     ))}
                   </ul>
-                  <p className="text-[9px] italic text-amber-750">
+                  <p className="text-[9px] italic text-amber-700">
                     💡 Unmatched guests might have spelling discrepancies. Make sure the 'Guest ID' column is preserved.
                   </p>
                 </div>
@@ -296,7 +304,7 @@ export default function SeatingUploadPage() {
           )}
 
           {/* CSV Dropzone */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-6">
+          <Paper elevation={1} sx={{ p: 3, spaceY: 3 }}>
             <div
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -311,9 +319,9 @@ export default function SeatingUploadPage() {
                 <Upload className="w-6 h-6" />
               </div>
               <div className="space-y-1">
-                <p className="text-xs font-semibold text-gray-800">
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   Drag & drop your edited CSV here, or{' '}
-                  <label className="text-blue-500 hover:text-blue-600 cursor-pointer font-bold underline">
+                  <label className="text-blue-500 hover:text-blue-650 cursor-pointer font-bold underline">
                     browse files
                     <input
                       type="file"
@@ -323,10 +331,10 @@ export default function SeatingUploadPage() {
                       onChange={handleFileChange}
                     />
                   </label>
-                </p>
-                <p className="text-[10px] text-gray-500 max-w-sm mx-auto">
+                </Typography>
+                <Typography variant="caption" color="text.secondary" className="block max-w-sm mx-auto">
                   Only `.csv` spreadsheets are supported. Ensure a column named `Table No` exists.
-                </p>
+                </Typography>
               </div>
 
               {file && (
@@ -337,131 +345,141 @@ export default function SeatingUploadPage() {
               )}
             </div>
 
-            <div className="flex justify-end border-t border-gray-150 pt-4">
-              <button
-                type="button"
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid', borderColor: 'divider', pt: 2, mt: 2 }}>
+              <Button
+                variant="contained"
                 onClick={handleUpload}
                 disabled={!file || isUploading}
-                className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-200 disabled:text-gray-450 disabled:cursor-not-allowed text-white rounded-md py-2 px-5 text-xs font-semibold tracking-wide shadow-xs active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                startIcon={isUploading ? <CircularProgress size={16} color="inherit" /> : <Upload size={16} />}
               >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4" />
-                    Upload Seating Assignments
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+                {isUploading ? 'Uploading...' : 'Upload Seating Assignments'}
+              </Button>
+            </Box>
+          </Paper>
 
         </div>
 
         {/* Right Column: Instructions */}
-        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-4 h-fit">
-          <h2 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2 border-b border-gray-150 pb-3">
-            <HelpCircle className="w-4 h-4 text-gray-400" /> Seating Notes
-          </h2>
+        <Paper elevation={1} sx={{ p: 3, h: 'fit-content', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, borderBottom: '1px solid', borderColor: 'divider', pb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <HelpCircle size={18} className="text-gray-400" /> Seating Notes
+          </Typography>
           
-          <div className="space-y-3.5 text-xs leading-relaxed text-gray-600">
-            <p>
+          <div className="space-y-3.5 text-xs leading-relaxed text-gray-605">
+            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
               Assignments made in the table below are **saved instantly** to the database and will reflect immediately on the public search view.
-            </p>
-            <p>
+            </Typography>
+            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
               If you upload a new CSV, the system will update table numbers for matching guests. **Existing seating assignments for other guests will not be removed** unless you explicitly clear them or upload an empty value.
-            </p>
-            <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-[10px] text-blue-800 leading-normal">
+            </Typography>
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-[10px] text-blue-800 leading-normal font-sans">
               💡 **Quick Edit Tip**: You can type in the table numbers below, press **Enter** or click away (Blur) to save. Leave the input blank to clear/unassign a table number.
             </div>
           </div>
-        </div>
+        </Paper>
 
       </div>
 
-      {/* Guest Seating Grid */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+      {/* Guest Seating Grid (Styled Identically to Guests Page Table) */}
+      <Paper elevation={1}>
         
         {/* Table Filters */}
-        <div className="p-4 border-b border-gray-150 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">
+        <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
             Guest Seating Grid ({filteredGuests.length} guests)
-          </h3>
+          </Typography>
           
-          <div className="flex flex-wrap items-center gap-2.5">
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'center' }}>
             {/* Search Input */}
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search guest name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1.5 w-44 bg-white border border-gray-205 rounded-md text-xs focus:outline-none focus:border-blue-500 text-gray-800 font-medium"
-              />
-            </div>
+            <TextField
+              size="small"
+              placeholder="Search guest name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search size={16} className="text-gray-400" />
+                    </InputAdornment>
+                  ),
+                }
+              }}
+              sx={{ width: 200, '& .MuiOutlinedInput-root': { fontSize: '0.75rem' } }}
+            />
 
             {/* Side filter */}
-            <select
-              value={sideFilter}
-              onChange={(e) => setSideFilter(e.target.value)}
-              className="py-1.5 px-2 bg-white border border-gray-205 rounded-md text-xs focus:outline-none text-gray-800 font-medium cursor-pointer"
-            >
-              <option value="all">All Sides</option>
-              <option value="bride">Bride Side</option>
-              <option value="groom">Groom Side</option>
-            </select>
+            <FormControl size="small" sx={{ minWidth: 110 }}>
+              <InputLabel id="side-filter-label">Side</InputLabel>
+              <Select
+                labelId="side-filter-label"
+                value={sideFilter}
+                label="Side"
+                onChange={(e) => setSideFilter(e.target.value)}
+                sx={{ fontSize: '0.75rem' }}
+              >
+                <MenuItem value="all">All Sides</MenuItem>
+                <MenuItem value="bride">Bride Side</MenuItem>
+                <MenuItem value="groom">Groom Side</MenuItem>
+              </Select>
+            </FormControl>
 
             {/* Status Filter */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="py-1.5 px-2 bg-white border border-gray-205 rounded-md text-xs focus:outline-none text-gray-800 font-medium cursor-pointer"
-            >
-              <option value="all">All RSVPs</option>
-              <option value="attending">Attending</option>
-              <option value="declined">Declined</option>
-              <option value="pending">Pending</option>
-            </select>
-          </div>
-        </div>
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel id="status-filter-label">RSVP Status</InputLabel>
+              <Select
+                labelId="status-filter-label"
+                value={statusFilter}
+                label="RSVP Status"
+                onChange={(e) => setStatusFilter(e.target.value)}
+                sx={{ fontSize: '0.75rem' }}
+              >
+                <MenuItem value="all">All RSVPs</MenuItem>
+                <MenuItem value="attending">Attending</MenuItem>
+                <MenuItem value="declined">Declined</MenuItem>
+                <MenuItem value="pending">Pending</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </Box>
 
         {/* Seating Table */}
-        <div className="overflow-x-auto">
+        <TableContainer>
           {isGridLoading ? (
-            <div className="py-20 flex flex-col items-center justify-center text-gray-400 gap-2">
-              <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-              <p className="text-xs">Fetching seating database...</p>
-            </div>
+            <Box sx={{ py: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              <CircularProgress size={30} />
+              <Typography variant="body2" color="text.secondary">Fetching seating database...</Typography>
+            </Box>
           ) : filteredGuests.length === 0 ? (
-            <div className="py-16 text-center text-gray-450 text-xs">
-              No guests found matching the selected filters.
-            </div>
+            <Box sx={{ py: 8, textCol: 'center', textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">No guests found matching the selected filters.</Typography>
+            </Box>
           ) : (
-            <table className="min-w-full divide-y divide-gray-150">
-              <thead className="bg-gray-50/30 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                <tr>
-                  <th scope="col" className="px-6 py-3">Guest Name</th>
-                  <th scope="col" className="px-6 py-3">Side</th>
-                  <th scope="col" className="px-6 py-3">RSVP Status</th>
-                  <th scope="col" className="px-6 py-3">Assigned Table No</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-150 text-xs text-gray-700">
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Guest Name</TableCell>
+                  <TableCell>Side</TableCell>
+                  <TableCell>RSVP Status</TableCell>
+                  <TableCell>Assigned Table No</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {filteredGuests.map((guest) => (
-                  <tr key={guest.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-3.5 font-semibold text-gray-900">{guest.name}</td>
-                    <td className="px-6 py-3.5"><SideBadge side={guest.side} /></td>
-                    <td className="px-6 py-3.5"><RSVPBadge guest={guest} /></td>
-                    <td className="px-6 py-3.5 max-w-[180px]">
-                      <div className="relative flex items-center gap-2">
-                        <input
-                          type="text"
-                          defaultValue={guest.table_no || ''}
+                  <TableRow key={guest.id} hover>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{guest.name}</Typography>
+                    </TableCell>
+                    <TableCell><SideChip side={guest.side || 'bride'} /></TableCell>
+                    <TableCell><StatusChip guest={guest} /></TableCell>
+                    <TableCell sx={{ minWidth: 180, maxWidth: 220 }}>
+                      <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <TextField
+                          size="small"
+                          fullWidth
                           placeholder="e.g. Table 3 (tap to edit)"
+                          defaultValue={guest.table_no || ''}
+                          disabled={savingId === guest.id}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               (e.target as HTMLInputElement).blur();
@@ -473,25 +491,33 @@ export default function SeatingUploadPage() {
                               handleTableNoChange(guest.id, val);
                             }
                           }}
-                          disabled={savingId === guest.id}
-                          className="w-full bg-white border border-gray-200 hover:border-gray-300 focus:border-blue-500 rounded-md py-1.5 px-2.5 text-xs text-gray-800 focus:outline-none transition-colors"
+                          slotProps={{
+                            input: {
+                              endAdornment: savingId === guest.id ? (
+                                <InputAdornment position="end">
+                                  <CircularProgress size={14} />
+                                </InputAdornment>
+                              ) : null
+                            }
+                          }}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              fontSize: '0.8rem',
+                              bgcolor: 'background.paper',
+                            }
+                          }}
                         />
-                        {savingId === guest.id && (
-                          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-blue-500">
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
-        </div>
+        </TableContainer>
 
-      </div>
+      </Paper>
 
-    </div>
+    </Box>
   );
 }

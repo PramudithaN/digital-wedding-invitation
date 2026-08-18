@@ -1,9 +1,39 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getGuests, addGuest, clearAllGuests } from '@/lib/db';
 import { normalizePhoneNumber } from '@/lib/whatsapp';
+import { checkIsAuthenticated } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const searchQuery = searchParams.get('q');
+    
+    if (searchQuery !== null) {
+      const q = searchQuery.toLowerCase().trim();
+      if (!q) {
+        return NextResponse.json([]);
+      }
+      
+      const guests = await getGuests();
+      const filtered = guests
+        .filter(g => g.name.toLowerCase().includes(q))
+        .map(g => ({
+          id: g.id,
+          name: g.name,
+          side: g.side,
+          relationship: g.relationship,
+          table_no: g.table_no || '',
+          rsvp_status: g.rsvp?.status || 'pending'
+        }));
+      return NextResponse.json(filtered);
+    }
+    
+    // Verify admin authentication for fetching all guests
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
     const guests = await getGuests();
     return NextResponse.json(guests);
   } catch (error: any) {
@@ -27,6 +57,7 @@ export async function POST(request: Request) {
           category_id: item.category_id || null,
           relationship: item.relationship || 'friend',
           notes: item.notes || '',
+          table_no: item.table_no || '',
           plus_one: item.plus_one
         });
         results.push(guest);
@@ -45,6 +76,7 @@ export async function POST(request: Request) {
         category_id: body.category_id || null,
         relationship: body.relationship || 'friend',
         notes: body.notes || '',
+        table_no: body.table_no || '',
         plus_one: body.plus_one
       });
       return NextResponse.json(guest);

@@ -25,7 +25,7 @@ import Tooltip from '@mui/material/Tooltip';
 
 import {
   LayoutGrid, Users, CheckCircle2, Split, Tags,
-  BarChart3, Settings, LogOut, Heart, Menu,
+  BarChart3, Settings, LogOut, Heart, Menu, FileSpreadsheet,
 } from 'lucide-react';
 
 const DRAWER_WIDTH = 240;
@@ -35,11 +35,12 @@ const NAV_ITEMS = [
   { href: '/guests', label: 'Guests', icon: Users },
   { href: '/rsvp', label: 'RSVPs', icon: CheckCircle2 },
   { href: '/tables', label: 'Tables', icon: Split },
+  { href: '/seating-upload', label: 'Seating Upload', icon: FileSpreadsheet },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
-const MOBILE_NAV = NAV_ITEMS.slice(0, 5);
+const MOBILE_NAV = NAV_ITEMS.slice(0, 6);
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

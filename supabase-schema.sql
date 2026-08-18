@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS guests (
   relationship   TEXT DEFAULT 'friend',
   invite_token   UUID UNIQUE DEFAULT gen_random_uuid(),  -- used in invite URL
   notes          TEXT,
+  table_no       TEXT,                -- table assignment number
   created_at     TIMESTAMPTZ DEFAULT now()
 );
 

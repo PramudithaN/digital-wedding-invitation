@@ -15,6 +15,7 @@ export interface Guest {
   relationship?: 'relative' | 'friend';
   invite_token: string;
   notes?: string;
+  table_no?: string;
   created_at?: string;
 }
 

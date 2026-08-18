@@ -98,20 +98,22 @@ export default function RSVPTrackerPage() {
   };
 
   const handleDownloadRSVPs = () => {
-    const headers = ['Guest Name', 'Side', 'Status', 'Meal Preference', 'Alcohol Preference', 'Responded Date', 'Notes'];
+    const headers = ['Guest ID', 'Guest Name', 'Side', 'Status', 'Meal Preference', 'Alcohol Preference', 'Responded Date', 'Notes', 'Table No'];
     const rows = filteredGuests.map(g => [
+      g.id,
       g.name,
       g.side || 'bride',
       g.rsvp?.status || 'pending',
       g.rsvp?.meal_choice || '-',
       g.rsvp?.alcohol_choice || '-',
       g.rsvp?.responded_at ? new Date(g.rsvp.responded_at).toISOString().split('T')[0] : '-',
-      g.notes || ''
+      g.notes || '',
+      g.table_no || ''
     ]);
     
     const csvContent = [
       headers.join(','),
-      ...rows.map(row => row.map(val => `"${val.replace(/"/g, '""')}"`).join(','))
+      ...rows.map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))
     ].join('\n');
     
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });

@@ -348,18 +348,18 @@ export default function SeatingLookupPage() {
                             </div>
                           </div>
                           
-                          <div className="text-right shrink-0">
+                          <div className="shrink-0 flex items-center justify-center">
                             {hasTable ? (
-                              <div className="space-y-0.5">
-                                <span className="block text-[8px] text-[#A0A0A0] uppercase font-bold tracking-wider">Assigned Table</span>
-                                <span className="text-sm sm:text-base font-bold text-purple-700 font-serif">
+                              <div className="flex flex-col items-center justify-center bg-[#FDFBF7] border-2 border-[#C8A882] rounded-xl px-4.5 py-3.5 shadow-sm min-w-[100px] border-solid">
+                                <span className="text-[8px] text-[#C8A882] uppercase font-bold tracking-widest font-sans leading-none">Table</span>
+                                <span className="text-xl sm:text-2xl font-black text-[#2D312E] font-serif mt-1 leading-none">
                                   {guest.table_no}
                                 </span>
                               </div>
                             ) : (
-                              <div className="space-y-0.5">
-                                <span className="block text-[8px] text-[#A0A0A0] uppercase font-bold tracking-wider">Table Status</span>
-                                <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-md animate-pulse font-sans">
+                              <div className="flex flex-col items-center justify-center bg-amber-50/50 border border-dashed border-amber-300 rounded-xl px-4.5 py-3.5 min-w-[100px]">
+                                <span className="text-[8px] text-amber-700 uppercase font-bold tracking-widest font-sans leading-none">Status</span>
+                                <span className="text-[10px] font-bold text-amber-700 mt-1.5 animate-pulse font-sans leading-none">
                                   Pending
                                 </span>
                               </div>

@@ -249,7 +249,7 @@ export default function SeatingUploadPage() {
             href="/find-table" 
             target="_blank"
             startIcon={<ExternalLink size={16} />}
-            sx={{ whiteSpace: 'nowrap' }}
+            sx={{ whiteSpace: 'nowrap', color: '#FFFFFF' }}
           >
             Seating Lookup View
           </Button>
@@ -351,6 +351,7 @@ export default function SeatingUploadPage() {
                 onClick={handleUpload}
                 disabled={!file || isUploading}
                 startIcon={isUploading ? <CircularProgress size={16} color="inherit" /> : <Upload size={16} />}
+                sx={{ color: '#FFFFFF', '&.Mui-disabled': { color: 'rgba(0, 0, 0, 0.26)' } }}
               >
                 {isUploading ? 'Uploading...' : 'Upload Seating Assignments'}
               </Button>
@@ -365,17 +366,17 @@ export default function SeatingUploadPage() {
             <HelpCircle size={18} className="text-gray-400" /> Seating Notes
           </Typography>
           
-          <div className="space-y-3.5 text-xs leading-relaxed text-gray-605">
-            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-              Assignments made in the table below are **saved instantly** to the database and will reflect immediately on the public search view.
-            </Typography>
-            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-              If you upload a new CSV, the system will update table numbers for matching guests. **Existing seating assignments for other guests will not be removed** unless you explicitly clear them or upload an empty value.
-            </Typography>
-            <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-[10px] text-blue-800 leading-normal font-sans">
-              💡 **Quick Edit Tip**: You can type in the table numbers below, press **Enter** or click away (Blur) to save. Leave the input blank to clear/unassign a table number.
-            </div>
-          </div>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, fontSize: '0.75rem', color: 'text.secondary' }}>
+            <p>
+              • **Real-time Saving**: Typing a table number in the grid below saves it immediately.
+            </p>
+            <p>
+              • **CSV Updates**: Uploading a CSV will only update table numbers for guests listed in the file. Other guests' table numbers will remain unchanged.
+            </p>
+            <p>
+              • **Manual Edit**: Press **Enter** or click outside the box to save. Clear the text to unassign the table.
+            </p>
+          </Box>
         </Paper>
 
       </div>

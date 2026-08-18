@@ -10,6 +10,7 @@ interface MatchedGuest {
   relationship?: 'relative' | 'friend';
   table_no: string;
   rsvp_status: 'attending' | 'declined' | 'pending';
+  seats_count: number;
 }
 
 export default function SeatingLookupPage() {
@@ -329,8 +330,11 @@ export default function SeatingLookupPage() {
                           className="bg-[#FDFBF7]/95 border border-[#E3DEC9] rounded-xl p-4.5 shadow-sm transition-all duration-300 flex items-center justify-between gap-4 hover:shadow-md animate-fade-in"
                         >
                           <div className="space-y-1">
-                            <h3 className="font-semibold text-gray-800 text-sm leading-none">
-                              {guest.name}
+                            <h3 className="font-semibold text-gray-800 text-sm leading-none flex items-center gap-1.5 flex-wrap">
+                              <span>{guest.name}</span>
+                              <span className="text-[10px] text-gray-400 font-sans font-medium bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded">
+                                {guest.seats_count} {guest.seats_count === 1 ? 'seat' : 'seats'}
+                              </span>
                             </h3>
                             <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
                               {guest.side && (

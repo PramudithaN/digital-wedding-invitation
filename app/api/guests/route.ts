@@ -17,14 +17,21 @@ export async function GET(request: NextRequest) {
       const guests = await getGuests();
       const filtered = guests
         .filter(g => g.name.toLowerCase().includes(q) && g.rsvp?.status === 'attending')
-        .map(g => ({
-          id: g.id,
-          name: g.name,
-          side: g.side,
-          relationship: g.relationship,
-          table_no: g.table_no || '',
-          rsvp_status: g.rsvp?.status || 'pending'
-        }));
+        .map(g => {
+          const confirmed = g.rsvp?.plus_one || 1;
+          const attendingCount = g.rsvp?.attending_count && g.rsvp.attending_count > 0 
+            ? g.rsvp.attending_count 
+            : confirmed;
+          return {
+            id: g.id,
+            name: g.name,
+            side: g.side,
+            relationship: g.relationship,
+            table_no: g.table_no || '',
+            rsvp_status: g.rsvp?.status || 'pending',
+            seats_count: attendingCount
+          };
+        });
       return NextResponse.json(filtered);
     }
     

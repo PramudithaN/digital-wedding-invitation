@@ -108,12 +108,21 @@ body {
   50% { transform: translateY(6px); }
 }
 
+@keyframes bounceHorizontal {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-pulse-soft {
   animation: pulseSoft 2s ease-in-out infinite;
+}
+
+.animate-bounce-horizontal {
+  animation: bounceHorizontal 1.2s ease-in-out infinite;
 }
 
 /* Custom Sri Lankan Art Floating Animations */

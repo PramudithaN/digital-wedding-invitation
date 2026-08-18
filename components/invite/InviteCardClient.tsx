@@ -13,7 +13,8 @@ import {
   Wine,
   Users,
   Minus,
-  Plus
+  Plus,
+  ChevronRight
 } from 'lucide-react';
 import { GuestWithDetails, GalleryImage } from '@/lib/types';
 import Lightbox from '@/components/Lightbox';
@@ -95,6 +96,37 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
   // Countdown timer state
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [isExpired, setIsExpired] = useState(false);
+
+  // Gallery Carousel States
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  const [hasSwiped, setHasSwiped] = useState(false);
+  const galleryScrollRef = useRef<HTMLDivElement>(null);
+
+  const handleGalleryScroll = () => {
+    if (galleryScrollRef.current) {
+      const { scrollLeft, scrollWidth } = galleryScrollRef.current;
+      if (scrollLeft > 10) {
+        setHasSwiped(true);
+      }
+      const averageWidth = scrollWidth / displayImages.length;
+      const index = Math.round(scrollLeft / averageWidth);
+      if (index >= 0 && index < displayImages.length) {
+        setActivePhotoIndex(index);
+      }
+    }
+  };
+
+  const scrollToIndex = (index: number) => {
+    if (galleryScrollRef.current) {
+      const averageWidth = galleryScrollRef.current.scrollWidth / displayImages.length;
+      galleryScrollRef.current.scrollTo({
+        left: index * averageWidth,
+        behavior: 'smooth'
+      });
+      setActivePhotoIndex(index);
+      setHasSwiped(true);
+    }
+  };
 
   const timelineRef = useRef<HTMLDivElement>(null);
   const rsvpRef = useRef<HTMLDivElement>(null);
@@ -1153,32 +1185,75 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
       <section className="max-w-3xl mx-auto px-6 py-12 w-full text-center space-y-6">
         <h2 className="text-xl font-serif text-gray-900 font-light">Moments Gallery</h2>
         <div className="h-[1px] w-12 bg-[#D38A99] mx-auto" />
-        <div 
-          className="flex flex-row items-center justify-start sm:grid sm:grid-cols-2 md:grid-cols-3 gap-4 pt-4 px-2 sm:px-0 overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory pb-4 sm:pb-0"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {displayImages.map((url, idx) => (
-            <div 
-              key={idx}
-              onClick={() => setLightboxIndex(idx)}
-              className={`w-[262px] h-[350px] sm:w-auto sm:h-auto sm:aspect-[3/4] snap-center overflow-hidden rounded-xl border border-[#E8E4DE] shadow-xs group bg-[#FAFAF8] shrink-0 cursor-zoom-in relative ${
-                idx % 3 === 1 ? 'md:translate-y-4' : ''
-              }`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src={url} 
-                alt={`${weddingDetails.bride_name} & ${weddingDetails.groom_name} Moment ${idx + 1}`} 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                loading="lazy"
-              />
-              {/* Premium Hover Overlay */}
-              <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
-                <span className="text-[10px] uppercase tracking-wider text-white bg-black/45 px-2.5 py-1 rounded-md backdrop-blur-xs font-semibold">View Photo</span>
-              </div>
+        
+        <div className="relative">
+          <div 
+            ref={galleryScrollRef}
+            onScroll={handleGalleryScroll}
+            className="flex flex-row items-center justify-start sm:grid sm:grid-cols-2 md:grid-cols-3 gap-4 pt-4 px-2 sm:px-0 overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory pb-4 sm:pb-0"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {displayImages.map((url, idx) => {
+              const isActive = idx === activePhotoIndex;
+              return (
+                <div 
+                  key={idx}
+                  onClick={() => setLightboxIndex(idx)}
+                  className={`w-[262px] h-[350px] sm:w-auto sm:h-auto sm:aspect-[3/4] snap-center overflow-hidden rounded-xl border border-[#E8E4DE] shadow-xs group bg-[#FAFAF8] shrink-0 cursor-zoom-in relative transition-all duration-500 ${
+                    idx % 3 === 1 ? 'md:translate-y-4' : ''
+                  } ${
+                    !isActive ? 'scale-95 opacity-75 sm:scale-100 sm:opacity-100' : 'scale-100 opacity-100'
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
+                    src={url} 
+                    alt={`${weddingDetails.bride_name} & ${weddingDetails.groom_name} Moment ${idx + 1}`} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  {/* Premium Hover Overlay */}
+                  <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                    <span className="text-[10px] uppercase tracking-wider text-white bg-black/45 px-2.5 py-1 rounded-md backdrop-blur-xs font-semibold">View Photo</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Swipe Hint overlay on first image */}
+          {!hasSwiped && (
+            <div className="absolute right-4 bottom-8 bg-white/90 backdrop-blur-xs text-[10px] uppercase tracking-wider font-semibold text-gray-800 py-1.5 px-3 rounded-full shadow-md flex items-center gap-1 pointer-events-none animate-bounce-horizontal z-20 sm:hidden">
+              <span>Swipe</span>
+              <ChevronRight className="w-3.5 h-3.5 text-[#D38A99]" />
             </div>
-          ))}
+          )}
         </div>
+
+        {/* Mobile Swipe Indicators & Prompt */}
+        <div className="flex sm:hidden flex-col items-center gap-3 pt-3">
+          {/* Paging Dots */}
+          <div className="flex justify-center gap-1.5">
+            {displayImages.map((_, idx) => (
+              <button 
+                key={idx}
+                onClick={() => scrollToIndex(idx)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  idx === activePhotoIndex ? 'w-4 bg-[#D38A99]' : 'w-1.5 bg-[#D38A99]/30'
+                }`}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
+          </div>
+
+          {/* Prompt below dots if not swiped */}
+          {!hasSwiped && (
+            <p className="text-[10px] text-[#D38A99] font-medium uppercase tracking-widest animate-pulse">
+              Swipe to see more moments
+            </p>
+          )}
+        </div>
+
         <p className="text-[10px] text-gray-400 italic pt-6">&quot;Our journey together&quot;</p>
       </section>
 

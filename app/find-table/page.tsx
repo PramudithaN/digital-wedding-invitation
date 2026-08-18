@@ -255,7 +255,7 @@ export default function SeatingLookupPage() {
               <Sparkles className="w-4 h-4 text-[#C8A882] mx-auto animate-pulse" />
               <h2 className="text-xs font-semibold text-gray-800 tracking-wide uppercase">Find Your Table</h2>
               <p className="text-[10px] text-gray-500 leading-relaxed font-sans">
-                Please enter your name below to view your table assignment. Only guests who have confirmed **Attending** will be listed in the seating records.
+                Please enter your name below to view your table assignment.
               </p>
             </div>
 
@@ -310,7 +310,7 @@ export default function SeatingLookupPage() {
                   <AlertCircle className="w-5 h-5 text-gray-400 mx-auto" />
                   <p className="text-xs font-bold text-gray-800 uppercase tracking-wide">No Record Found</p>
                   <p className="text-[10px] text-gray-500 font-sans leading-relaxed">
-                    We couldn't find an **attending** guest matching "{query}". If you haven't RSVP'd yet, or if you RSVP'd as "declined", you won't be listed. Please try searching with a different part of your name.
+                    We couldn't find an attending guest matching "{query}". If you haven't RSVP'd yet, or if you RSVP'd as "declined", you won't be listed. Please try searching with a different part of your name.
                   </p>
                 </div>
               )}

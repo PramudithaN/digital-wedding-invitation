@@ -231,6 +231,27 @@ export default function SeatingUploadPage() {
     document.body.removeChild(link);
   };
 
+  // Download Seating Lookup QR Code
+  const handleDownloadQR = async () => {
+    try {
+      const targetUrl = 'https://digital-wedding-invitation-beige.vercel.app/find-table';
+      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(targetUrl)}`;
+      const response = await fetch(qrApiUrl);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'seating_lookup_qr_code.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setToast({ message: 'QR Code downloaded successfully!', type: 'success' });
+    } catch (err: any) {
+      console.error(err);
+      setToast({ message: 'Error downloading QR Code: ' + err.message, type: 'error' });
+    }
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -483,31 +504,82 @@ export default function SeatingUploadPage() {
 
           </div>
 
-          {/* Right Column: Information Card */}
-          <Paper 
-            elevation={0} 
-            sx={{ 
-              p: 3, 
-              h: 'fit-content', 
-              bgcolor: '#EFF6FF', 
-              border: '1px solid', 
-              borderColor: '#BFDBFE', 
-              borderRadius: 2,
-              display: 'flex', 
-              flexDirection: 'column', 
-              gap: 1.5 
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#1E40AF' }}>
-              <HelpCircle size={20} />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                How to manage table assignments
+          {/* Right Column: Information & QR */}
+          <div className="space-y-6">
+            
+            {/* Help / Instructions Card */}
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 3, 
+                h: 'fit-content', 
+                bgcolor: '#EFF6FF', 
+                border: '1px solid', 
+                borderColor: '#BFDBFE', 
+                borderRadius: 2,
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: 1.5 
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#1E40AF' }}>
+                <HelpCircle size={20} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                  How to manage table assignments
+                </Typography>
+              </Box>
+              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#1E3A8A', lineHeight: 1.5 }}>
+                To assign tables, you can type assignments directly into the guest rows below. Your changes will be saved in real-time as soon as you press Enter or click outside the text box. Alternatively, you can upload a CSV spreadsheet using the uploader card. Uploading a CSV will only update table numbers for the guests listed in the file, leaving other guest records unchanged.
               </Typography>
-            </Box>
-            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#1E3A8A', lineHeight: 1.5 }}>
-              To assign tables, you can type assignments directly into the guest rows below. Your changes will be saved in real-time as soon as you press Enter or click outside the text box. Alternatively, you can upload a CSV spreadsheet using the uploader card. Uploading a CSV will only update table numbers for the guests listed in the file, leaving other guest records unchanged.
-            </Typography>
-          </Paper>
+            </Paper>
+
+            {/* Dynamic QR Code Card */}
+            <Paper 
+              elevation={1} 
+              sx={{ 
+                p: 3, 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                textAlign: 'center', 
+                gap: 2 
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, width: '100%', borderBottom: '1px solid', borderColor: 'divider', pb: 1 }}>
+                Guest Seating QR Code
+              </Typography>
+              
+              <Box 
+                component="img" 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent('https://digital-wedding-invitation-beige.vercel.app/find-table')}`}
+                alt="Seating Lookup QR Code"
+                sx={{ 
+                  width: 150, 
+                  height: 150, 
+                  border: '1px solid', 
+                  borderColor: 'divider', 
+                  p: 1, 
+                  bgcolor: 'white',
+                  borderRadius: 1 
+                }}
+              />
+              
+              <Typography variant="caption" color="text.secondary">
+                Scan this QR code to go to the public Seating Lookup page.
+              </Typography>
+              
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleDownloadQR}
+                startIcon={<Download size={14} />}
+                fullWidth
+              >
+                Download QR Image
+              </Button>
+            </Paper>
+
+          </div>
 
         </div>
       )}

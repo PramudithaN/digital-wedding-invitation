@@ -41,7 +41,8 @@ export function normalizePhoneNumber(phone: string, defaultCountryCode: string =
     return `+${defaultCountryCode}${digitsOnly.slice(1)}`;
   }
 
-  if (digitsOnly.startsWith(defaultCountryCode)) {
+  // If the number already has more than 9 digits (e.g. 91771234567), keep the country code
+  if (digitsOnly.length > 9) {
     return `+${digitsOnly}`;
   }
 

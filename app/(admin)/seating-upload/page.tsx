@@ -386,109 +386,118 @@ export default function SeatingUploadPage() {
 
       {/* Collapsible Uploader Area */}
       {showUploader && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
+        <div className="space-y-6 animate-fade-in">
           
-          {/* Left Column Area: Dropzone, Results */}
-          <div className="lg:col-span-2 space-y-6">
-            
-            {error && (
-              <Alert severity="error" icon={<AlertCircle size={16} />}>{error}</Alert>
-            )}
+          {error && (
+            <Alert severity="error" icon={<AlertCircle size={16} />}>{error}</Alert>
+          )}
 
-            {successResult && (
-              <div className="bg-emerald-50 border border-emerald-150 text-emerald-800 text-xs p-5 rounded-lg space-y-3 relative">
-                <button 
-                  onClick={() => setSuccessResult(null)}
-                  className="absolute top-3 right-3 text-emerald-600 hover:text-emerald-800 cursor-pointer p-1"
-                  title="Dismiss"
-                >
-                  <X size={16} />
-                </button>
-                <div className="flex items-center gap-2.5">
-                  <CheckCircle className="w-5 h-5 shrink-0 text-emerald-600" />
-                  <span className="font-bold text-sm">Seating updated successfully!</span>
-                </div>
-                <div className="grid grid-cols-3 gap-4 py-2 border-y border-emerald-150/50 text-center font-medium">
-                  <div>
-                    <span className="block text-xl font-bold text-emerald-700">{successResult.updatedCount}</span>
-                    <span className="text-[10px] text-emerald-605 uppercase tracking-wide">Guests Updated</span>
-                  </div>
-                  <div>
-                    <span className="block text-xl font-bold text-emerald-700">{successResult.totalRowsProcessed}</span>
-                    <span className="text-[10px] text-emerald-605 uppercase tracking-wide">Processed Rows</span>
-                  </div>
-                  <div>
-                    <span className="block text-xl font-bold text-emerald-700">{successResult.totalErrors}</span>
-                    <span className="text-[10px] text-emerald-605 uppercase tracking-wide">Unmatched Rows</span>
-                  </div>
-                </div>
-                
-                {successResult.totalErrors > 0 && successResult.errors && (
-                  <div className="pt-2 space-y-1.5 text-amber-800">
-                    <p className="font-semibold text-[11px] uppercase tracking-wider">Unmatched Row Warnings (Top 10 shown):</p>
-                    <ul className="list-disc pl-4 space-y-0.5 font-mono text-[10px] bg-white/40 p-2.5 rounded-md">
-                      {successResult.errors.map((err, i) => (
-                        <li key={i}>{err}</li>
-                      ))}
-                    </ul>
-                    <p className="text-[9px] italic text-amber-700">
-                      💡 Unmatched guests might have spelling discrepancies. Make sure the 'Guest ID' column is preserved.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* CSV Dropzone */}
-            <Paper elevation={1} sx={{ p: 3, spaceY: 3 }}>
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 flex flex-col items-center justify-center gap-4 ${
-                  isDragging 
-                    ? 'border-blue-500 bg-blue-50/50 scale-[0.99]' 
-                    : 'border-gray-200 hover:border-gray-300 bg-gray-50/30'
-                }`}
+          {successResult && (
+            <div className="bg-emerald-50 border border-emerald-150 text-emerald-800 text-xs p-5 rounded-lg space-y-3 relative w-full">
+              <button 
+                onClick={() => setSuccessResult(null)}
+                className="absolute top-3 right-3 text-emerald-600 hover:text-emerald-800 cursor-pointer p-1"
+                title="Dismiss"
               >
-                <div className={`p-3 rounded-full ${isDragging ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'} transition-colors`}>
-                  <Upload className="w-6 h-6" />
-                </div>
-                <div className="space-y-1">
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    Drag & drop your edited CSV here, or{' '}
-                    <label className="text-blue-500 hover:text-blue-650 cursor-pointer font-bold underline">
-                      browse files
-                      <input
-                        type="file"
-                        accept=".csv"
-                        className="hidden"
-                        disabled={isUploading}
-                        onChange={handleFileChange}
-                      />
-                    </label>
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" className="block max-w-sm mx-auto">
-                    Only `.csv` spreadsheets are supported. Ensure a column named `Table No` exists.
-                  </Typography>
-                </div>
-
-                {file && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-md text-xs text-gray-700 font-medium font-mono max-w-xs truncate">
-                    <FileSpreadsheet className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span className="truncate">{file.name}</span>
-                  </div>
-                )}
+                <X size={16} />
+              </button>
+              <div className="flex items-center gap-2.5">
+                <CheckCircle className="w-5 h-5 shrink-0 text-emerald-600" />
+                <span className="font-bold text-sm">Seating updated successfully!</span>
               </div>
+              <div className="grid grid-cols-3 gap-4 py-2 border-y border-emerald-150/50 text-center font-medium">
+                <div>
+                  <span className="block text-xl font-bold text-emerald-700">{successResult.updatedCount}</span>
+                  <span className="text-[10px] text-emerald-605 uppercase tracking-wide">Guests Updated</span>
+                </div>
+                <div>
+                  <span className="block text-xl font-bold text-emerald-700">{successResult.totalRowsProcessed}</span>
+                  <span className="text-[10px] text-emerald-605 uppercase tracking-wide">Processed Rows</span>
+                </div>
+                <div>
+                  <span className="block text-xl font-bold text-emerald-700">{successResult.totalErrors}</span>
+                  <span className="text-[10px] text-emerald-605 uppercase tracking-wide">Unmatched Rows</span>
+                </div>
+              </div>
+              
+              {successResult.totalErrors > 0 && successResult.errors && (
+                <div className="pt-2 space-y-1.5 text-amber-800">
+                  <p className="font-semibold text-[11px] uppercase tracking-wider">Unmatched Row Warnings (Top 10 shown):</p>
+                  <ul className="list-disc pl-4 space-y-0.5 font-mono text-[10px] bg-white/40 p-2.5 rounded-md">
+                    {successResult.errors.map((err, i) => (
+                      <li key={i}>{err}</li>
+                    ))}
+                  </ul>
+                  <p className="text-[9px] italic text-amber-700">
+                    💡 Unmatched guests might have spelling discrepancies. Make sure the 'Guest ID' column is preserved.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid', borderColor: 'divider', pt: 2, mt: 2 }}>
+          {/* 3-Column Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+            
+            {/* Column 1: CSV Uploader Card */}
+            <Paper elevation={1} sx={{ p: 3, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, borderBottom: '1px solid', borderColor: 'divider', pb: 1.5, display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <Upload size={18} className="text-blue-500" /> Seating Import
+                </Typography>
+                
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`border-2 border-dashed rounded-lg p-5 text-center transition-all duration-200 flex flex-col items-center justify-center gap-3 ${
+                    isDragging 
+                      ? 'border-blue-500 bg-blue-50/50' 
+                      : 'border-gray-200 hover:border-gray-300 bg-gray-50/30'
+                  }`}
+                >
+                  <div className={`p-2 rounded-full ${isDragging ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'} transition-colors`}>
+                    <Upload className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
+                      Drag & drop CSV here, or{' '}
+                      <label className="text-blue-500 hover:text-blue-650 cursor-pointer font-bold underline">
+                        browse
+                        <input
+                          type="file"
+                          accept=".csv"
+                          className="hidden"
+                          disabled={isUploading}
+                          onChange={handleFileChange}
+                        />
+                      </label>
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', display: 'block' }}>
+                      Ensure a column named &lsquo;Table No&rsquo; exists.
+                    </Typography>
+                  </div>
+
+                  {file && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 border border-gray-200 rounded-md text-[10px] text-gray-700 font-medium font-mono max-w-full truncate">
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <span className="truncate">{file.name}</span>
+                    </div>
+                  )}
+                </div>
+              </Box>
+
+              <Box sx={{ borderTop: '1px solid', borderColor: 'divider', pt: 2, mt: 2 }}>
                 <Button
                   variant="contained"
                   onClick={() => setIsConfirmUploadOpen(true)}
                   disabled={!file || isUploading}
                   startIcon={isUploading ? <CircularProgress size={16} color="inherit" /> : <Upload size={16} />}
+                  fullWidth
                   sx={{ 
                     color: '#FFFFFF', 
+                    py: 1,
+                    fontSize: '0.75rem',
                     '&.Mui-disabled': { 
                       color: 'rgba(0, 0, 0, 0.38) !important', 
                       backgroundColor: '#E2E8F0 !important',
@@ -497,76 +506,79 @@ export default function SeatingUploadPage() {
                     } 
                   }}
                 >
-                  {isUploading ? 'Uploading...' : 'Upload Seating Assignments'}
+                  {isUploading ? 'Uploading...' : 'Upload Assignments'}
                 </Button>
               </Box>
             </Paper>
 
-          </div>
-
-          {/* Right Column: Information & QR */}
-          <div className="space-y-6">
-            
-            {/* Help / Instructions Card */}
+            {/* Column 2: Information Card */}
             <Paper 
               elevation={0} 
               sx={{ 
                 p: 3, 
-                h: 'fit-content', 
                 bgcolor: '#EFF6FF', 
                 border: '1px solid', 
                 borderColor: '#BFDBFE', 
                 borderRadius: 2,
                 display: 'flex', 
                 flexDirection: 'column', 
-                gap: 1.5 
+                justifyContent: 'space-between',
+                height: '100%'
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#1E40AF' }}>
-                <HelpCircle size={20} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                  How to manage table assignments
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#1E40AF', borderBottom: '1px solid', borderColor: '#BFDBFE', pb: 1 }}>
+                  <HelpCircle size={20} />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                    How to manage tables
+                  </Typography>
+                </Box>
+                <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#1E3A8A', lineHeight: 1.5 }}>
+                  To assign tables, you can type table numbers directly into the Guest Seating Grid rows below. Changes are saved in real-time instantly on focus out (Blur) or by pressing Enter.
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#1E3A8A', lineHeight: 1.5 }}>
+                  Alternatively, import a CSV using the uploader card. This will selectively update table numbers for guests listed in the sheet, leaving all other guests untouched.
                 </Typography>
               </Box>
-              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#1E3A8A', lineHeight: 1.5 }}>
-                To assign tables, you can type assignments directly into the guest rows below. Your changes will be saved in real-time as soon as you press Enter or click outside the text box. Alternatively, you can upload a CSV spreadsheet using the uploader card. Uploading a CSV will only update table numbers for the guests listed in the file, leaving other guest records unchanged.
-              </Typography>
             </Paper>
 
-            {/* Dynamic QR Code Card */}
+            {/* Column 3: Dynamic QR Code Card */}
             <Paper 
               elevation={1} 
               sx={{ 
                 p: 3, 
                 display: 'flex', 
                 flexDirection: 'column', 
+                justifyContent: 'space-between',
                 alignItems: 'center', 
                 textAlign: 'center', 
-                gap: 2 
+                height: '100%'
               }}
             >
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, width: '100%', borderBottom: '1px solid', borderColor: 'divider', pb: 1 }}>
-                Guest Seating QR Code
-              </Typography>
-              
-              <Box 
-                component="img" 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent('https://digital-wedding-invitation-beige.vercel.app/find-table')}`}
-                alt="Seating Lookup QR Code"
-                sx={{ 
-                  width: 150, 
-                  height: 150, 
-                  border: '1px solid', 
-                  borderColor: 'divider', 
-                  p: 1, 
-                  bgcolor: 'white',
-                  borderRadius: 1 
-                }}
-              />
-              
-              <Typography variant="caption" color="text.secondary">
-                Scan this QR code to go to the public Seating Lookup page.
-              </Typography>
+              <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, width: '100%', borderBottom: '1px solid', borderColor: 'divider', pb: 1 }}>
+                  Guest Seating QR Code
+                </Typography>
+                
+                <Box 
+                  component="img" 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent('https://digital-wedding-invitation-beige.vercel.app/find-table')}`}
+                  alt="Seating Lookup QR Code"
+                  sx={{ 
+                    width: 120, 
+                    height: 120, 
+                    border: '1px solid', 
+                    borderColor: 'divider', 
+                    p: 0.5, 
+                    bgcolor: 'white',
+                    borderRadius: 1 
+                  }}
+                />
+                
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                  Scan this QR code to view the public Seating Lookup page.
+                </Typography>
+              </Box>
               
               <Button
                 variant="outlined"
@@ -574,6 +586,7 @@ export default function SeatingUploadPage() {
                 onClick={handleDownloadQR}
                 startIcon={<Download size={14} />}
                 fullWidth
+                sx={{ mt: 1.5, fontSize: '0.7rem', py: 0.8 }}
               >
                 Download QR Image
               </Button>

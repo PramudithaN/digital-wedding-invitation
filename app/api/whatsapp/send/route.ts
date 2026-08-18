@@ -30,7 +30,17 @@ export async function POST(request: Request) {
       
       const targets = guests.filter(g => {
         if (!g.phone) return false;
-        if (session && g.side !== session) return false;
+        if (session) {
+          if (session === 'bride') {
+            if (g.side !== 'bride' || g.relationship === 'relative') return false;
+          } else if (session === 'groom') {
+            if (g.side !== 'groom' || g.relationship === 'relative') return false;
+          } else if (session === 'bride_relative') {
+            if (g.side !== 'bride' || g.relationship !== 'relative') return false;
+          } else if (session === 'groom_relative') {
+            if (g.side !== 'groom' || g.relationship !== 'relative') return false;
+          }
+        }
         if (filter === 'pending') {
           return !g.rsvp?.status || g.rsvp.status === 'pending';
         }

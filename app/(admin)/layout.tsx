@@ -35,7 +35,6 @@ const NAV_ITEMS = [
   { href: '/guests', label: 'Guests', icon: Users },
   { href: '/rsvp', label: 'RSVPs', icon: CheckCircle2 },
   { href: '/tables', label: 'Tables', icon: Split },
-  { href: '/categories', label: 'Categories', icon: Tags },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];

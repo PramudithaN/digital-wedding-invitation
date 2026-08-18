@@ -11,11 +11,10 @@ import {
   UtensilsCrossed, 
   Heart 
 } from 'lucide-react';
-import { GuestWithDetails, Category } from '@/lib/types';
+import { GuestWithDetails } from '@/lib/types';
 
 export default function SideBySidePage() {
   const [guests, setGuests] = useState<GuestWithDetails[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -26,14 +25,10 @@ export default function SideBySidePage() {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [guestsRes, catsRes] = await Promise.all([
-          fetch('/api/guests'),
-          fetch('/api/categories')
-        ]);
-        if (!guestsRes.ok || !catsRes.ok) throw new Error('Failed to load guest data');
+        const guestsRes = await fetch('/api/guests');
+        if (!guestsRes.ok) throw new Error('Failed to load guest data');
         
         setGuests(await guestsRes.json());
-        setCategories(await catsRes.json());
       } catch (err: any) {
         setError(err.message || 'Error loading representation data.');
       } finally {
@@ -103,169 +98,97 @@ export default function SideBySidePage() {
           </div>
         </div>
 
-        {/* Categories Breakdown */}
+        {/* Groups Breakdown */}
         <div className="space-y-3">
-          {categories.map((cat) => {
-            const catGuests = sideGuests.filter(g => g.category_id === cat.id);
-            const catAttending = catGuests.filter(g => g.rsvp?.status === 'attending');
-            const catPlusOnes = catAttending.filter(g => g.rsvp?.plus_one).length;
-            const catConfirmedSeats = catAttending.length + catPlusOnes;
-            
-            if (catGuests.length === 0) return null;
-
-            const groupKey = `${side}-${cat.id}`;
-            const isExpanded = expandedGroups[groupKey] || false;
-
-            return (
-              <div 
-                key={cat.id} 
-                className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs"
-              >
-                {/* Accordion Trigger */}
-                <button
-                  onClick={() => toggleGroup(side, cat.id)}
-                  className="w-full text-left p-4.5 flex items-center justify-between hover:bg-gray-50/50 transition-all cursor-pointer"
-                >
-                  <div className="space-y-1.5 flex-1 pr-4">
-                    <div className="flex items-center gap-2">
-                      <span style={{ backgroundColor: cat.colour }} className="w-2 h-2 rounded-full shrink-0" />
-                      <span className="font-semibold text-gray-800 text-xs">{cat.name}</span>
-                      <span className="text-[10px] text-gray-450 font-normal">
-                        ({catAttending.length} of {catGuests.length} attending)
-                      </span>
-                    </div>
-                    {/* Progress bar track */}
-                    <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                      <div 
-                        style={{ width: `${(catAttending.length / catGuests.length) * 100}%` }}
-                        className={`h-full ${sideProgressColor}`}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <span className="text-xs font-bold text-gray-900">{catConfirmedSeats}</span>
-                      <span className="block text-[8px] text-gray-400 uppercase font-bold">Seats</span>
-                    </div>
-                    {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
-                  </div>
-                </button>
-
-                {/* Accordion Content */}
-                {isExpanded && (
-                  <div className="border-t border-gray-150 bg-gray-50/30 px-5 py-4 space-y-2">
-                    <h4 className="text-[9px] text-gray-400 uppercase font-bold tracking-wider mb-2">
-                      Attendees ({catAttending.length})
-                    </h4>
-                    {catAttending.length === 0 ? (
-                      <p className="text-xs text-gray-450 italic py-0.5">No confirmed guests here yet.</p>
-                    ) : (
-                      <div className="divide-y divide-gray-100">
-                        {catAttending.map((guest) => (
-                          <div key={guest.id} className="py-2 flex items-center justify-between text-xs">
-                            <div className="space-y-0.5">
-                              <span className="font-medium text-gray-900">{guest.name}</span>
-                              {guest.rsvp?.plus_one && (
-                                <span className="block text-[9px] text-gray-450">
-                                  +1: <span className="text-gray-500 font-semibold">{guest.rsvp.plus_one_name || 'Yes'}</span>
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              {guest.rsvp?.meal_choice && (
-                                <span className="inline-flex px-1.5 py-0.5 rounded bg-white text-gray-500 uppercase text-[9px] tracking-wide border border-gray-200">
-                                  {guest.rsvp.meal_choice}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Uncategorised list */}
           {(() => {
-            const catGuests = sideGuests.filter(g => !g.category_id);
-            const catAttending = catGuests.filter(g => g.rsvp?.status === 'attending');
-            const catPlusOnes = catAttending.filter(g => g.rsvp?.plus_one).length;
-            const catConfirmedSeats = catAttending.length + catPlusOnes;
-            
-            if (catGuests.length === 0) return null;
+            const groups = [
+              { id: 'relative', name: 'Relatives', colour: '#DC2626', filter: (g: GuestWithDetails) => g.relationship === 'relative' },
+              { id: 'friend', name: 'Friends & Others', colour: '#2563EB', filter: (g: GuestWithDetails) => g.relationship !== 'relative' }
+            ];
 
-            const groupKey = `${side}-none`;
-            const isExpanded = expandedGroups[groupKey] || false;
+            return groups.map((group) => {
+              const catGuests = sideGuests.filter(group.filter);
+              const catAttending = catGuests.filter(g => g.rsvp?.status === 'attending');
+              const catPlusOnes = catAttending.filter(g => g.rsvp?.plus_one).length;
+              const catConfirmedSeats = catAttending.length + catPlusOnes;
+              
+              if (catGuests.length === 0) return null;
 
-            return (
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs">
-                <button
-                  onClick={() => toggleGroup(side, 'none')}
-                  className="w-full text-left p-4.5 flex items-center justify-between hover:bg-gray-50/50 transition-all cursor-pointer"
+              const groupKey = `${side}-${group.id}`;
+              const isExpanded = expandedGroups[groupKey] || false;
+
+              return (
+                <div 
+                  key={group.id} 
+                  className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs"
                 >
-                  <div className="space-y-1.5 flex-1 pr-4">
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full shrink-0 border border-gray-300 bg-transparent" />
-                      <span className="font-medium text-gray-400 text-xs italic">Uncategorised</span>
-                      <span className="text-xs text-gray-450 font-normal">
-                        ({catAttending.length} of {catGuests.length} attending)
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                      <div 
-                        style={{ width: `${(catAttending.length / catGuests.length) * 100}%` }}
-                        className={`h-full ${sideProgressColor}`}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <span className="text-xs font-bold text-gray-900">{catConfirmedSeats}</span>
-                      <span className="block text-[8px] text-gray-400 uppercase font-bold">Seats</span>
-                    </div>
-                    {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
-                  </div>
-                </button>
-
-                {isExpanded && (
-                  <div className="border-t border-gray-150 bg-gray-50/30 px-5 py-4 space-y-2">
-                    <h4 className="text-[9px] text-gray-400 uppercase font-bold tracking-wider mb-2">
-                      Attendees ({catAttending.length})
-                    </h4>
-                    {catAttending.length === 0 ? (
-                      <p className="text-xs text-gray-450 italic py-0.5">No confirmed guests here.</p>
-                    ) : (
-                      <div className="divide-y divide-gray-100">
-                        {catAttending.map((guest) => (
-                          <div key={guest.id} className="py-2 flex items-center justify-between text-xs">
-                            <div className="space-y-0.5">
-                              <span className="font-medium text-gray-900">{guest.name}</span>
-                              {guest.rsvp?.plus_one && (
-                                <span className="block text-[9px] text-gray-450">
-                                  +1: <span className="text-gray-500 font-semibold">{guest.rsvp.plus_one_name || 'Yes'}</span>
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              {guest.rsvp?.meal_choice && (
-                                <span className="inline-flex px-1.5 py-0.5 rounded bg-white text-gray-500 uppercase text-[9px] tracking-wide border border-gray-200">
-                                  {guest.rsvp.meal_choice}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        ))}
+                  {/* Accordion Trigger */}
+                  <button
+                    onClick={() => toggleGroup(side, group.id)}
+                    className="w-full text-left p-4.5 flex items-center justify-between hover:bg-gray-50/50 transition-all cursor-pointer"
+                  >
+                    <div className="space-y-1.5 flex-1 pr-4">
+                      <div className="flex items-center gap-2">
+                        <span style={{ backgroundColor: group.colour }} className="w-2 h-2 rounded-full shrink-0" />
+                        <span className="font-semibold text-gray-800 text-xs">{group.name}</span>
+                        <span className="text-[10px] text-gray-450 font-normal">
+                          ({catAttending.length} of {catGuests.length} attending)
+                        </span>
                       </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
+                      {/* Progress bar track */}
+                      <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                        <div 
+                          style={{ width: `${(catAttending.length / catGuests.length) * 100}%` }}
+                          className={`h-full ${sideProgressColor}`}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <span className="text-xs font-bold text-gray-900">{catConfirmedSeats}</span>
+                        <span className="block text-[8px] text-gray-400 uppercase font-bold">Seats</span>
+                      </div>
+                      {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                    </div>
+                  </button>
+
+                  {/* Accordion Content */}
+                  {isExpanded && (
+                    <div className="border-t border-gray-150 bg-gray-50/30 px-5 py-4 space-y-2">
+                      <h4 className="text-[9px] text-gray-400 uppercase font-bold tracking-wider mb-2">
+                        Attendees ({catAttending.length})
+                      </h4>
+                      {catAttending.length === 0 ? (
+                        <p className="text-xs text-gray-450 italic py-0.5">No confirmed guests here yet.</p>
+                      ) : (
+                        <div className="divide-y divide-gray-100">
+                          {catAttending.map((guest) => (
+                            <div key={guest.id} className="py-2 flex items-center justify-between text-xs">
+                              <div className="space-y-0.5">
+                                <span className="font-medium text-gray-900">{guest.name}</span>
+                                {guest.rsvp?.plus_one && (
+                                  <span className="block text-[9px] text-gray-450">
+                                    +1: <span className="text-gray-500 font-semibold">{guest.rsvp.plus_one_name || 'Yes'}</span>
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-right">
+                                {guest.rsvp?.meal_choice && (
+                                  <span className="inline-flex px-1.5 py-0.5 rounded bg-white text-gray-500 uppercase text-[9px] tracking-wide border border-gray-200">
+                                    {guest.rsvp.meal_choice}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            });
           })()}
         </div>
       </div>

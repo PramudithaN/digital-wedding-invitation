@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Mail, Phone, Edit2, Trash2, MessageCircle, Loader2, AlertCircle, X, CheckCircle2, Copy, ExternalLink, Upload, Download } from 'lucide-react';
+import { Plus, Search, Mail, Phone, Edit2, Trash2, MessageCircle, Loader2, AlertCircle, X, CheckCircle2, Copy, ExternalLink, Upload, Download, ArrowUp } from 'lucide-react';
 import { GuestWithDetails, Category } from '@/lib/types';
 import { normalizePhoneNumber } from '@/lib/whatsapp';
 
@@ -123,7 +123,6 @@ const WhatsappWhiteIcon = ({ size = 16, className }: { size?: number; className?
 
 export default function GuestsPage() {
   const [guests, setGuests] = useState<GuestWithDetails[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -142,19 +141,25 @@ export default function GuestsPage() {
 
   const [search, setSearch] = useState('');
   const [sideFilter, setSideFilter] = useState('all');
-  const [catFilter, setCatFilter] = useState('all');
+  const [relFilter, setRelFilter] = useState('all');
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [side, setSide] = useState<'bride' | 'groom'>('bride');
-  const [categoryId, setCategoryId] = useState('');
+  const [relationship, setRelationship] = useState<'relative' | 'friend'>('friend');
   const [notes, setNotes] = useState('');
   const [guestCount, setGuestCount] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedGuest, setSelectedGuest] = useState<GuestWithDetails | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // CSV upload & reset states
+  const [isUploading, setIsUploading] = useState(false);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Bulk sending states
   const [isBulkOpen, setIsBulkOpen] = useState(false);
@@ -163,7 +168,7 @@ export default function GuestsPage() {
   const [isBulkWizardOpen, setIsBulkWizardOpen] = useState(false);
   const [bulkList, setBulkList] = useState<GuestWithDetails[]>([]);
   const [bulkIndex, setBulkIndex] = useState(0);
-  const [whatsappSession, setWhatsappSession] = useState<'bride' | 'groom'>('bride');
+  const [whatsappSession, setWhatsappSession] = useState<'bride' | 'groom' | 'bride_relative' | 'groom_relative'>('bride');
   const [isBulkSendingTwilio, setIsBulkSendingTwilio] = useState(false);
 
   // Automated WhatsApp states
@@ -202,9 +207,8 @@ export default function GuestsPage() {
   const fetchData = async (silent = false) => {
     try {
       if (!silent) setIsLoading(true);
-      const [gR, cR] = await Promise.all([fetch('/api/guests'), fetch('/api/categories')]);
+      const gR = await fetch('/api/guests');
       setGuests(await gR.json());
-      setCategories(await cR.json());
     } catch (err: any) { setError(err.message || 'An error occurred.'); }
     finally { if (!silent) setIsLoading(false); }
   };
@@ -217,6 +221,22 @@ export default function GuestsPage() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (globalThis.window?.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+    globalThis.window?.addEventListener('scroll', handleScroll);
+    return () => globalThis.window?.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleAddGuest = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -224,20 +244,20 @@ export default function GuestsPage() {
       const res = await fetch('/api/guests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), phone: normalizePhoneNumber(phone.trim()), email: email.trim(), side, category_id: categoryId || null, notes: notes.trim(), plus_one: guestCount }),
+        body: JSON.stringify({ name: name.trim(), phone: normalizePhoneNumber(phone.trim()), email: email.trim(), side, relationship, notes: notes.trim(), plus_one: guestCount }),
       });
       await fetchData(true);
-      setName(''); setPhone(''); setEmail(''); setSide('bride'); setCategoryId(''); setNotes(''); setGuestCount(1); setIsAddOpen(false);
+      setName(''); setPhone(''); setEmail(''); setSide('bride'); setRelationship('friend'); setNotes(''); setGuestCount(1); setIsAddOpen(false);
       showToast('Guest added successfully!', 'success');
     } catch (err: any) { showToast(err.message || 'Could not add', 'error'); }
     finally { setIsSubmitting(false); }
   };
 
   const handleDownloadTemplate = () => {
-    const headers = ['Name', 'Phone', 'Email', 'Side', 'Count', 'Notes'];
+    const headers = ['Name', 'Phone', 'Email', 'Side', 'Relationship', 'Count', 'Notes'];
     const sampleRows = [
-      ['Sarah Karunaratne', '+94771234567', 'sarah@example.com', 'bride', '2', "Bride's sister"],
-      ['James Wijesinghe', '+94777654321', 'james@example.com', 'groom', '1', "Groom's roommate"]
+      ['Sarah Karunaratne', '+94771234567', 'sarah@example.com', 'bride', 'relative', '2', "Bride's sister"],
+      ['James Wijesinghe', '+94777654321', 'james@example.com', 'groom', 'friend', '1', "Groom's roommate"]
     ];
     
     const csvContent = [
@@ -260,6 +280,7 @@ export default function GuestsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     
+    setIsUploading(true);
     const reader = new FileReader();
     reader.onload = async (event) => {
       const text = event.target?.result as string;
@@ -277,17 +298,16 @@ export default function GuestsPage() {
           const rawPhone = getVal(['phone', 'phone number', 'mobile', 'contact']);
           const rawEmail = getVal(['email', 'email address']);
           const rawSide = getVal(['side', 'wedding side', 'bride/groom']).toLowerCase();
-          const rawCategory = getVal(['category', 'group']);
+          const rawRelationship = getVal(['relationship', 'type', 'relation', 'is relative', 'relative']).toLowerCase();
           const rawNotes = getVal(['notes', 'note', 'private notes']);
           const rawCount = getVal(['count', 'guest count', 'size', 'plus_one', 'plus one']);
           
           let side = 'bride';
           if (rawSide.includes('groom') || rawSide === 'g') side = 'groom';
           
-          let matchedCategoryId: string | null = null;
-          if (rawCategory) {
-            const matchedCat = categories.find(c => c.name.toLowerCase().trim() === rawCategory.toLowerCase().trim());
-            if (matchedCat) matchedCategoryId = matchedCat.id;
+          let relationship = 'friend';
+          if (rawRelationship.includes('relative') || rawRelationship === 'yes' || rawRelationship === 'true') {
+            relationship = 'relative';
           }
 
           let parsedCount = parseInt(rawCount.replace(/[^\d]/g, ''), 10);
@@ -300,7 +320,7 @@ export default function GuestsPage() {
             phone: rawPhone ? normalizePhoneNumber(rawPhone.trim()) : '',
             email: rawEmail.trim(),
             side,
-            category_id: matchedCategoryId,
+            relationship,
             notes: rawNotes.trim(),
             plus_one: parsedCount
           };
@@ -310,7 +330,6 @@ export default function GuestsPage() {
           throw new Error('Could not find any guest rows with valid names. Make sure your CSV has a "Name" header.');
         }
         
-        setIsSubmitting(true);
         const res = await fetch('/api/guests', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -327,11 +346,36 @@ export default function GuestsPage() {
       } catch (err: any) {
         showToast(err.message || 'Error parsing CSV file', 'error');
       } finally {
-        setIsSubmitting(false);
+        setIsUploading(false);
         e.target.value = '';
       }
     };
+    reader.onerror = () => {
+      showToast('Error reading file', 'error');
+      setIsUploading(false);
+      e.target.value = '';
+    };
     reader.readAsText(file);
+  };
+
+  const handleResetList = async () => {
+    try {
+      setIsResetting(true);
+      const res = await fetch('/api/guests', {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to clear guest list');
+      }
+      await fetchData(true);
+      showToast('All guest records have been cleared.', 'success');
+      setIsResetConfirmOpen(false);
+    } catch (err: any) {
+      showToast(err.message || 'Error clearing guest list', 'error');
+    } finally {
+      setIsResetting(false);
+    }
   };
 
   const handleDeleteGuest = async (id: string) => {
@@ -363,7 +407,17 @@ export default function GuestsPage() {
   const handleStartBulk = async () => {
     const targets = guests.filter(g => {
       if (!g.phone) return false;
-      if (whatsappSession && g.side !== whatsappSession) return false;
+      if (whatsappSession) {
+        if (whatsappSession === 'bride') {
+          if (g.side !== 'bride' || g.relationship === 'relative') return false;
+        } else if (whatsappSession === 'groom') {
+          if (g.side !== 'groom' || g.relationship === 'relative') return false;
+        } else if (whatsappSession === 'bride_relative') {
+          if (g.side !== 'bride' || g.relationship !== 'relative') return false;
+        } else if (whatsappSession === 'groom_relative') {
+          if (g.side !== 'groom' || g.relationship !== 'relative') return false;
+        }
+      }
       if (bulkFilter === 'pending') {
         return !g.rsvp?.status || g.rsvp.status === 'pending';
       }
@@ -474,7 +528,7 @@ export default function GuestsPage() {
     return (
       (g.name.toLowerCase().includes(s) || (g.phone && g.phone.includes(s)) || (g.email && g.email.toLowerCase().includes(s))) &&
       (sideFilter === 'all' || g.side === sideFilter) &&
-      (catFilter === 'all' || g.category_id === catFilter)
+      (relFilter === 'all' || g.relationship === relFilter)
     );
   });
 
@@ -493,6 +547,9 @@ export default function GuestsPage() {
           <Button variant="outlined" component="label" startIcon={<Upload size={16} />} sx={{ whiteSpace: 'nowrap' }}>
             Upload CSV
             <input type="file" accept=".csv" onChange={handleCSVUpload} hidden />
+          </Button>
+          <Button variant="outlined" color="error" onClick={() => setIsResetConfirmOpen(true)} startIcon={<Trash2 size={16} />} disabled={guests.length === 0} sx={{ whiteSpace: 'nowrap' }}>
+            Reset List
           </Button>
           <Button variant="contained" color="success" startIcon={<WhatsappWhiteIcon />} onClick={() => setIsBulkOpen(true)} sx={{ whiteSpace: 'nowrap', bgcolor: '#16A34A', '&:hover': { bgcolor: '#15803D' } }}>
             Bulk Invite
@@ -527,10 +584,11 @@ export default function GuestsPage() {
           </Grid>
           <Grid size={{ xs: 6, sm: 3.5 }}>
             <FormControl size="small" fullWidth>
-              <InputLabel>Category</InputLabel>
-              <Select value={catFilter} label="Category" onChange={e => setCatFilter(e.target.value)}>
-                <MenuItem value="all">All Categories</MenuItem>
-                {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+              <InputLabel>Relationship</InputLabel>
+              <Select value={relFilter} label="Relationship" onChange={e => setRelFilter(e.target.value)}>
+                <MenuItem value="all">All Relationships</MenuItem>
+                <MenuItem value="relative">Relatives</MenuItem>
+                <MenuItem value="friend">Friends/Others</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -555,6 +613,7 @@ export default function GuestsPage() {
                 <TableRow>
                   <TableCell>Guest Name</TableCell>
                   <TableCell>Side</TableCell>
+                  <TableCell>Relationship</TableCell>
                   <TableCell>Count</TableCell>
                   <TableCell>Contact</TableCell>
                   <TableCell>Status</TableCell>
@@ -569,6 +628,15 @@ export default function GuestsPage() {
                       {g.notes && <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 220, display: 'block' }}>{g.notes}</Typography>}
                     </TableCell>
                     <TableCell><SideChip side={g.side || 'bride'} /></TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={g.relationship === 'relative' ? 'Relative' : 'Friend/Other'} 
+                        size="small" 
+                        variant="outlined" 
+                        color={g.relationship === 'relative' ? 'error' : 'primary'} 
+                        sx={{ fontWeight: 600, fontSize: '0.65rem' }} 
+                      />
+                    </TableCell>
                     <TableCell>
                       {(() => {
                         const status = g.rsvp?.status || 'pending';
@@ -670,6 +738,11 @@ export default function GuestsPage() {
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>{g.name}</Typography>
                       <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
                         <SideChip side={g.side || 'bride'} />
+                        <Chip
+                          size="small"
+                          label={g.relationship === 'relative' ? 'Relative' : 'Friend/Other'}
+                          sx={{ height: 18, fontSize: '0.65rem', border: '1px solid', borderColor: g.relationship === 'relative' ? '#FECACA' : '#BFDBFE', color: g.relationship === 'relative' ? '#DC2626' : '#2563EB', fontWeight: 600, bgcolor: 'transparent' }}
+                        />
                         {(() => {
                           const status = g.rsvp?.status || 'pending';
                           const confirmed = g.rsvp?.plus_one || 1;
@@ -805,6 +878,7 @@ export default function GuestsPage() {
               <Grid container spacing={1.5} sx={{ mb: 2 }}>
                 {[
                   { label: 'Side', value: selectedGuest.side },
+                  { label: 'Relationship', value: selectedGuest.relationship === 'relative' ? 'Relative' : 'Friend/Other' },
                   { 
                     label: 'Count (Attending / Confirmed)', 
                     value: selectedGuest.rsvp?.status === 'attending' 
@@ -858,10 +932,10 @@ export default function GuestsPage() {
             </ToggleButtonGroup>
           </Box>
           <FormControl size="small" fullWidth>
-            <InputLabel>Category</InputLabel>
-            <Select value={categoryId} label="Category" onChange={e => setCategoryId(e.target.value)}>
-              <MenuItem value="">No Category</MenuItem>
-              {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+            <InputLabel>Relationship</InputLabel>
+            <Select value={relationship} label="Relationship" onChange={e => setRelationship(e.target.value as any)}>
+              <MenuItem value="friend">Friend / Other</MenuItem>
+              <MenuItem value="relative">Relative</MenuItem>
             </Select>
           </FormControl>
           <TextField
@@ -906,10 +980,12 @@ export default function GuestsPage() {
           </FormControl>
 
           <FormControl fullWidth size="small">
-            <InputLabel>Sender Account / Side</InputLabel>
-            <Select value={whatsappSession} label="Sender Account / Side" onChange={e => setWhatsappSession(e.target.value as any)}>
-              <MenuItem value="bride">Bride's Side (Sends to Bride's guests)</MenuItem>
-              <MenuItem value="groom">Groom's Side (Sends to Groom's guests)</MenuItem>
+            <InputLabel>Sender Account / Group</InputLabel>
+            <Select value={whatsappSession} label="Sender Account / Group" onChange={e => setWhatsappSession(e.target.value as any)}>
+              <MenuItem value="bride">Bride&apos;s Side (Friends/Other)</MenuItem>
+              <MenuItem value="groom">Groom&apos;s Side (Friends/Other)</MenuItem>
+              <MenuItem value="bride_relative">Bride&apos;s Relatives</MenuItem>
+              <MenuItem value="groom_relative">Groom&apos;s Relatives</MenuItem>
             </Select>
           </FormControl>
           
@@ -1144,6 +1220,71 @@ export default function GuestsPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* CSV/Excel upload loading overlay */}
+      <Dialog open={isUploading} keepMounted={false}>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4, gap: 2 }}>
+          <CircularProgress size={40} color="primary" />
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>Uploading guest list...</Typography>
+          <Typography variant="caption" color="text.secondary">Please wait while the records are saved.</Typography>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Confirmation Dialog */}
+      <Dialog open={isResetConfirmOpen} onClose={() => !isResetting && setIsResetConfirmOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <AlertCircle color="#DC2626" size={24} />
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>Reset Guest List?</Typography>
+        </DialogTitle>
+        <DialogContent sx={{ py: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Are you sure you want to delete all guests? This action is permanent and cannot be undone. All RSVPs and invite links will also be cleared.
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, mt: 3, justifyContent: 'flex-end' }}>
+            <Button
+              variant="outlined"
+              onClick={() => setIsResetConfirmOpen(false)}
+              disabled={isResetting}
+              sx={{ textTransform: 'none', color: '#6B7280', borderColor: '#E5E7EB', '&:hover': { borderColor: '#D1D5DB' } }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleResetList}
+              disabled={isResetting}
+              sx={{ textTransform: 'none', fontWeight: 700 }}
+              startIcon={isResetting ? <CircularProgress size={16} color="inherit" /> : <Trash2 size={16} />}
+            >
+              {isResetting ? 'Clearing...' : 'Clear All'}
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <IconButton
+          onClick={scrollToTop}
+          sx={{
+            position: 'fixed',
+            bottom: { xs: 80, md: 24 }, // higher on mobile to clear bottom navbar
+            right: 24,
+            bgcolor: 'primary.main',
+            color: 'white',
+            boxShadow: 3,
+            zIndex: 1000,
+            '&:hover': {
+              bgcolor: 'primary.dark',
+            },
+            width: 44,
+            height: 44,
+          }}
+        >
+          <ArrowUp size={20} />
+        </IconButton>
+      )}
 
       {/* Toast */}
       <Snackbar open={toast !== null} autoHideDuration={3000} onClose={() => setToast(null)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }} sx={{ zIndex: 9999 }}>

@@ -43,6 +43,7 @@ function readMockDB(): {
           email: 'sarah@example.com', 
           side: 'bride' as const, 
           category_id: 'cat-1', 
+          relationship: 'relative' as const,
           invite_token: 'sarah-token-777', 
           notes: 'Bride\'s sister, helper with flowers', 
           created_at: new Date().toISOString() 
@@ -54,6 +55,7 @@ function readMockDB(): {
           email: 'james@example.com', 
           side: 'groom' as const, 
           category_id: 'cat-2', 
+          relationship: 'friend' as const,
           invite_token: 'james-token-888', 
           notes: 'Groom\'s college roommate', 
           created_at: new Date().toISOString() 
@@ -65,6 +67,7 @@ function readMockDB(): {
           email: 'maya@example.com',
           side: 'bride' as const,
           category_id: 'cat-3',
+          relationship: 'friend' as const,
           invite_token: 'maya-token-999',
           notes: 'Work colleague',
           created_at: new Date().toISOString()
@@ -406,6 +409,22 @@ export async function deleteGuest(id: string): Promise<void> {
     db.guests = db.guests.filter(g => g.id !== id);
     db.rsvps = db.rsvps.filter(r => r.guest_id !== id);
     db.invite_links = db.invite_links.filter(l => l.guest_id !== id);
+    writeMockDB(db);
+  }
+}
+
+export async function clearAllGuests(): Promise<void> {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase!
+      .from('guests')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    if (error) throw error;
+  } else {
+    const db = readMockDB();
+    db.guests = [];
+    db.rsvps = [];
+    db.invite_links = [];
     writeMockDB(db);
   }
 }

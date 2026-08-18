@@ -17,7 +17,7 @@ import {
   CheckCircle2,
   Copy
 } from 'lucide-react';
-import { GuestWithDetails, Category } from '@/lib/types';
+import { GuestWithDetails } from '@/lib/types';
 import { normalizePhoneNumber } from '@/lib/whatsapp';
 
 export default function EditGuestPage() {
@@ -26,7 +26,6 @@ export default function EditGuestPage() {
   const id = routerParams.id as string;
 
   const [guest, setGuest] = useState<GuestWithDetails | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -43,7 +42,7 @@ export default function EditGuestPage() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [side, setSide] = useState<'bride' | 'groom'>('bride');
-  const [categoryId, setCategoryId] = useState('');
+  const [relationship, setRelationship] = useState<'relative' | 'friend'>('friend');
   const [notes, setNotes] = useState('');
   const [guestCount, setGuestCount] = useState<number>(1);
 
@@ -51,30 +50,26 @@ export default function EditGuestPage() {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [guestRes, catsRes] = await Promise.all([
-          fetch(`/api/guests/${id}`),
-          fetch('/api/categories')
-        ]);
+        const guestRes = await fetch(`/api/guests/${id}`);
 
         if (guestRes.status === 404) {
           throw new Error('Guest not found');
         }
-        if (!guestRes.ok || !catsRes.ok) {
+        if (!guestRes.ok) {
           throw new Error('Failed to load guest details');
         }
 
         const guestData: GuestWithDetails = await guestRes.json();
-        const catsData = await catsRes.json();
 
         setGuest(guestData);
-        setCategories(catsData);
 
         // Pre-fill form
         setName(guestData.name);
         setPhone(guestData.phone || '');
         setEmail(guestData.email || '');
         setSide(guestData.side || 'bride');
-        setCategoryId(guestData.category_id || '');
+        setRelationship(guestData.relationship || 'friend');
+        notes && setNotes(guestData.notes || '');
         setNotes(guestData.notes || '');
         setGuestCount(guestData.rsvp?.plus_one || 1);
       } catch (err: any) {
@@ -105,7 +100,7 @@ export default function EditGuestPage() {
           phone: normalizePhoneNumber(phone.trim()),
           email: email.trim(),
           side,
-          category_id: categoryId || null,
+          relationship,
           notes: notes.trim(),
           plus_one: guestCount
         }),
@@ -274,23 +269,19 @@ export default function EditGuestPage() {
               </div>
             </div>
 
-            {/* Category */}
+            {/* Relationship */}
             <div>
-              <label htmlFor="edit-cat" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-                Category Group
+              <label htmlFor="edit-rel" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                Relationship
               </label>
               <select
-                id="edit-cat"
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
+                id="edit-rel"
+                value={relationship}
+                onChange={(e) => setRelationship(e.target.value as any)}
                 className="w-full bg-white border border-gray-200 text-gray-700 text-xs rounded-md py-2.5 px-3 focus:outline-none focus:border-blue-500 cursor-pointer"
               >
-                <option value="">No Category</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
+                <option value="friend">Friend / Other</option>
+                <option value="relative">Relative</option>
               </select>
             </div>
 

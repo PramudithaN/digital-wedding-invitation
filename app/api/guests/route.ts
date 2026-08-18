@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getGuests, addGuest } from '@/lib/db';
+import { getGuests, addGuest, clearAllGuests } from '@/lib/db';
 import { normalizePhoneNumber } from '@/lib/whatsapp';
 
 export async function GET() {
@@ -25,6 +25,7 @@ export async function POST(request: Request) {
           email: item.email || '',
           side: item.side || null,
           category_id: item.category_id || null,
+          relationship: item.relationship || 'friend',
           notes: item.notes || '',
           plus_one: item.plus_one
         });
@@ -42,11 +43,21 @@ export async function POST(request: Request) {
         email: body.email || '',
         side: body.side || null,
         category_id: body.category_id || null,
+        relationship: body.relationship || 'friend',
         notes: body.notes || '',
         plus_one: body.plus_one
       });
       return NextResponse.json(guest);
     }
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE() {
+  try {
+    await clearAllGuests();
+    return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

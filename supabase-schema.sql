@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS guests (
   email          TEXT,
   side           TEXT CHECK (side IN ('bride', 'groom')),
   category_id    UUID REFERENCES categories(id) ON DELETE SET NULL,
+  relationship   TEXT DEFAULT 'friend',
   invite_token   UUID UNIQUE DEFAULT gen_random_uuid(),  -- used in invite URL
   notes          TEXT,
   created_at     TIMESTAMPTZ DEFAULT now()

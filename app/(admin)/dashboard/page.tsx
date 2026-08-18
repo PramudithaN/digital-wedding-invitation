@@ -39,17 +39,15 @@ const STAT_CARDS = [
 
 export default function DashboardPage() {
   const [guests, setGuests] = useState<GuestWithDetails[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
   const fetchData = async (silent = false) => {
     try {
       if (!silent) setIsLoading(true);
-      const [gR, cR] = await Promise.all([fetch('/api/guests'), fetch('/api/categories')]);
-      if (!gR.ok || !cR.ok) throw new Error('Failed to load dashboard metrics');
+      const gR = await fetch('/api/guests');
+      if (!gR.ok) throw new Error('Failed to load dashboard metrics');
       setGuests(await gR.json());
-      setCategories(await cR.json());
     } catch (err: any) {
       setError(err.message || 'Error loading dashboard');
     } finally {
@@ -193,54 +191,8 @@ export default function DashboardPage() {
                 </Grid>
               </Grid>
             </Paper>
-
-            {/* Categories Breakdown */}
-            <Paper elevation={1} sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem', fontWeight: 700 }}>
-                  Categories Breakdown
-                </Typography>
-                <Button component={Link} href="/categories" size="small" endIcon={<ArrowRight size={14} />} sx={{ fontSize: '0.75rem' }}>
-                  Manage
-                </Button>
-              </Box>
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      {['Category', 'Invited', 'Attending', 'Declined', 'Pending'].map(h => (
-                        <TableCell key={h}>{h}</TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {categories.map((cat) => {
-                      const cg = guests.filter(g => g.category_id === cat.id);
-                      const cA = cg.filter(g => g.rsvp?.status === 'attending').length;
-                      const cD = cg.filter(g => g.rsvp?.status === 'declined').length;
-                      return (
-                        <TableRow key={cat.id}>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: cat.colour, flexShrink: 0 }} />
-                              <Typography variant="body2" sx={{ fontWeight: 500 }}>{cat.name}</Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell><Typography variant="body2">{cg.length}</Typography></TableCell>
-                          <TableCell><Typography variant="body2" sx={{ color: 'success.main', fontWeight: 600 }}>{cA}</Typography></TableCell>
-                          <TableCell><Typography variant="body2" sx={{ color: 'error.main' }}>{cD}</Typography></TableCell>
-                          <TableCell><Typography variant="body2" color="text.secondary">{cg.length - cA - cD}</Typography></TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Paper>
           </Box>
-        </Grid>
-
-        {/* Right: Recent Activity */}
+        </Grid>        {/* Right: Recent Activity */}
         <Grid size={{ xs: 12, lg: 4 }}>
           <Paper elevation={1} sx={{ p: 3, height: 'fit-content' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>

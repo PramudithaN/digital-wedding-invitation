@@ -13,11 +13,13 @@ import {
   AlertCircle,
   Edit2,
   Calendar,
-  Download
+  Download,
+  ArrowUp
 } from 'lucide-react';
 import { GuestWithDetails } from '@/lib/types';
 
 import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Card from '@mui/material/Card';
@@ -79,6 +81,7 @@ export default function RSVPTrackerPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'attending' | 'declined' | 'pending'>('all');
   const [mealFilter, setMealFilter] = useState('all');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const fetchGuests = async (silent = false) => {
     try {
@@ -129,6 +132,22 @@ export default function RSVPTrackerPage() {
     }, 15000); // Polling every 15 seconds
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (globalThis.window?.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+    globalThis.window?.addEventListener('scroll', handleScroll);
+    return () => globalThis.window?.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleStatusChange = async (guestId: string, newStatus: 'attending' | 'declined' | 'pending') => {
     const guestObj = guests.find(g => g.id === guestId);
@@ -608,6 +627,30 @@ export default function RSVPTrackerPage() {
       )}
 
       </Box>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <IconButton
+          onClick={scrollToTop}
+          sx={{
+            position: 'fixed',
+            bottom: { xs: 80, md: 24 }, // higher on mobile to clear bottom navbar
+            right: 24,
+            bgcolor: 'primary.main',
+            color: 'white',
+            boxShadow: 3,
+            zIndex: 1000,
+            '&:hover': {
+              bgcolor: 'primary.dark',
+            },
+            width: 44,
+            height: 44,
+          }}
+        >
+          <ArrowUp size={20} />
+        </IconButton>
+      )}
+
       {toast && (
         <Box sx={{
           position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 9999,

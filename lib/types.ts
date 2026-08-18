@@ -12,6 +12,7 @@ export interface Guest {
   email?: string;
   side?: 'bride' | 'groom';
   category_id?: string;
+  relationship?: 'relative' | 'friend';
   invite_token: string;
   notes?: string;
   created_at?: string;

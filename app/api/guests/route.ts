@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       
       const guests = await getGuests();
       const filtered = guests
-        .filter(g => g.name.toLowerCase().includes(q))
+        .filter(g => g.name.toLowerCase().includes(q) && g.rsvp?.status === 'attending')
         .map(g => ({
           id: g.id,
           name: g.name,

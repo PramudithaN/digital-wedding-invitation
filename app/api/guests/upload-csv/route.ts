@@ -184,3 +184,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message || 'An error occurred during file upload.' }, { status: 500 });
   }
 }
+
+export async function DELETE() {
+  try {
+    const guests = await getGuests();
+    let resetCount = 0;
+    for (const guest of guests) {
+      if (guest.table_no) {
+        await updateGuest(guest.id, { table_no: '' });
+        resetCount++;
+      }
+    }
+    return NextResponse.json({ success: true, resetCount });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'An error occurred while resetting seating assignments.' }, { status: 500 });
+  }
+}

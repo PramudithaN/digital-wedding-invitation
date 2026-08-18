@@ -12,7 +12,9 @@ import {
   ExternalLink,
   Download,
   Search,
-  Check
+  Check,
+  X,
+  ArrowUp
 } from 'lucide-react';
 import { GuestWithDetails } from '@/lib/types';
 
@@ -37,6 +39,10 @@ import TableBody from '@mui/material/TableBody';
 import InputAdornment from '@mui/material/InputAdornment';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import IconButton from '@mui/material/IconButton';
 
 function StatusChip({ guest }: { guest: GuestWithDetails }) {
   const status = guest.rsvp?.status;
@@ -82,6 +88,11 @@ export default function SeatingUploadPage() {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
+  // Additional feature states
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
   const fetchGuests = async (silent = false) => {
     try {
       if (!silent) setIsGridLoading(true);
@@ -99,6 +110,19 @@ export default function SeatingUploadPage() {
 
   useEffect(() => {
     fetchGuests();
+  }, []);
+
+  // Listen to window scroll position to toggle scroll to top button
+  useEffect(() => {
+    const handleScroll = () => {
+      if (globalThis.window?.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+    globalThis.window?.addEventListener('scroll', handleScroll);
+    return () => globalThis.window?.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleTableNoChange = async (guestId: string, value: string) => {
@@ -124,6 +148,56 @@ export default function SeatingUploadPage() {
     } finally {
       setSavingId(null);
     }
+  };
+
+  const handleResetSeating = async () => {
+    try {
+      setIsResetting(true);
+      const res = await fetch('/api/guests/upload-csv', {
+        method: 'DELETE'
+      });
+      if (!res.ok) {
+        throw new Error('Failed to reset seating assignments');
+      }
+      
+      const data = await res.json();
+      setGuests(prev => prev.map(g => ({ ...g, table_no: '' })));
+      setToast({ message: `Successfully cleared all ${data.resetCount} table assignments!`, type: 'success' });
+      setIsResetDialogOpen(false);
+    } catch (err: any) {
+      console.error(err);
+      setToast({ message: 'Error resetting seating: ' + err.message, type: 'error' });
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  const handleDownloadSeating = () => {
+    const headers = ['Guest ID', 'Guest Name', 'Side', 'RSVP Status', 'Table No'];
+    const rows = guests
+      .filter(g => g.rsvp?.status === 'attending') // only confirmed attendees
+      .map(g => [
+        g.id,
+        g.name,
+        g.side || 'bride',
+        g.rsvp?.status || 'pending',
+        g.table_no || ''
+      ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'wedding_seating_assignments.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -355,7 +429,9 @@ export default function SeatingUploadPage() {
                   color: '#FFFFFF', 
                   '&.Mui-disabled': { 
                     color: 'rgba(0, 0, 0, 0.38)', 
-                    backgroundColor: '#E2E8F0' 
+                    backgroundColor: '#E2E8F0',
+                    pointerEvents: 'auto',
+                    cursor: 'not-allowed'
                   } 
                 }}
               >
@@ -366,35 +442,63 @@ export default function SeatingUploadPage() {
 
         </div>
 
-        {/* Right Column: Instructions */}
-        <Paper elevation={1} sx={{ p: 3, h: 'fit-content', display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, borderBottom: '1px solid', borderColor: 'divider', pb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <HelpCircle size={18} className="text-gray-400" /> Seating Notes
-          </Typography>
-          
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, fontSize: '0.75rem', color: 'text.secondary' }}>
-            <p>
-              • **Real-time Saving**: Typing a table number in the grid below saves it immediately.
-            </p>
-            <p>
-              • **CSV Updates**: Uploading a CSV will only update table numbers for guests listed in the file. Other guests' table numbers will remain unchanged.
-            </p>
-            <p>
-              • **Manual Edit**: Press **Enter** or click outside the box to save. Clear the text to unassign the table.
-            </p>
+        {/* Right Column: Simplified Information Card (No title, bullets or asterisks) */}
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: 3, 
+            h: 'fit-content', 
+            bgcolor: '#EFF6FF', 
+            border: '1px solid', 
+            borderColor: '#BFDBFE', 
+            borderRadius: 2,
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: 1.5 
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#1E40AF' }}>
+            <HelpCircle size={20} />
+            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+              How to manage table assignments
+            </Typography>
           </Box>
+          <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#1E3A8A', lineHeight: 1.5 }}>
+            To assign tables, you can type assignments directly into the guest rows below. Your changes will be saved in real-time as soon as you press Enter or click outside the text box. Alternatively, you can upload a CSV spreadsheet using the uploader card. Uploading a CSV will only update table numbers for the guests listed in the file, leaving other guest records unchanged.
+          </Typography>
         </Paper>
 
       </div>
 
-      {/* Guest Seating Grid (Styled Identically to Guests Page Table) */}
+      {/* Guest Seating Grid */}
       <Paper elevation={1}>
         
-        {/* Table Filters */}
+        {/* Table Header & Controls */}
         <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-            Guest Seating Grid ({filteredGuests.length} guests)
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+              Guest Seating Grid ({filteredGuests.length} guests)
+            </Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleDownloadSeating}
+              startIcon={<Download size={14} />}
+              sx={{ py: 0.5, fontSize: '0.7rem', height: 26 }}
+            >
+              Export Seating
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              onClick={() => setIsResetDialogOpen(true)}
+              startIcon={<X size={14} />}
+              sx={{ py: 0.5, fontSize: '0.7rem', height: 26 }}
+            >
+              Reset Seating
+            </Button>
+          </Box>
           
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'center' }}>
             {/* Search Input */}
@@ -412,11 +516,11 @@ export default function SeatingUploadPage() {
                   ),
                 }
               }}
-              sx={{ width: 200, '& .MuiOutlinedInput-root': { fontSize: '0.75rem' } }}
+              sx={{ width: 180, '& .MuiOutlinedInput-root': { fontSize: '0.75rem' } }}
             />
 
             {/* Side filter */}
-            <FormControl size="small" sx={{ minWidth: 110 }}>
+            <FormControl size="small" sx={{ minWidth: 100 }}>
               <InputLabel id="side-filter-label">Side</InputLabel>
               <Select
                 labelId="side-filter-label"
@@ -432,7 +536,7 @@ export default function SeatingUploadPage() {
             </FormControl>
 
             {/* Status Filter */}
-            <FormControl size="small" sx={{ minWidth: 120 }}>
+            <FormControl size="small" sx={{ minWidth: 110 }}>
               <InputLabel id="status-filter-label">RSVP Status</InputLabel>
               <Select
                 labelId="status-filter-label"
@@ -458,7 +562,7 @@ export default function SeatingUploadPage() {
               <Typography variant="body2" color="text.secondary">Fetching seating database...</Typography>
             </Box>
           ) : filteredGuests.length === 0 ? (
-            <Box sx={{ py: 8, textCol: 'center', textAlign: 'center' }}>
+            <Box sx={{ py: 8, textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">No guests found matching the selected filters.</Typography>
             </Box>
           ) : (
@@ -524,6 +628,62 @@ export default function SeatingUploadPage() {
         </TableContainer>
 
       </Paper>
+
+      {/* Reset Confirmation Dialog */}
+      <Dialog open={isResetDialogOpen} onClose={() => !isResetting && setIsResetDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <AlertCircle color="#DC2626" size={24} />
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>Reset Seating?</Typography>
+        </DialogTitle>
+        <DialogContent sx={{ py: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Are you sure you want to clear table numbers for all guests? This action is permanent and will remove all table numbers from the public seating lookup page.
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, mt: 3, justifyContent: 'flex-end' }}>
+            <Button
+              variant="outlined"
+              onClick={() => setIsResetDialogOpen(false)}
+              disabled={isResetting}
+              sx={{ textTransform: 'none', color: '#6B7280', borderColor: '#E5E7EB', '&:hover': { borderColor: '#D1D5DB' } }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleResetSeating}
+              disabled={isResetting}
+              sx={{ textTransform: 'none', fontWeight: 700 }}
+              startIcon={isResetting ? <CircularProgress size={16} color="inherit" /> : <X size={16} />}
+            >
+              {isResetting ? 'Clearing...' : 'Clear Seating'}
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Floating Scroll to Top Button */}
+      {showScrollTop && (
+        <IconButton
+          onClick={() => globalThis.window?.scrollTo({ top: 0, behavior: 'smooth' })}
+          sx={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            bgcolor: 'primary.main',
+            color: 'white',
+            boxShadow: 3,
+            zIndex: 1000,
+            '&:hover': {
+              bgcolor: 'primary.dark',
+            },
+            width: 44,
+            height: 44,
+          }}
+        >
+          <ArrowUp size={20} />
+        </IconButton>
+      )}
 
     </Box>
   );

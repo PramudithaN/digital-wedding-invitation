@@ -799,40 +799,25 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
 
           <div className="relative py-4 flex flex-col items-center">
             {/* Timeline vertical line */}
-            <div className="absolute left-[39px] sm:left-1/2 top-10 bottom-10 w-[1.5px] bg-[#D38A99]/20 -translate-x-1/2 z-0" />
+            <div className="absolute left-1/2 top-10 bottom-10 w-[1.5px] bg-[#D38A99]/20 -translate-x-1/2 z-0" />
 
             <div className="w-full space-y-8 sm:space-y-10">
               {itineraryItems.map((item, idx) => (
                 <div key={idx} className="relative z-10">
-                  {/* Desktop Layout (centered) */}
-                  <div className="hidden sm:grid grid-cols-[1fr_auto_1fr] items-center gap-6 w-full">
+                  <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6 w-full">
                     {/* Left side: Time */}
                     <div className="text-right">
-                      <p className="font-serif text-base font-semibold tracking-wider text-[#D38A99] uppercase">{item.time}</p>
+                      <p className="font-serif text-xs sm:text-base font-semibold tracking-wider text-[#D38A99] uppercase">{item.time}</p>
                     </div>
                     
-                    {/* Centered Large Icon circle */}
-                    <div className="w-20 h-20 rounded-full bg-[#FCFAF5] border border-[#E8DCC7] flex items-center justify-center overflow-hidden shadow-md hover:scale-110 transition-transform duration-300 relative z-10">
-                      <ItineraryIcon src={item.iconSrc} />
+                    {/* Centered Icon circle */}
+                    <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-[#FCFAF5] border border-[#E8DCC7] flex items-center justify-center overflow-hidden shadow-md sm:hover:scale-110 transition-transform duration-300 relative z-10">
+                      <ItineraryIcon src={item.iconSrc} className="scale-[0.8] sm:scale-100" />
                     </div>
                     
                     {/* Right side: Title */}
                     <div className="text-left">
-                      <h4 className="font-serif text-base text-[#2D312E] font-medium leading-snug max-w-[200px]">{item.title}</h4>
-                    </div>
-                  </div>
-
-                  {/* Mobile Layout (left-aligned) */}
-                  <div className="flex sm:hidden items-center gap-4 w-full pl-2">
-                    {/* Left-aligned Icon circle */}
-                    <div className="w-12 h-12 rounded-full bg-[#FCFAF5] border border-[#E8DCC7] flex items-center justify-center overflow-hidden shadow-sm shrink-0 relative z-10">
-                      <ItineraryIcon src={item.iconSrc} className="scale-[0.8]" />
-                    </div>
-                    
-                    {/* Right side: Details */}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-serif text-xs font-semibold tracking-wider text-[#D38A99] uppercase">{item.time}</p>
-                      <h4 className="font-serif text-sm text-[#2D312E] font-medium leading-tight mt-0.5">{item.title}</h4>
+                      <h4 className="font-serif text-xs sm:text-base text-[#2D312E] font-medium leading-tight sm:leading-snug max-w-[120px] sm:max-w-[200px]">{item.title}</h4>
                     </div>
                   </div>
                 </div>

@@ -351,7 +351,13 @@ export default function SeatingUploadPage() {
                 onClick={handleUpload}
                 disabled={!file || isUploading}
                 startIcon={isUploading ? <CircularProgress size={16} color="inherit" /> : <Upload size={16} />}
-                sx={{ color: '#FFFFFF', '&.Mui-disabled': { color: 'rgba(0, 0, 0, 0.26)' } }}
+                sx={{ 
+                  color: '#FFFFFF', 
+                  '&.Mui-disabled': { 
+                    color: 'rgba(0, 0, 0, 0.38)', 
+                    backgroundColor: '#E2E8F0' 
+                  } 
+                }}
               >
                 {isUploading ? 'Uploading...' : 'Upload Seating Assignments'}
               </Button>

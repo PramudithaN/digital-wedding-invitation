@@ -204,7 +204,7 @@ export default function SeatingLookupPage() {
           className="absolute inset-0 z-0 pointer-events-none select-none rounded-2xl opacity-100"
           style={{
             backgroundImage: 'url("/Invitation-background.png")',
-            backgroundSize: '180% 100%',
+            backgroundSize: '260% 100%',
             backgroundPosition: 'center center',
             backgroundRepeat: 'no-repeat',
           }}

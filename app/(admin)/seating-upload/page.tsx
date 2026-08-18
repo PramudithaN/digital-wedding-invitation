@@ -79,8 +79,8 @@ export default function SeatingUploadPage() {
   } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Collapsible state for uploader
-  const [showUploader, setShowUploader] = useState(false);
+  // Uploader visibility state (Visible by default)
+  const [showUploader, setShowUploader] = useState(true);
 
   // Seating grid states
   const [guests, setGuests] = useState<GuestWithDetails[]>([]);
@@ -91,9 +91,20 @@ export default function SeatingUploadPage() {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  // Additional feature states
+  // Confirmation states
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [isConfirmUploadOpen, setIsConfirmUploadOpen] = useState(false);
+  
+  // Inline edit confirmation states
+  const [confirmEditOpen, setConfirmEditOpen] = useState(false);
+  const [pendingEdit, setPendingEdit] = useState<{
+    guestId: string;
+    guestName: string;
+    newVal: string;
+    oldVal: string;
+  } | null>(null);
+
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   const fetchGuests = async (silent = false) => {
@@ -128,29 +139,46 @@ export default function SeatingUploadPage() {
     return () => globalThis.window?.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleTableNoChange = async (guestId: string, value: string) => {
+  // Inline edit confirmation handlers
+  const handleTableNoBlurOrEnter = (guestId: string, guestName: string, newVal: string, oldVal: string) => {
+    if (newVal === oldVal) return;
+    setPendingEdit({ guestId, guestName, newVal, oldVal });
+    setConfirmEditOpen(true);
+  };
+
+  const handleConfirmEdit = async () => {
+    if (!pendingEdit) return;
+    const { guestId, newVal } = pendingEdit;
+    
     try {
       setSavingId(guestId);
+      setConfirmEditOpen(false);
       const res = await fetch(`/api/guests/${guestId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ table_no: value })
+        body: JSON.stringify({ table_no: newVal })
       });
       if (!res.ok) {
         throw new Error('Failed to update table number');
       }
       
       // Update local state
-      setGuests(prev => prev.map(g => g.id === guestId ? { ...g, table_no: value } : g));
-      
-      // Show toast confirmation
+      setGuests(prev => prev.map(g => g.id === guestId ? { ...g, table_no: newVal } : g));
       setToast({ message: 'Table assignment updated successfully!', type: 'success' });
     } catch (err: any) {
       console.error(err);
       setToast({ message: 'Error saving table number: ' + err.message, type: 'error' });
+      fetchGuests(true); // Reset input back to DB value
     } finally {
       setSavingId(null);
+      setPendingEdit(null);
     }
+  };
+
+  const handleCancelEdit = () => {
+    setConfirmEditOpen(false);
+    setPendingEdit(null);
+    fetchGuests(true); // reload to revert input values in the DOM
   };
 
   const handleResetSeating = async () => {
@@ -248,6 +276,7 @@ export default function SeatingUploadPage() {
     if (!file) return;
 
     try {
+      setIsConfirmUploadOpen(false);
       setIsUploading(true);
       setError('');
       setSuccessResult(null);
@@ -268,6 +297,8 @@ export default function SeatingUploadPage() {
 
       setSuccessResult(data);
       setFile(null); // Reset file input
+      setShowUploader(false); // Auto-hide upload panel on successful upload
+      setToast({ message: `Successfully updated ${data.updatedCount} seating assignments!`, type: 'success' });
       fetchGuests(true); // Reload the guest list to show new seating assignments
     } catch (err: any) {
       setError(err.message || 'An error occurred during file upload.');
@@ -317,7 +348,7 @@ export default function SeatingUploadPage() {
             startIcon={<Upload size={16} />}
             sx={{ whiteSpace: 'nowrap' }}
           >
-            {showUploader ? 'Hide Uploader' : 'Upload CSV'}
+            {showUploader ? 'Hide Uploader' : 'Reupload CSV'}
           </Button>
           <Button 
             variant="contained" 
@@ -432,7 +463,7 @@ export default function SeatingUploadPage() {
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid', borderColor: 'divider', pt: 2, mt: 2 }}>
                 <Button
                   variant="contained"
-                  onClick={handleUpload}
+                  onClick={() => setIsConfirmUploadOpen(true)}
                   disabled={!file || isUploading}
                   startIcon={isUploading ? <CircularProgress size={16} color="inherit" /> : <Upload size={16} />}
                   sx={{ 
@@ -609,9 +640,7 @@ export default function SeatingUploadPage() {
                           }}
                           onBlur={(e) => {
                             const val = e.target.value.trim();
-                            if (val !== (guest.table_no || '')) {
-                              handleTableNoChange(guest.id, val);
-                            }
+                            handleTableNoBlurOrEnter(guest.id, guest.name, val, guest.table_no || '');
                           }}
                           slotProps={{
                             input: {
@@ -639,6 +668,66 @@ export default function SeatingUploadPage() {
         </TableContainer>
 
       </Paper>
+
+      {/* CSV Upload Confirmation Dialog */}
+      <Dialog open={isConfirmUploadOpen} onClose={() => setIsConfirmUploadOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Upload size={22} className="text-blue-600" />
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>Upload Seating CSV?</Typography>
+        </DialogTitle>
+        <DialogContent sx={{ py: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Are you sure you want to apply seating assignments from the selected CSV file? This will overwrite table numbers for matching guests.
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, mt: 3, justifyContent: 'flex-end' }}>
+            <Button
+              variant="outlined"
+              onClick={() => setIsConfirmUploadOpen(false)}
+              sx={{ textTransform: 'none', color: '#6B7280', borderColor: '#E5E7EB', '&:hover': { borderColor: '#D1D5DB' } }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleUpload}
+              sx={{ textTransform: 'none', fontWeight: 700, color: '#FFFFFF' }}
+            >
+              Confirm Upload
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Inline Edit Confirmation Dialog */}
+      <Dialog open={confirmEditOpen} onClose={handleCancelEdit} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <HelpCircle size={22} className="text-amber-600" />
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>Confirm Table Change?</Typography>
+        </DialogTitle>
+        <DialogContent sx={{ py: 2 }}>
+          {pendingEdit && (
+            <Typography variant="body2" color="text.secondary">
+              Are you sure you want to change the table assignment for <strong>{pendingEdit.guestName}</strong> from <strong>&ldquo;{pendingEdit.oldVal || 'None'}&rdquo;</strong> to <strong>&ldquo;{pendingEdit.newVal || 'None'}&rdquo;</strong>?
+            </Typography>
+          )}
+          <Box sx={{ display: 'flex', gap: 1, mt: 3, justifyContent: 'flex-end' }}>
+            <Button
+              variant="outlined"
+              onClick={handleCancelEdit}
+              sx={{ textTransform: 'none', color: '#6B7280', borderColor: '#E5E7EB', '&:hover': { borderColor: '#D1D5DB' } }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleConfirmEdit}
+              sx={{ textTransform: 'none', fontWeight: 700, color: '#FFFFFF' }}
+            >
+              Save Change
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
 
       {/* Reset Confirmation Dialog */}
       <Dialog open={isResetDialogOpen} onClose={() => !isResetting && setIsResetDialogOpen(false)} maxWidth="xs" fullWidth>

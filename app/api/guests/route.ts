@@ -3,6 +3,17 @@ import { getGuests, addGuest, clearAllGuests } from '@/lib/db';
 import { normalizePhoneNumber } from '@/lib/whatsapp';
 import { checkIsAuthenticated } from '@/lib/auth';
 
+/** Maps extended UI side values down to those the DB constraint allows. */
+function normalizeSide(side: string | undefined | null): string | null {
+  const valid = ['bride', 'groom', 'bride_mother', 'bride_father', 'groom_mother', 'groom_father'];
+  if (!side) return null;
+  if (valid.includes(side)) return side;
+  // Fallback: collapse unknowns to bride/groom prefix match
+  if (side.startsWith('bride')) return 'bride';
+  if (side.startsWith('groom')) return 'groom';
+  return null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -60,7 +71,7 @@ export async function POST(request: Request) {
           name: item.name,
           phone: normalizedPhone,
           email: item.email || '',
-          side: item.side || null,
+          side: normalizeSide(item.side),
           category_id: item.category_id || null,
           relationship: item.relationship || 'friend',
           notes: item.notes || '',
@@ -79,7 +90,7 @@ export async function POST(request: Request) {
         name: body.name,
         phone: normalizedPhone,
         email: body.email || '',
-        side: body.side || null,
+        side: normalizeSide(body.side),
         category_id: body.category_id || null,
         relationship: body.relationship || 'friend',
         notes: body.notes || '',

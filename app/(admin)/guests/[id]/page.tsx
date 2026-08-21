@@ -41,7 +41,7 @@ export default function EditGuestPage() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [side, setSide] = useState<'bride' | 'groom'>('bride');
+const [side, setSide] = useState<'bride' | 'groom' | 'groom_mother' | 'groom_father' | 'bride_mother' | 'bride_father' | string>('bride');
   const [relationship, setRelationship] = useState<'relative' | 'friend'>('friend');
   const [notes, setNotes] = useState('');
   const [guestCount, setGuestCount] = useState<number>(1);
@@ -238,37 +238,87 @@ export default function EditGuestPage() {
               />
             </div>
 
-            {/* Side */}
-            <div>
+       {/* Side */}
+            <div className="md:col-span-2">
               <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
                 Wedding Side *
               </label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <button
                   type="button"
                   onClick={() => setSide('bride')}
                   className={`py-2 px-3 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
                     side === 'bride'
                       ? 'bg-purple-50 text-purple-700 border-purple-300'
-                      : 'bg-white border-gray-200 text-gray-500'
+                      : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
                   }`}
                 >
                   Bride's Side
                 </button>
+                
                 <button
                   type="button"
                   onClick={() => setSide('groom')}
                   className={`py-2 px-3 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
                     side === 'groom'
                       ? 'bg-blue-50 text-blue-700 border-blue-300'
-                      : 'bg-white border-gray-200 text-gray-500'
+                      : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
                   }`}
                 >
                   Groom's Side
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSide('groom_mother')}
+                  className={`py-2 px-3 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
+                    side === 'groom_mother'
+                      ? 'bg-indigo-50 text-indigo-700 border-indigo-300'
+                      : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  Groom's Mother's Side
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSide('groom_father')}
+                  className={`py-2 px-3 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
+                    side === 'groom_father'
+                      ? 'bg-cyan-50 text-cyan-700 border-cyan-300'
+                      : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  Groom's Father's Side
+                </button>
+
+                {/* Optional: Include Bride's parents if you need them for the 6 options */}
+                <button
+                  type="button"
+                  onClick={() => setSide('bride_mother')}
+                  className={`py-2 px-3 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
+                    side === 'bride_mother'
+                      ? 'bg-pink-50 text-pink-700 border-pink-300'
+                      : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  Bride's Mother's Side
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSide('bride_father')}
+                  className={`py-2 px-3 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
+                    side === 'bride_father'
+                      ? 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-300'
+                      : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  Bride's Father's Side
+                </button>
               </div>
             </div>
-
+            
             {/* Relationship */}
             <div>
               <label htmlFor="edit-rel" className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">

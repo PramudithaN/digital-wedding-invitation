@@ -39,6 +39,10 @@ export async function POST(request: Request) {
             if (g.side !== 'bride' || g.relationship !== 'relative') return false;
           } else if (session === 'groom_relative') {
             if (g.side !== 'groom' || g.relationship !== 'relative') return false;
+          } else if (session === 'groom_mother') {
+            if (g.side !== 'groom_mother') return false;
+          } else if (session === 'groom_father') {
+            if (g.side !== 'groom_father') return false;
           }
         }
         if (filter === 'pending') {

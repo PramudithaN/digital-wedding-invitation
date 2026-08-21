@@ -168,7 +168,7 @@ export default function GuestsPage() {
   const [isBulkWizardOpen, setIsBulkWizardOpen] = useState(false);
   const [bulkList, setBulkList] = useState<GuestWithDetails[]>([]);
   const [bulkIndex, setBulkIndex] = useState(0);
-  const [whatsappSession, setWhatsappSession] = useState<'bride' | 'groom' | 'bride_relative' | 'groom_relative'>('bride');
+  const [whatsappSession, setWhatsappSession] = useState<'bride' | 'groom' | 'bride_relative' | 'groom_relative' | 'groom_mother' | 'groom_father'>('bride');
   const [isBulkSendingTwilio, setIsBulkSendingTwilio] = useState(false);
 
   // Automated WhatsApp states
@@ -416,6 +416,10 @@ export default function GuestsPage() {
           if (g.side !== 'bride' || g.relationship !== 'relative') return false;
         } else if (whatsappSession === 'groom_relative') {
           if (g.side !== 'groom' || g.relationship !== 'relative') return false;
+        } else if (whatsappSession === 'groom_mother') {
+          if (g.side !== 'groom_mother') return false;
+        } else if (whatsappSession === 'groom_father') {
+          if (g.side !== 'groom_father') return false;
         }
       }
       if (bulkFilter === 'pending') {
@@ -926,9 +930,11 @@ export default function GuestsPage() {
           <TextField label="Email Address" value={email} onChange={e => setEmail(e.target.value)} size="small" fullWidth type="email" />
           <Box>
             <Typography variant="caption" sx={{ mb: 1, display: 'block', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', fontWeight: 700 }}>Wedding Side *</Typography>
-            <ToggleButtonGroup value={side} exclusive onChange={(_, v) => v && setSide(v)} fullWidth size="small">
-              <ToggleButton value="bride" sx={{ '&.Mui-selected': { bgcolor: '#FAF5FF', color: '#9333EA', borderColor: '#D8B4FE' } }}>Bride&apos;s Side</ToggleButton>
-              <ToggleButton value="groom" sx={{ '&.Mui-selected': { bgcolor: '#EFF6FF', color: '#2563EB', borderColor: '#BFDBFE' } }}>Groom&apos;s Side</ToggleButton>
+            <ToggleButtonGroup value={side} exclusive onChange={(_, v) => v && setSide(v)} fullWidth size="small" sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+              <ToggleButton value="bride" sx={{ flex: '1 1 45%', '&.Mui-selected': { bgcolor: '#FAF5FF', color: '#9333EA', borderColor: '#D8B4FE' } }}>Bride&apos;s Side</ToggleButton>
+              <ToggleButton value="groom" sx={{ flex: '1 1 45%', '&.Mui-selected': { bgcolor: '#EFF6FF', color: '#2563EB', borderColor: '#BFDBFE' } }}>Groom&apos;s Side</ToggleButton>
+              <ToggleButton value="groom_mother" sx={{ flex: '1 1 45%', '&.Mui-selected': { bgcolor: '#F0FDF4', color: '#16A34A', borderColor: '#BBF7D0' } }}>Groom&apos;s Mother&apos;s Side</ToggleButton>
+              <ToggleButton value="groom_father" sx={{ flex: '1 1 45%', '&.Mui-selected': { bgcolor: '#FFF7ED', color: '#EA580C', borderColor: '#FED7AA' } }}>Groom&apos;s Father&apos;s Side</ToggleButton>
             </ToggleButtonGroup>
           </Box>
           <FormControl size="small" fullWidth>
@@ -986,6 +992,8 @@ export default function GuestsPage() {
               <MenuItem value="groom">Groom&apos;s Side (Friends/Other)</MenuItem>
               <MenuItem value="bride_relative">Bride&apos;s Relatives</MenuItem>
               <MenuItem value="groom_relative">Groom&apos;s Relatives</MenuItem>
+              <MenuItem value="groom_mother">Groom&apos;s Mother&apos;s Side</MenuItem>
+              <MenuItem value="groom_father">Groom&apos;s Father&apos;s Side</MenuItem>
             </Select>
           </FormControl>
           

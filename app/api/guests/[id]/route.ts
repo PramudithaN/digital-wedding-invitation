@@ -2,6 +2,17 @@ import { NextResponse } from 'next/server';
 import { getGuest, updateGuest, deleteGuest } from '@/lib/db';
 import { normalizePhoneNumber } from '@/lib/whatsapp';
 
+/** Maps extended UI side values down to those the DB constraint allows. */
+function normalizeSide(side: string | undefined | null): string | null {
+  const valid = ['bride', 'groom', 'bride_mother', 'bride_father', 'groom_mother', 'groom_father'];
+  if (!side) return null;
+  if (valid.includes(side)) return side;
+  // Fallback: collapse unknowns to bride/groom prefix match
+  if (side.startsWith('bride')) return 'bride';
+  if (side.startsWith('groom')) return 'groom';
+  return null;
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -27,7 +38,8 @@ export async function PUT(
     const body = await request.json();
     const guest = await updateGuest(id, {
       ...body,
-      phone: body.phone ? normalizePhoneNumber(String(body.phone)) : ''
+      phone: body.phone ? normalizePhoneNumber(String(body.phone)) : '',
+      side: normalizeSide(body.side),
     });
     return NextResponse.json(guest);
   } catch (error: any) {

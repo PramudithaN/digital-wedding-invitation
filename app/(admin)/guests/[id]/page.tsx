@@ -257,16 +257,21 @@ export default function EditGuestPage() {
                 </button>
                 
                 <button
-                  type="button"
-                  onClick={() => setSide('groom')}
-                  className={`py-2 px-3 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
-                    side === 'groom'
-                      ? 'bg-blue-50 text-blue-700 border-blue-300'
-                      : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  Groom's Side
-                </button>
+                    type="button"
+                    onClick={() => {
+                      setSide('groom');
+                      if (relationship === 'relative') {
+                        setRelationship('friend');
+                      }
+                    }}
+                    className={`py-2 px-3 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
+                      side === 'groom'
+                        ? 'bg-blue-50 text-blue-700 border-blue-300'
+                        : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                    }`}
+                  >
+                    Groom's Side
+                  </button>
 
                 <button
                   type="button"
@@ -306,7 +311,7 @@ export default function EditGuestPage() {
                 className="w-full bg-white border border-gray-200 text-gray-700 text-xs rounded-md py-2.5 px-3 focus:outline-none focus:border-blue-500 cursor-pointer"
               >
                 <option value="friend">Friend / Other</option>
-                <option value="relative">Relative</option>
+                <option value="relative" disabled={side === 'groom'}>Relative</option>
               </select>
             </div>
 

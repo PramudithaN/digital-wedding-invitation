@@ -938,7 +938,14 @@ export default function GuestsPage() {
           <TextField label="Email Address" value={email} onChange={e => setEmail(e.target.value)} size="small" fullWidth type="email" />
           <Box>
             <Typography variant="caption" sx={{ mb: 1, display: 'block', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', fontWeight: 700 }}>Wedding Side *</Typography>
-            <ToggleButtonGroup value={side} exclusive onChange={(_, v) => v && setSide(v)} fullWidth size="small" sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+            <ToggleButtonGroup value={side} exclusive onChange={(_, v) => {
+              if (v) {
+                setSide(v);
+                if (v === 'groom' && relationship === 'relative') {
+                  setRelationship('friend');
+                }
+              }
+            }} fullWidth size="small" sx={{ flexWrap: 'wrap', gap: 0.5 }}>
               <ToggleButton value="bride" sx={{ flex: '1 1 45%', '&.Mui-selected': { bgcolor: '#FAF5FF', color: '#9333EA', borderColor: '#D8B4FE' } }}>Bride&apos;s Side</ToggleButton>
               <ToggleButton value="groom" sx={{ flex: '1 1 45%', '&.Mui-selected': { bgcolor: '#EFF6FF', color: '#2563EB', borderColor: '#BFDBFE' } }}>Groom&apos;s Side</ToggleButton>
               <ToggleButton value="groom_mother" sx={{ flex: '1 1 45%', '&.Mui-selected': { bgcolor: '#F0FDF4', color: '#16A34A', borderColor: '#BBF7D0' } }}>Groom&apos;s Mother&apos;s Side</ToggleButton>
@@ -949,7 +956,7 @@ export default function GuestsPage() {
             <InputLabel>Relationship</InputLabel>
             <Select value={relationship} label="Relationship" onChange={e => setRelationship(e.target.value as any)}>
               <MenuItem value="friend">Friend / Other</MenuItem>
-              <MenuItem value="relative">Relative</MenuItem>
+              <MenuItem value="relative" disabled={side === 'groom'}>Relative</MenuItem>
             </Select>
           </FormControl>
           <TextField

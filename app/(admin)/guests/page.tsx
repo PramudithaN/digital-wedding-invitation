@@ -50,9 +50,15 @@ function StatusChip({ guest }: { guest: GuestWithDetails }) {
 }
 
 function SideChip({ side }: { side: string }) {
+  let label = side;
+  if (side === 'groom_mother') label = "Groom's Mother";
+  else if (side === 'groom_father') label = "Groom's Father";
+  else if (side === 'bride') label = "Bride";
+  else if (side === 'groom') label = "Groom";
+  
   return (
     <Chip
-      label={side}
+      label={label}
       size="small"
       sx={{
         bgcolor: side === 'bride' ? '#FAF5FF' : '#EFF6FF',
@@ -146,7 +152,7 @@ export default function GuestsPage() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [side, setSide] = useState<'bride' | 'groom'>('bride');
+  const [side, setSide] = useState<'bride' | 'groom' | 'groom_mother' | 'groom_father'>('bride');
   const [relationship, setRelationship] = useState<'relative' | 'friend'>('friend');
   const [notes, setNotes] = useState('');
   const [guestCount, setGuestCount] = useState<number>(1);
@@ -168,7 +174,7 @@ export default function GuestsPage() {
   const [isBulkWizardOpen, setIsBulkWizardOpen] = useState(false);
   const [bulkList, setBulkList] = useState<GuestWithDetails[]>([]);
   const [bulkIndex, setBulkIndex] = useState(0);
-  const [whatsappSession, setWhatsappSession] = useState<'bride' | 'groom' | 'bride_relative' | 'groom_relative' | 'groom_mother' | 'groom_father'>('bride');
+  const [whatsappSession, setWhatsappSession] = useState<'bride' | 'groom' | 'bride_relative' | 'groom_mother' | 'groom_father'>('bride');
   const [isBulkSendingTwilio, setIsBulkSendingTwilio] = useState(false);
 
   // Automated WhatsApp states
@@ -303,7 +309,9 @@ export default function GuestsPage() {
           const rawCount = getVal(['count', 'guest count', 'size', 'plus_one', 'plus one']);
           
           let side = 'bride';
-          if (rawSide.includes('groom') || rawSide === 'g') side = 'groom';
+          if (rawSide === 'groom_mother') side = 'groom_mother';
+          else if (rawSide === 'groom_father') side = 'groom_father';
+          else if (rawSide.includes('groom') || rawSide === 'g') side = 'groom';
           
           let relationship = 'friend';
           if (rawRelationship.includes('relative') || rawRelationship === 'yes' || rawRelationship === 'true') {
@@ -414,8 +422,6 @@ export default function GuestsPage() {
           if (g.side !== 'groom' || g.relationship === 'relative') return false;
         } else if (whatsappSession === 'bride_relative') {
           if (g.side !== 'bride' || g.relationship !== 'relative') return false;
-        } else if (whatsappSession === 'groom_relative') {
-          if (g.side !== 'groom' || g.relationship !== 'relative') return false;
         } else if (whatsappSession === 'groom_mother') {
           if (g.side !== 'groom_mother') return false;
         } else if (whatsappSession === 'groom_father') {
@@ -583,6 +589,8 @@ export default function GuestsPage() {
                 <MenuItem value="all">All Sides</MenuItem>
                 <MenuItem value="bride">Bride&apos;s Side</MenuItem>
                 <MenuItem value="groom">Groom&apos;s Side</MenuItem>
+                <MenuItem value="groom_mother">Groom's Mother's Side</MenuItem>
+                <MenuItem value="groom_father">Groom's Father's Side</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -991,7 +999,6 @@ export default function GuestsPage() {
               <MenuItem value="bride">Bride&apos;s Side (Friends/Other)</MenuItem>
               <MenuItem value="groom">Groom&apos;s Side (Friends/Other)</MenuItem>
               <MenuItem value="bride_relative">Bride&apos;s Relatives</MenuItem>
-              <MenuItem value="groom_relative">Groom&apos;s Relatives</MenuItem>
               <MenuItem value="groom_mother">Groom&apos;s Mother&apos;s Side</MenuItem>
               <MenuItem value="groom_father">Groom&apos;s Father&apos;s Side</MenuItem>
             </Select>

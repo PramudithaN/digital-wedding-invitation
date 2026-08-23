@@ -23,11 +23,7 @@ const sessions = {
     status: { state: 'idle' },
     isSending: false
   },
-  groom_relative: {
-    client: null,
-    status: { state: 'idle' },
-    isSending: false
-  },
+
   groom_mother: {
     client: null,
     status: { state: 'idle' },
@@ -42,7 +38,7 @@ const sessions = {
 
 function getSessionName(req) {
   const sessionName = req.query.session || (req.body && req.body.session) || 'bride';
-  if (['bride', 'groom', 'bride_relative', 'groom_relative', 'groom_mother', 'groom_father'].includes(sessionName)) {
+  if (['bride', 'groom', 'bride_relative', 'groom_mother', 'groom_father'].includes(sessionName)) {
     return sessionName;
   }
   return 'bride';

@@ -41,7 +41,7 @@ export default function EditGuestPage() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-const [side, setSide] = useState<'bride' | 'groom' | 'groom_mother' | 'groom_father' | 'bride_mother' | 'bride_father' | string>('bride');
+  const [side, setSide] = useState<'bride' | 'groom' | 'groom_mother' | 'groom_father' | string>('bride');
   const [relationship, setRelationship] = useState<'relative' | 'friend'>('friend');
   const [notes, setNotes] = useState('');
   const [guestCount, setGuestCount] = useState<number>(1);
@@ -290,31 +290,6 @@ const [side, setSide] = useState<'bride' | 'groom' | 'groom_mother' | 'groom_fat
                   }`}
                 >
                   Groom's Father's Side
-                </button>
-
-                {/* Optional: Include Bride's parents if you need them for the 6 options */}
-                <button
-                  type="button"
-                  onClick={() => setSide('bride_mother')}
-                  className={`py-2 px-3 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
-                    side === 'bride_mother'
-                      ? 'bg-pink-50 text-pink-700 border-pink-300'
-                      : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  Bride's Mother's Side
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSide('bride_father')}
-                  className={`py-2 px-3 rounded-md border text-xs font-semibold transition-all cursor-pointer ${
-                    side === 'bride_father'
-                      ? 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-300'
-                      : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  Bride's Father's Side
                 </button>
               </div>
             </div>

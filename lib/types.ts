@@ -10,7 +10,7 @@ export interface Guest {
   name: string;
   phone?: string;
   email?: string;
-  side?: 'bride' | 'groom';
+  side?: 'bride' | 'groom' | 'groom_mother' | 'groom_father';
   category_id?: string;
   relationship?: 'relative' | 'friend';
   invite_token: string;

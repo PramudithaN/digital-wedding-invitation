@@ -878,7 +878,11 @@ export async function updateGalleryImagesOrder(orderedIds: string[]): Promise<vo
           .update({ position: index })
           .eq('id', id)
       );
-      await Promise.all(promises);
+      const results = await Promise.all(promises);
+      const errors = results.filter(r => r.error);
+      if (errors.length > 0) {
+        throw new Error(errors[0].error?.message || 'Error updating gallery images order in Supabase');
+      }
     } catch (e) {
       console.error('Error updating gallery images order in Supabase:', e);
       throw e;

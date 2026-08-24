@@ -423,25 +423,38 @@ export default function RSVPTrackerPage() {
                       </TableCell>
                       <TableCell>
                         {rsvpStatus === 'attending' && meal ? (
-                          <Chip
-                            icon={<UtensilsCrossed size={12} />}
-                            label={meal}
-                            size="small"
-                            variant="outlined"
-                            sx={{ textTransform: 'capitalize', fontSize: '0.7rem' }}
-                          />
+                          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                            {meal.split(',').map((m, idx) => m.trim() && (
+                              <Chip
+                                key={idx}
+                                icon={<UtensilsCrossed size={12} />}
+                                label={m.trim()}
+                                size="small"
+                                variant="outlined"
+                                sx={{ textTransform: 'capitalize', fontSize: '0.7rem' }}
+                              />
+                            ))}
+                          </Box>
                         ) : (
                           <Typography variant="caption" color="text.disabled">—</Typography>
                         )}
                       </TableCell>
                       <TableCell>
-                        {rsvpStatus === 'attending' && guest.rsvp?.alcohol_choice && guest.rsvp?.alcohol_choice !== 'none' ? (
-                          <Chip
-                            label={guest.rsvp.alcohol_choice}
-                            size="small"
-                            variant="outlined"
-                            sx={{ textTransform: 'capitalize', fontSize: '0.7rem', borderColor: '#D38A99', color: '#D38A99', fontWeight: 650 }}
-                          />
+                        {rsvpStatus === 'attending' && guest.rsvp?.alcohol_choice && guest.rsvp?.alcohol_choice.trim() !== '' ? (
+                          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                            {guest.rsvp.alcohol_choice.split(',').map((alc, idx) => alc.trim() && alc.trim() !== 'none' && (
+                              <Chip
+                                key={idx}
+                                label={alc.trim()}
+                                size="small"
+                                variant="outlined"
+                                sx={{ textTransform: 'capitalize', fontSize: '0.7rem', borderColor: '#D38A99', color: '#D38A99', fontWeight: 650 }}
+                              />
+                            ))}
+                            {guest.rsvp.alcohol_choice.split(',').every((alc) => alc.trim() === 'none') && (
+                              <Typography variant="caption" color="text.disabled">—</Typography>
+                            )}
+                          </Box>
                         ) : (
                           <Typography variant="caption" color="text.disabled">—</Typography>
                         )}
@@ -568,18 +581,26 @@ export default function RSVPTrackerPage() {
                     </Box>
 
                     {/* Meal / Alcohol details */}
-                    {(rsvpStatus === 'attending' && (meal || (guest.rsvp?.alcohol_choice && guest.rsvp.alcohol_choice !== 'none'))) && (
+                    {(rsvpStatus === 'attending' && (meal || (guest.rsvp?.alcohol_choice && guest.rsvp.alcohol_choice.trim() !== ''))) && (
                       <Box sx={{ display: 'flex', gap: 2, mt: 1.5, pt: 1.5, borderTop: '1px solid', borderColor: 'divider', flexWrap: 'wrap' }}>
                         {meal && (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
                             <UtensilsCrossed size={12} style={{ color: '#9CA3AF' }} />
-                            <Typography variant="caption" sx={{ textTransform: 'capitalize' }}>{meal}</Typography>
+                            {meal.split(',').map((m, idx) => m.trim() && (
+                              <Typography key={idx} variant="caption" sx={{ textTransform: 'capitalize' }}>
+                                {m.trim()}{idx < meal.split(',').length - 1 ? ',' : ''}
+                              </Typography>
+                            ))}
                           </Box>
                         )}
-                        {guest.rsvp?.alcohol_choice && guest.rsvp.alcohol_choice !== 'none' && (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        {guest.rsvp?.alcohol_choice && guest.rsvp.alcohol_choice.trim() !== '' && !guest.rsvp.alcohol_choice.split(',').every(alc => alc.trim() === 'none') && (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '11px' }}>🍷</span>
-                            <Typography variant="caption" sx={{ textTransform: 'capitalize', color: '#D38A99', fontWeight: 600 }}>{guest.rsvp.alcohol_choice}</Typography>
+                            {guest.rsvp.alcohol_choice.split(',').map((alc, idx) => alc.trim() && alc.trim() !== 'none' && (
+                              <Typography key={idx} variant="caption" sx={{ textTransform: 'capitalize', color: '#D38A99', fontWeight: 600 }}>
+                                {alc.trim()}{idx < guest.rsvp!.alcohol_choice!.split(',').length - 1 && guest.rsvp!.alcohol_choice!.split(',')[idx + 1].trim() !== 'none' ? ',' : ''}
+                              </Typography>
+                            ))}
                           </Box>
                         )}
                       </Box>

@@ -58,10 +58,13 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
       ? guest.rsvp.attending_count 
       : maxGuests
   );
-  const [mealChoice, setMealChoice] = useState(guest.rsvp?.meal_choice || '');
+  const initialMealChoices = guest.rsvp?.meal_choice ? guest.rsvp.meal_choice.split(', ') : [];
+  const [mealChoices, setMealChoices] = useState<string[]>(initialMealChoices.length > 0 ? initialMealChoices : ['']);
+  
+  const initialAlcoholChoices = guest.rsvp?.alcohol_choice ? guest.rsvp.alcohol_choice.split(', ') : [];
+  const [alcoholChoices, setAlcoholChoices] = useState<string[]>(initialAlcoholChoices.length > 0 ? initialAlcoholChoices : ['']);
   const [dietaryNotes, setDietaryNotes] = useState(guest.rsvp?.dietary_notes || '');
   const [message, setMessage] = useState(guest.rsvp?.message || '');
-  const [alcoholChoice, setAlcoholChoice] = useState(guest.rsvp?.alcohol_choice || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(!!(guest.rsvp && guest.rsvp.status && guest.rsvp.status !== 'pending'));
   const [error, setError] = useState('');
@@ -182,10 +185,10 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
           status: attending,
           plus_one: guest.rsvp?.plus_one || 1,
           plus_one_name: attending === 'attending' ? plusOneName.trim() : '',
-          meal_choice: attending === 'attending' ? mealChoice : '',
+          meal_choice: attending === 'attending' ? mealChoices.slice(0, finalAttendingCount).join(', ') : '',
           dietary_notes: attending === 'attending' ? dietaryNotes.trim() : '',
           message: message.trim(),
-          alcohol_choice: attending === 'attending' ? alcoholChoice : '',
+          alcohol_choice: attending === 'attending' ? alcoholChoices.slice(0, finalAttendingCount).join(', ') : '',
           attending_count: finalAttendingCount,
         }),
       });
@@ -1009,59 +1012,76 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
                       </p>
                     </div>
 
-                    {/* Meal Preference */}
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] flex items-center gap-1.5">
-                        <UtensilsCrossed className="w-3.5 h-3.5 text-[#C8A882]" /> Meal Selection
-                      </label>
-                      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-                        {[
-                          { value: 'non-veg', label: 'Non-Veg' },
-                          { value: 'veg', label: 'Veg' },
-                          { value: 'vegan', label: 'Vegan' }
-                        ].map((m) => (
-                          <button
-                            key={m.value}
-                            type="button"
-                            onClick={() => setMealChoice(m.value)}
-                            className={`py-2.5 px-1 sm:px-3 border rounded text-[11px] sm:text-xs font-semibold capitalize transition-all cursor-pointer ${
-                              mealChoice === m.value
-                                ? 'bg-[#FAF0F2] text-[#D38A99] border-[#D38A99]'
-                                : 'bg-white border-gray-200 text-gray-500'
-                            }`}
-                          >
-                            {m.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                    {/* Meal and Alcohol Preferences */}
+                    {Array.from({ length: typeof attendingCount === 'number' ? attendingCount : 1 }).map((_, index) => (
+                      <div key={index} className="space-y-4 pt-4 border-t border-gray-100 first:border-0 first:pt-0 mt-4">
+                        {(typeof attendingCount === 'number' && attendingCount > 1) && (
+                          <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#D38A99]">Guest {index + 1}</h4>
+                        )}
+                        
+                        {/* Meal Preference */}
+                        <div className="space-y-2">
+                          <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] flex items-center gap-1.5">
+                            <UtensilsCrossed className="w-3.5 h-3.5 text-[#C8A882]" /> Meal Selection
+                          </label>
+                          <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+                            {[
+                              { value: 'non-veg', label: 'Non-Veg' },
+                              { value: 'veg', label: 'Veg' },
+                              { value: 'vegan', label: 'Vegan' }
+                            ].map((m) => (
+                              <button
+                                key={m.value}
+                                type="button"
+                                onClick={() => {
+                                  const newChoices = [...mealChoices];
+                                  newChoices[index] = m.value;
+                                  setMealChoices(newChoices);
+                                }}
+                                className={`py-2.5 px-1 sm:px-3 border rounded text-[11px] sm:text-xs font-semibold capitalize transition-all cursor-pointer ${
+                                  mealChoices[index] === m.value
+                                    ? 'bg-[#FAF0F2] text-[#D38A99] border-[#D38A99]'
+                                    : 'bg-white border-gray-200 text-gray-500'
+                                }`}
+                              >
+                                {m.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
 
-                    {/* Alcohol Preference */}
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] flex items-center gap-1.5">
-                        <Wine className="w-3.5 h-3.5 text-[#C8A882]" /> Alcohol Selection
-                      </label>
-                      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-                        {[
-                          { value: 'hard liquor', label: 'Hard Liquor' },
-                          { value: 'wine', label: 'Wine' },
-                          { value: 'none', label: 'No Alcohol' }
-                        ].map((alc) => (
-                          <button
-                            key={alc.value}
-                            type="button"
-                            onClick={() => setAlcoholChoice(alc.value)}
-                            className={`py-2.5 px-1 sm:px-3 border rounded text-[11px] sm:text-xs font-semibold capitalize transition-all cursor-pointer ${
-                              alcoholChoice === alc.value
-                                ? 'bg-[#FAF0F2] text-[#D38A99] border-[#D38A99]'
-                                : 'bg-white border-gray-200 text-gray-500'
-                            }`}
-                          >
-                            {alc.label}
-                          </button>
-                        ))}
+                        {/* Alcohol Preference */}
+                        <div className="space-y-2">
+                          <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B] flex items-center gap-1.5">
+                            <Wine className="w-3.5 h-3.5 text-[#C8A882]" /> Alcohol Selection
+                          </label>
+                          <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+                            {[
+                              { value: 'hard liquor', label: 'Hard Liquor' },
+                              { value: 'wine', label: 'Wine' },
+                              { value: 'none', label: 'No Alcohol' }
+                            ].map((alc) => (
+                              <button
+                                key={alc.value}
+                                type="button"
+                                onClick={() => {
+                                  const newChoices = [...alcoholChoices];
+                                  newChoices[index] = alc.value;
+                                  setAlcoholChoices(newChoices);
+                                }}
+                                className={`py-2.5 px-1 sm:px-3 border rounded text-[11px] sm:text-xs font-semibold capitalize transition-all cursor-pointer ${
+                                  alcoholChoices[index] === alc.value
+                                    ? 'bg-[#FAF0F2] text-[#D38A99] border-[#D38A99]'
+                                    : 'bg-white border-gray-200 text-gray-500'
+                                }`}
+                              >
+                                {alc.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    ))}
 
                     {/* Dietary Restrictions */}
                     <div>

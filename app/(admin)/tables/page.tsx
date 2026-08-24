@@ -55,15 +55,20 @@ export default function SideBySidePage() {
     );
   }
 
-  // Calculate totals
-  const brideGuests = guests.filter(g => g.side === 'bride');
-  const groomGuests = guests.filter(g => g.side === 'groom');
+  const brideGuests = guests.filter(g => g.side?.startsWith('bride'));
+  const groomGuests = guests.filter(g => g.side?.startsWith('groom'));
 
   const brideAttending = brideGuests.filter(g => g.rsvp?.status === 'attending');
   const groomAttending = groomGuests.filter(g => g.rsvp?.status === 'attending');
 
-  const bridePlusOnes = brideAttending.filter(g => g.rsvp?.plus_one).length;
-  const groomPlusOnes = groomAttending.filter(g => g.rsvp?.plus_one).length;
+  const bridePlusOnes = brideAttending.reduce((sum, g) => {
+    const count = g.rsvp?.attending_count && g.rsvp.attending_count > 0 ? g.rsvp.attending_count : (g.rsvp?.plus_one || 1);
+    return sum + (count > 0 ? count - 1 : 0);
+  }, 0);
+  const groomPlusOnes = groomAttending.reduce((sum, g) => {
+    const count = g.rsvp?.attending_count && g.rsvp.attending_count > 0 ? g.rsvp.attending_count : (g.rsvp?.plus_one || 1);
+    return sum + (count > 0 ? count - 1 : 0);
+  }, 0);
 
   const brideTotalSeats = brideAttending.length + bridePlusOnes;
   const groomTotalSeats = groomAttending.length + groomPlusOnes;
@@ -109,7 +114,10 @@ export default function SideBySidePage() {
             return groups.map((group) => {
               const catGuests = sideGuests.filter(group.filter);
               const catAttending = catGuests.filter(g => g.rsvp?.status === 'attending');
-              const catPlusOnes = catAttending.filter(g => g.rsvp?.plus_one).length;
+              const catPlusOnes = catAttending.reduce((sum, g) => {
+                const count = g.rsvp?.attending_count && g.rsvp.attending_count > 0 ? g.rsvp.attending_count : (g.rsvp?.plus_one || 1);
+                return sum + (count > 0 ? count - 1 : 0);
+              }, 0);
               const catConfirmedSeats = catAttending.length + catPlusOnes;
               
               if (catGuests.length === 0) return null;

@@ -28,14 +28,7 @@ import TableRow from '@mui/material/TableRow';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 
-const STAT_CARDS = [
-  { key: 'total',    label: 'Total Invited', color: '#7C3AED', bg: '#F5F3FF', Icon: Users },
-  { key: 'attend',   label: 'Attending',     color: '#16A34A', bg: '#F0FDF4', Icon: CheckCircle2 },
-  { key: 'declined', label: 'Declined',      color: '#DC2626', bg: '#FEF2F2', Icon: XCircle },
-  { key: 'pending',  label: 'Pending',       color: '#D97706', bg: '#FFFBEB', Icon: Clock },
-  { key: 'seats',    label: 'Total Seats',   color: '#0284C7', bg: '#F0F9FF', Icon: Armchair },
-  { key: 'plus',     label: 'Plus Ones',     color: '#9333EA', bg: '#FAF5FF', Icon: UserPlus },
-];
+
 
 export default function DashboardPage() {
   const [guests, setGuests] = useState<GuestWithDetails[]>([]);
@@ -76,15 +69,26 @@ export default function DashboardPage() {
   const attending   = guests.filter(g => g.rsvp?.status === 'attending').length;
   const declined    = guests.filter(g => g.rsvp?.status === 'declined').length;
   const pending     = totalInvited - attending - declined;
-  const plusOnes    = guests.filter(g => g.rsvp?.status === 'attending' && g.rsvp?.plus_one).length;
-  const totalSeats  = attending + plusOnes;
+  
+  const plusOnes = guests.filter(g => g.rsvp?.status === 'attending').reduce((sum, g) => {
+    const count = g.rsvp?.attending_count && g.rsvp.attending_count > 0 ? g.rsvp.attending_count : (g.rsvp?.plus_one || 1);
+    return sum + (count > 0 ? count - 1 : 0);
+  }, 0);
+  
+  const totalSeats = attending + plusOnes;
 
-  const brideTotal     = guests.filter(g => g.side === 'bride').length;
-  const groomTotal     = guests.filter(g => g.side === 'groom').length;
-  const brideAttending = guests.filter(g => g.side === 'bride' && g.rsvp?.status === 'attending').length;
-  const groomAttending = guests.filter(g => g.side === 'groom' && g.rsvp?.status === 'attending').length;
-  const bridePlusOnes  = guests.filter(g => g.side === 'bride' && g.rsvp?.status === 'attending' && g.rsvp?.plus_one).length;
-  const groomPlusOnes  = guests.filter(g => g.side === 'groom' && g.rsvp?.status === 'attending' && g.rsvp?.plus_one).length;
+  const brideTotal     = guests.filter(g => g.side?.startsWith('bride')).length;
+  const groomTotal     = guests.filter(g => g.side?.startsWith('groom')).length;
+  const brideAttending = guests.filter(g => g.side?.startsWith('bride') && g.rsvp?.status === 'attending').length;
+  const groomAttending = guests.filter(g => g.side?.startsWith('groom') && g.rsvp?.status === 'attending').length;
+  const bridePlusOnes  = guests.filter(g => g.side?.startsWith('bride') && g.rsvp?.status === 'attending').reduce((sum, g) => {
+    const count = g.rsvp?.attending_count && g.rsvp.attending_count > 0 ? g.rsvp.attending_count : (g.rsvp?.plus_one || 1);
+    return sum + (count > 0 ? count - 1 : 0);
+  }, 0);
+  const groomPlusOnes  = guests.filter(g => g.side?.startsWith('groom') && g.rsvp?.status === 'attending').reduce((sum, g) => {
+    const count = g.rsvp?.attending_count && g.rsvp.attending_count > 0 ? g.rsvp.attending_count : (g.rsvp?.plus_one || 1);
+    return sum + (count > 0 ? count - 1 : 0);
+  }, 0);
   const brideSeats     = brideAttending + bridePlusOnes;
   const groomSeats     = groomAttending + groomPlusOnes;
 
@@ -111,20 +115,33 @@ export default function DashboardPage() {
       {error && <Alert severity="error" icon={<AlertCircle size={16} />}>{error}</Alert>}
 
       {/* Stat Cards */}
-      <Grid container spacing={2}>
-        {STAT_CARDS.map(({ key, label, color, bg, Icon }) => (
-          <Grid size={{ xs: 6, sm: 4, md: 2 }} key={key}>
+      <Grid container spacing={{ xs: 1, sm: 2 }} sx={{ flexWrap: 'nowrap' }}>
+        {[
+          { key: 'total',    label: 'Total Invited', color: '#7C3AED', bg: '#F5F3FF', Icon: Users },
+          { key: 'attend',   label: 'Attending & Plus Ones', color: '#16A34A', bg: '#F0FDF4', Icon: CheckCircle2 },
+          { key: 'declined', label: 'Declined',      color: '#DC2626', bg: '#FEF2F2', Icon: XCircle },
+          { key: 'pending',  label: 'Pending',       color: '#D97706', bg: '#FFFBEB', Icon: Clock },
+          { key: 'seats',    label: 'Total Seats',   color: '#0284C7', bg: '#F0F9FF', Icon: Armchair }
+        ].map(({ key, label, color, bg, Icon }) => (
+          <Grid size={{ xs: true }} key={key} sx={{ flex: 1, minWidth: 0 }}>
             <Card elevation={1} sx={{ height: '100%', borderTop: `3px solid ${color}`, bgcolor: bg }}>
-              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                  <Icon size={16} style={{ color }} />
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, mb: 1 }}>
+                  <Icon size={14} style={{ color, flexShrink: 0 }} />
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: { xs: '0.55rem', sm: '0.7rem' }, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600, whiteSpace: { xs: 'normal', sm: 'nowrap' }, lineHeight: 1.1 }}>
                     {label}
                   </Typography>
                 </Box>
-                <Typography variant="h4" sx={{ color, lineHeight: 1, fontWeight: 800 }}>
-                  {statValues[key]}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: 0.5 }}>
+                  <Typography variant="h4" sx={{ color, lineHeight: 1, fontWeight: 800, fontSize: { xs: '1.25rem', sm: '2.125rem' } }}>
+                    {statValues[key]}
+                  </Typography>
+                  {key === 'attend' && (
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, fontSize: { xs: '0.6rem', sm: '0.75rem' } }}>
+                      + {statValues.plus}
+                    </Typography>
+                  )}
+                </Box>
               </CardContent>
             </Card>
           </Grid>

@@ -100,7 +100,7 @@ export default function AnalyticsPage() {
         g.invite_link?.sent_at ? `"${new Date(g.invite_link.sent_at).toISOString()}"` : '""',
         g.invite_link?.opened_at ? `"${new Date(g.invite_link.opened_at).toISOString()}"` : '""',
         `"${g.rsvp?.status || 'pending'}"`,
-        g.rsvp?.plus_one ? '"Yes"' : '"No"',
+        (g.rsvp?.plus_one && g.rsvp.plus_one > 1) ? '"Yes"' : '"No"',
         `"${(g.rsvp?.plus_one_name || '').replace(/"/g, '""')}"`,
         `"${(g.rsvp?.meal_choice || '').replace(/"/g, '""')}"`,
         `"${(g.rsvp?.dietary_notes || '').replace(/"/g, '""')}"`,
@@ -124,7 +124,7 @@ export default function AnalyticsPage() {
         `"${(g.side || '').replace(/"/g, '""')}"`,
         `"${(g.category?.name || '').replace(/"/g, '""')}"`,
         '"Attending"',
-        g.rsvp?.plus_one ? '"Yes"' : '"No"',
+        (g.rsvp?.plus_one && g.rsvp.plus_one > 1) ? '"Yes"' : '"No"',
         `"${(g.rsvp?.plus_one_name || '').replace(/"/g, '""')}"`,
         `"${(g.rsvp?.meal_choice || 'No preference').replace(/"/g, '""')}"`,
         `"${(g.rsvp?.dietary_notes || '').replace(/"/g, '""')}"`,
@@ -359,8 +359,14 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-4 text-xs font-mono py-2 border-b border-gray-200">
-          <div>Bride's Side Confirmed: {guests.filter(g => g.side === 'bride' && g.rsvp?.status === 'attending').length + guests.filter(g => g.side === 'bride' && g.rsvp?.status === 'attending' && g.rsvp.plus_one).length} Seats</div>
-          <div>Groom's Side Confirmed: {guests.filter(g => g.side === 'groom' && g.rsvp?.status === 'attending').length + guests.filter(g => g.side === 'groom' && g.rsvp?.status === 'attending' && g.rsvp.plus_one).length} Seats</div>
+          <div>Bride's Side Confirmed: {guests.filter(g => g.side === 'bride' && g.rsvp?.status === 'attending').reduce((sum, g) => {
+            const count = g.rsvp?.attending_count && g.rsvp.attending_count > 0 ? g.rsvp.attending_count : (g.rsvp?.plus_one || 1);
+            return sum + count;
+          }, 0)} Seats</div>
+          <div>Groom's Side Confirmed: {guests.filter(g => g.side === 'groom' && g.rsvp?.status === 'attending').reduce((sum, g) => {
+            const count = g.rsvp?.attending_count && g.rsvp.attending_count > 0 ? g.rsvp.attending_count : (g.rsvp?.plus_one || 1);
+            return sum + count;
+          }, 0)} Seats</div>
         </div>
 
         <div className="space-y-6 pt-4">
@@ -384,7 +390,7 @@ export default function AnalyticsPage() {
                     <td className="py-2 font-semibold text-gray-900">{g.name}</td>
                     <td className="py-2 uppercase text-[10px] text-gray-650">{g.side}</td>
                     <td className="py-2 text-[10px] text-gray-600">{g.category?.name || 'Uncategorised'}</td>
-                    <td className="py-2 text-[10px] text-gray-600">{g.rsvp?.plus_one ? `Yes (${g.rsvp.plus_one_name || 'Unnamed'})` : 'No'}</td>
+                    <td className="py-2 text-[10px] text-gray-600">{(g.rsvp?.plus_one && g.rsvp.plus_one > 1) ? `Yes (${g.rsvp.plus_one_name || 'Unnamed'})` : 'No'}</td>
                     <td className="py-2 text-[10px] capitalize text-gray-600">{g.rsvp?.meal_choice || 'No preference'}</td>
                     <td className="py-2 text-[10px] italic text-gray-500">{g.rsvp?.dietary_notes || 'None'}</td>
                     <td className="py-2 text-[10px] capitalize text-gray-600">{g.rsvp?.alcohol_choice || 'none'}</td>

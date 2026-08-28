@@ -10,7 +10,8 @@ import {
   UtensilsCrossed,
   Printer,
   HelpCircle,
-  Wine
+  Wine,
+  Users
 } from 'lucide-react';
 import { GuestWithDetails } from '@/lib/types';
 
@@ -47,30 +48,64 @@ export default function AnalyticsPage() {
   // Calculate Metrics
   const totalGuests = guests.length;
   
-  const openedLinks = guests.filter(g => g.invite_link?.opened_at).length;
-  const openRate = totalGuests > 0 ? Math.round((openedLinks / totalGuests) * 100) : 0;
-
   const responded = guests.filter(g => g.rsvp?.status && g.rsvp.status !== 'pending').length;
   const responseRate = totalGuests > 0 ? Math.round((responded / totalGuests) * 100) : 0;
 
-  // Pending segment breakdown
-  const openedNotResponded = guests.filter(g => g.invite_link?.opened_at && (!g.rsvp || g.rsvp.status === 'pending')).length;
-  const neverOpened = totalGuests - openedLinks;
+  // Plus Ones (Extra Guests) per side
+  const sidePlusOnes = {
+    bride: 0,
+    groom: 0,
+    groom_mother: 0,
+    groom_father: 0,
+    unassigned: 0
+  };
+
+  guests.forEach(g => {
+    if (g.rsvp?.status === 'attending') {
+      const count = g.rsvp.attending_count && g.rsvp.attending_count > 0 ? g.rsvp.attending_count : (g.rsvp.plus_one || 1);
+      const extraGuests = Math.max(0, count - 1);
+      
+      if (g.side === 'bride') sidePlusOnes.bride += extraGuests;
+      else if (g.side === 'groom') sidePlusOnes.groom += extraGuests;
+      else if (g.side === 'groom_mother') sidePlusOnes.groom_mother += extraGuests;
+      else if (g.side === 'groom_father') sidePlusOnes.groom_father += extraGuests;
+      else sidePlusOnes.unassigned += extraGuests;
+    }
+  });
 
   // Meal Choice Stats
   const attendingGuests = guests.filter(g => g.rsvp?.status === 'attending');
-  const vegCount = attendingGuests.filter(g => g.rsvp?.meal_choice === 'veg').length;
-  const nonVegCount = attendingGuests.filter(g => g.rsvp?.meal_choice === 'non-veg').length;
-  const veganCount = attendingGuests.filter(g => g.rsvp?.meal_choice === 'vegan').length;
-  const noPrefCount = attendingGuests.filter(g => !g.rsvp?.meal_choice || g.rsvp.meal_choice === '').length;
-  
-  const mealTotal = vegCount + nonVegCount + veganCount + noPrefCount;
 
-  // Alcohol Stats
-  const hardLiquorCount = attendingGuests.filter(g => g.rsvp?.alcohol_choice === 'hard liquor').length;
-  const wineCount = attendingGuests.filter(g => g.rsvp?.alcohol_choice === 'wine').length;
-  const noAlcCount = attendingGuests.filter(g => !g.rsvp?.alcohol_choice || g.rsvp.alcohol_choice === 'none' || g.rsvp.alcohol_choice === '').length;
-  
+  let vegCount = 0;
+  let nonVegCount = 0;
+  let veganCount = 0;
+  let noPrefCount = 0;
+
+  let hardLiquorCount = 0;
+  let wineCount = 0;
+  let noAlcCount = 0;
+
+  attendingGuests.forEach(g => {
+    const count = g.rsvp?.attending_count && g.rsvp.attending_count > 0 ? g.rsvp.attending_count : (g.rsvp?.plus_one || 1);
+
+    const mealChoices = g.rsvp?.meal_choice ? g.rsvp.meal_choice.split(',').map(s => s.trim()) : [];
+    const alcChoices = g.rsvp?.alcohol_choice ? g.rsvp.alcohol_choice.split(',').map(s => s.trim()) : [];
+
+    for (let i = 0; i < count; i++) {
+      const meal = mealChoices[i] || '';
+      if (meal === 'veg') vegCount++;
+      else if (meal === 'non-veg') nonVegCount++;
+      else if (meal === 'vegan') veganCount++;
+      else noPrefCount++;
+
+      const alc = alcChoices[i] || 'none';
+      if (alc === 'hard liquor') hardLiquorCount++;
+      else if (alc === 'wine') wineCount++;
+      else noAlcCount++;
+    }
+  });
+
+  const mealTotal = vegCount + nonVegCount + veganCount + noPrefCount;
   const alcTotal = hardLiquorCount + wineCount + noAlcCount;
 
   // Export CSV Helper
@@ -159,22 +194,7 @@ export default function AnalyticsPage() {
       )}
 
       {/* Analytics Overview Cards (hidden in print) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:hidden">
-        {/* Open Rate */}
-        <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-3.5">
-          <div className="flex items-center justify-between text-gray-550">
-            <span className="text-xs font-semibold uppercase tracking-wider">Invite Open Rate</span>
-            <Eye className="w-4.5 h-4.5 text-blue-500" />
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-gray-900">{openRate}%</span>
-            <span className="text-xs text-gray-400">({openedLinks} of {totalGuests})</span>
-          </div>
-          <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-            <div style={{ width: `${openRate}%` }} className="bg-blue-500 h-full" />
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:hidden">
         {/* Response Rate */}
         <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-3.5">
           <div className="flex items-center justify-between text-gray-550">
@@ -190,21 +210,39 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Pending responses */}
+        {/* Plus Ones by Side */}
         <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between text-gray-550">
-            <span className="text-xs font-semibold uppercase tracking-wider">Pending Breakdown</span>
-            <HelpCircle className="w-4.5 h-4.5 text-amber-500" />
+            <span className="text-xs font-semibold uppercase tracking-wider">Plus Ones by Side (Attending)</span>
+            <Users className="w-4.5 h-4.5 text-pink-500" />
           </div>
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="bg-gray-50 p-2 rounded border border-gray-200">
-              <span className="block text-gray-400 uppercase tracking-wider text-[8px] font-semibold">Opened, no RSVP</span>
-              <span className="text-base font-bold text-gray-800">{openedNotResponded}</span>
+              <span className="block text-gray-400 uppercase tracking-wider text-[8px] font-semibold">Bride Side</span>
+              <span className="text-base font-bold text-gray-800">{sidePlusOnes.bride}</span>
             </div>
             <div className="bg-gray-50 p-2 rounded border border-gray-200">
-              <span className="block text-gray-400 uppercase tracking-wider text-[8px] font-semibold">Never Opened</span>
-              <span className="text-base font-bold text-gray-800">{neverOpened}</span>
+              <span className="block text-gray-400 uppercase tracking-wider text-[8px] font-semibold">Groom Side</span>
+              <span className="text-base font-bold text-gray-800">{sidePlusOnes.groom}</span>
             </div>
+            {(sidePlusOnes.groom_mother > 0 || sidePlusOnes.groom_father > 0) && (
+              <>
+                <div className="bg-gray-50 p-2 rounded border border-gray-200">
+                  <span className="block text-gray-400 uppercase tracking-wider text-[8px] font-semibold">Groom Mother</span>
+                  <span className="text-base font-bold text-gray-800">{sidePlusOnes.groom_mother}</span>
+                </div>
+                <div className="bg-gray-50 p-2 rounded border border-gray-200">
+                  <span className="block text-gray-400 uppercase tracking-wider text-[8px] font-semibold">Groom Father</span>
+                  <span className="text-base font-bold text-gray-800">{sidePlusOnes.groom_father}</span>
+                </div>
+              </>
+            )}
+            {sidePlusOnes.unassigned > 0 && (
+              <div className="bg-gray-50 p-2 rounded border border-gray-200 col-span-2">
+                <span className="block text-gray-400 uppercase tracking-wider text-[8px] font-semibold">Unassigned</span>
+                <span className="text-base font-bold text-gray-800">{sidePlusOnes.unassigned}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

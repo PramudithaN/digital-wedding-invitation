@@ -536,7 +536,7 @@ export default function GuestsPage() {
   const filtered = guests.filter(g => {
     const s = search.toLowerCase();
     return (
-      (g.name.toLowerCase().includes(s) || (g.phone && g.phone.includes(s)) || (g.email && g.email.toLowerCase().includes(s))) &&
+      (g.name.toLowerCase().includes(s) || (g.phone && g.phone.includes(s)) || (g.email && g.email.toLowerCase().includes(s)) || (g.notes && g.notes.toLowerCase().includes(s))) &&
       (sideFilter === 'all' || g.side === sideFilter) &&
       (relFilter === 'all' || g.relationship === relFilter)
     );
@@ -577,7 +577,7 @@ export default function GuestsPage() {
         <Grid container spacing={2} sx={{ alignItems: 'center' }}>
           <Grid size={{ xs: 12, sm: 5 }}>
             <TextField
-              size="small" fullWidth placeholder="Search guests..." value={search}
+              size="small" fullWidth placeholder="Search name, phone, email, or comments..." value={search}
               onChange={e => setSearch(e.target.value)}
               slotProps={{ input: { startAdornment: <InputAdornment position="start"><Search size={16} /></InputAdornment> } }}
             />

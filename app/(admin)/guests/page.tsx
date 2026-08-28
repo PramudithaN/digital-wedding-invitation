@@ -42,10 +42,15 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 function StatusChip({ guest }: { guest: GuestWithDetails }) {
   const status = guest.rsvp?.status;
+  
+  // Safely check invite link sent/opened states whether it's an object or an array (Supabase one-to-many)
+  const isOpened = Array.isArray(guest.invite_link) ? guest.invite_link.some(l => l.opened_at) : !!guest.invite_link?.opened_at;
+  const isSent = Array.isArray(guest.invite_link) ? guest.invite_link.some(l => l.sent_at) : !!guest.invite_link?.sent_at;
+  
   if (status === 'attending') return <Chip label="Attending" size="small" sx={{ bgcolor: '#F0FDF4', color: '#16A34A', fontWeight: 700, fontSize: '0.7rem' }} />;
   if (status === 'declined')  return <Chip label="Declined"  size="small" sx={{ bgcolor: '#FEF2F2', color: '#DC2626', fontWeight: 700, fontSize: '0.7rem' }} />;
-  if (guest.invite_link?.opened_at) return <Chip label="Opened" size="small" sx={{ bgcolor: '#FFFBEB', color: '#D97706', fontWeight: 700, fontSize: '0.7rem' }} />;
-  if (guest.invite_link?.sent_at)   return <Chip label="Sent"   size="small" sx={{ bgcolor: '#EFF6FF', color: '#2563EB', fontWeight: 700, fontSize: '0.7rem' }} />;
+  if (isOpened) return <Chip label="Opened" size="small" sx={{ bgcolor: '#FFFBEB', color: '#D97706', fontWeight: 700, fontSize: '0.7rem' }} />;
+  if (isSent)   return <Chip label="Sent"   size="small" sx={{ bgcolor: '#EFF6FF', color: '#2563EB', fontWeight: 700, fontSize: '0.7rem' }} />;
   return <Chip label="Pending" size="small" sx={{ bgcolor: '#F9FAFB', color: '#6B7280', fontWeight: 700, fontSize: '0.7rem' }} />;
 }
 
@@ -148,6 +153,7 @@ export default function GuestsPage() {
   const [search, setSearch] = useState('');
   const [sideFilter, setSideFilter] = useState('all');
   const [relFilter, setRelFilter] = useState('all');
+  const [sentFilter, setSentFilter] = useState('all');
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -160,6 +166,7 @@ export default function GuestsPage() {
   const [selectedGuest, setSelectedGuest] = useState<GuestWithDetails | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [guestToDelete, setGuestToDelete] = useState<GuestWithDetails | null>(null);
 
   // CSV upload & reset states
   const [isUploading, setIsUploading] = useState(false);
@@ -393,7 +400,10 @@ export default function GuestsPage() {
       setGuests(p => p.filter(g => g.id !== id));
       showToast('Guest deleted.', 'success');
     } catch (err: any) { showToast(err.message || 'Could not delete', 'error'); }
-    finally { setDeletingId(null); }
+    finally { 
+      setDeletingId(null); 
+      setGuestToDelete(null);
+    }
   };
 
   const handleSendWhatsApp = async (guest: GuestWithDetails) => {
@@ -535,10 +545,17 @@ export default function GuestsPage() {
 
   const filtered = guests.filter(g => {
     const s = search.toLowerCase();
+    
+    // Check if invite link is sent (handles both mock DB object and Supabase array formats)
+    const hasSentLink = Array.isArray(g.invite_link) 
+      ? g.invite_link.some(l => l.sent_at) 
+      : !!g.invite_link?.sent_at;
+      
     return (
       (g.name.toLowerCase().includes(s) || (g.phone && g.phone.includes(s)) || (g.email && g.email.toLowerCase().includes(s)) || (g.notes && g.notes.toLowerCase().includes(s))) &&
       (sideFilter === 'all' || g.side === sideFilter) &&
-      (relFilter === 'all' || g.relationship === relFilter)
+      (relFilter === 'all' || g.relationship === relFilter) &&
+      (sentFilter === 'all' || (sentFilter === 'sent' ? hasSentLink : !hasSentLink))
     );
   });
 
@@ -575,14 +592,14 @@ export default function GuestsPage() {
       {/* Filters */}
       <Paper elevation={1} sx={{ p: 2 }}>
         <Grid container spacing={2} sx={{ alignItems: 'center' }}>
-          <Grid size={{ xs: 12, sm: 5 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <TextField
               size="small" fullWidth placeholder="Search name, phone, email, or comments..." value={search}
               onChange={e => setSearch(e.target.value)}
               slotProps={{ input: { startAdornment: <InputAdornment position="start"><Search size={16} /></InputAdornment> } }}
             />
           </Grid>
-          <Grid size={{ xs: 6, sm: 3.5 }}>
+          <Grid size={{ xs: 6, sm: 6, md: 3 }}>
             <FormControl size="small" fullWidth>
               <InputLabel>Side</InputLabel>
               <Select value={sideFilter} label="Side" onChange={e => setSideFilter(e.target.value)}>
@@ -594,13 +611,23 @@ export default function GuestsPage() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid size={{ xs: 6, sm: 3.5 }}>
+          <Grid size={{ xs: 6, sm: 6, md: 3 }}>
             <FormControl size="small" fullWidth>
               <InputLabel>Relationship</InputLabel>
               <Select value={relFilter} label="Relationship" onChange={e => setRelFilter(e.target.value)}>
                 <MenuItem value="all">All Relationships</MenuItem>
                 <MenuItem value="relative">Relatives</MenuItem>
                 <MenuItem value="friend">Friends/Others</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 6, sm: 6, md: 3 }}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Invitation Status</InputLabel>
+              <Select value={sentFilter} label="Invitation Status" onChange={e => setSentFilter(e.target.value)}>
+                <MenuItem value="all">All Status</MenuItem>
+                <MenuItem value="sent">Sent</MenuItem>
+                <MenuItem value="not_sent">Not Sent</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -720,7 +747,7 @@ export default function GuestsPage() {
                         <Tooltip title="Open Invite"><IconButton size="small" color="success" onClick={() => openInviteLink(g)}><ExternalLink size={16} /></IconButton></Tooltip>
                         <Tooltip title="Edit"><IconButton size="small" component={Link} href={`/guests/${g.id}`}><Edit2 size={16} /></IconButton></Tooltip>
                         <Tooltip title="Delete">
-                          <IconButton size="small" color="error" disabled={deletingId !== null} onClick={() => handleDeleteGuest(g.id)}>
+                          <IconButton size="small" color="error" disabled={deletingId !== null} onClick={() => setGuestToDelete(g)}>
                             {deletingId === g.id ? <CircularProgress size={14} /> : <Trash2 size={16} />}
                           </IconButton>
                         </Tooltip>
@@ -820,7 +847,7 @@ export default function GuestsPage() {
                     </Box>
                   )}
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5, pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }} onClick={e => e.stopPropagation()}>
-                    <IconButton size="medium" color="error" onClick={() => handleDeleteGuest(g.id)} disabled={deletingId !== null} sx={{ bgcolor: 'rgba(220,38,38,0.06)', width: 40, height: 40 }}>
+                    <IconButton size="medium" color="error" onClick={() => setGuestToDelete(g)} disabled={deletingId !== null} sx={{ bgcolor: 'rgba(220,38,38,0.06)', width: 40, height: 40 }}>
                       {deletingId === g.id ? <CircularProgress size={18} /> : <Trash2 size={18} />}
                     </IconButton>
                     <Box sx={{ display: 'flex', gap: 1 }}>
@@ -1249,6 +1276,39 @@ export default function GuestsPage() {
           <CircularProgress size={40} color="primary" />
           <Typography variant="body2" sx={{ fontWeight: 600 }}>Uploading guest list...</Typography>
           <Typography variant="caption" color="text.secondary">Please wait while the records are saved.</Typography>
+        </DialogContent>
+      </Dialog>
+
+      {/* Guest Delete Confirmation Dialog */}
+      <Dialog open={guestToDelete !== null} onClose={() => setGuestToDelete(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <AlertCircle color="#DC2626" size={24} />
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>Delete Guest?</Typography>
+        </DialogTitle>
+        <DialogContent sx={{ py: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Are you sure you want to delete <strong>{guestToDelete?.name}</strong>? This will remove their RSVP and any invite links. This action cannot be undone.
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, mt: 3, justifyContent: 'flex-end' }}>
+            <Button
+              variant="outlined"
+              onClick={() => setGuestToDelete(null)}
+              disabled={deletingId !== null}
+              sx={{ textTransform: 'none', color: '#6B7280', borderColor: '#E5E7EB', '&:hover': { borderColor: '#D1D5DB' } }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => guestToDelete && handleDeleteGuest(guestToDelete.id)}
+              disabled={deletingId !== null}
+              sx={{ textTransform: 'none', boxShadow: 'none' }}
+              startIcon={deletingId !== null ? <CircularProgress size={16} color="inherit" /> : <Trash2 size={16} />}
+            >
+              Delete
+            </Button>
+          </Box>
         </DialogContent>
       </Dialog>
 

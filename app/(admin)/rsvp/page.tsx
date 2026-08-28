@@ -14,7 +14,8 @@ import {
   Edit2,
   Calendar,
   Download,
-  ArrowUp
+  ArrowUp,
+  X
 } from 'lucide-react';
 import { GuestWithDetails } from '@/lib/types';
 
@@ -251,7 +252,18 @@ export default function RSVPTrackerPage() {
               placeholder="Search RSVPs..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              slotProps={{ input: { startAdornment: <InputAdornment position="start"><Search size={16} /></InputAdornment> } }}
+              slotProps={{ 
+                input: { 
+                  startAdornment: <InputAdornment position="start"><Search size={16} /></InputAdornment>,
+                  endAdornment: search ? (
+                    <InputAdornment position="end">
+                      <IconButton size="small" onClick={() => setSearch('')} edge="end">
+                        <X size={16} />
+                      </IconButton>
+                    </InputAdornment>
+                  ) : null
+                } 
+              }}
             />
           </Grid>
           <Grid size={{ xs: 6, sm: 3.5 }}>

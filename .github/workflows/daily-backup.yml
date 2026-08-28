@@ -15,9 +15,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install PostgreSQL Client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
-
       - name: Create Backup Directory
         run: mkdir -p backups
 
@@ -29,10 +26,9 @@ jobs:
           TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
           BACKUP_FILE="backups/wedding_db_backup_${TIMESTAMP}.sql"
           
-          echo "Starting database backup..."
-          # Run pg_dump using the secure connection string
-          # --clean ensures the backup contains DROP statements so you can easily restore over existing data if needed
-          pg_dump "$SUPABASE_DB_URL" --clean --if-exists --format=plain --no-owner --no-privileges > "$BACKUP_FILE"
+          echo "Starting database backup using Postgres 17 Docker image..."
+          # Run pg_dump using the postgres:17 docker image to match Supabase's server version
+          docker run --rm postgres:17 pg_dump "$SUPABASE_DB_URL" --clean --if-exists --format=plain --no-owner --no-privileges > "$BACKUP_FILE"
           
           echo "Backup completed successfully!"
           

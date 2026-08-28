@@ -429,28 +429,6 @@ export default function EditGuestPage() {
                     {guest?.created_at ? new Date(guest.created_at).toLocaleDateString() : 'N/A'}
                   </span>
                 </div>
-                
-                <div className="flex items-center justify-between text-xs py-1 border-b border-gray-100">
-                  <span className="text-gray-500">Sent via WhatsApp:</span>
-                  {guest?.invite_link?.sent_at ? (
-                    <span className="text-blue-600 font-medium">
-                      {new Date(guest.invite_link.sent_at).toLocaleDateString()}
-                    </span>
-                  ) : (
-                    <span className="text-gray-450 italic">Never Sent</span>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between text-xs py-1 border-b border-gray-100">
-                  <span className="text-gray-500 font-semibold">Opened Invitation:</span>
-                  {guest?.invite_link?.opened_at ? (
-                    <span className="text-green-600 font-semibold">
-                      {new Date(guest.invite_link.opened_at).toLocaleDateString()}
-                    </span>
-                  ) : (
-                    <span className="text-gray-450 italic">Never Opened</span>
-                  )}
-                </div>
               </div>
             </div>
           </div>
@@ -467,8 +445,10 @@ export default function EditGuestPage() {
                   <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status:</span>
                   {guest.rsvp.status === 'attending' ? (
                     <span className="badge badge-attending">Attending</span>
-                  ) : (
+                  ) : guest.rsvp.status === 'declined' ? (
                     <span className="badge badge-declined">Declined</span>
+                  ) : (
+                    <span className="badge badge-pending capitalize">{guest.rsvp.status || 'Pending'}</span>
                   )}
                 </div>
 

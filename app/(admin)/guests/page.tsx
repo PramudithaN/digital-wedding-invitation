@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Plus, Search, Mail, Phone, Edit2, Trash2, MessageCircle, Loader2, AlertCircle, X, CheckCircle2, Copy, ExternalLink, Upload, Download, ArrowUp } from 'lucide-react';
 import { GuestWithDetails, Category } from '@/lib/types';
 import { normalizePhoneNumber } from '@/lib/whatsapp';
+import { DEFAULT_WHATSAPP_TEMPLATE } from '@/lib/constants';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -146,8 +147,22 @@ export default function GuestsPage() {
   const getInviteUrl = (guest: GuestWithDetails) => `${process.env.NEXT_PUBLIC_HOSTED_URL || globalThis.location?.origin || ''}/invite/${guest.invite_token}`;
   const openInviteLink = (g: GuestWithDetails) => globalThis.open(getInviteUrl(g), '_blank', 'noopener,noreferrer');
   const handleCopyLink = (g: GuestWithDetails) => {
-    navigator.clipboard.writeText(getInviteUrl(g));
-    showToast(`${g.name}'s invite link copied!`, 'success');
+    const inviteUrl = getInviteUrl(g);
+    if (weddingDetails) {
+      let message = DEFAULT_WHATSAPP_TEMPLATE
+        .replace('{name}', g.name)
+        .replace('{bride}', weddingDetails.bride_name)
+        .replace('{groom}', weddingDetails.groom_name)
+        .replace('{date}', weddingDetails.date)
+        .replace('{venue}', weddingDetails.venue)
+        .replace('{city}', weddingDetails.city)
+        .replace('{url}', inviteUrl);
+      navigator.clipboard.writeText(message);
+      showToast(`${g.name}'s invite message copied!`, 'success');
+    } else {
+      navigator.clipboard.writeText(inviteUrl);
+      showToast(`${g.name}'s invite link copied!`, 'success');
+    }
   };
 
   const [search, setSearch] = useState('');
@@ -225,6 +240,15 @@ export default function GuestsPage() {
     } catch (err: any) { setError(err.message || 'An error occurred.'); }
     finally { if (!silent) setIsLoading(false); }
   };
+
+  const [weddingDetails, setWeddingDetails] = useState<any>(null);
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(d => setWeddingDetails(d))
+      .catch(e => console.error('Failed to load wedding details', e));
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -546,16 +570,22 @@ export default function GuestsPage() {
   const filtered = guests.filter(g => {
     const s = search.toLowerCase();
     
-    // Check if invite link is sent (handles both mock DB object and Supabase array formats)
-    const hasSentLink = Array.isArray(g.invite_link) 
-      ? g.invite_link.some(l => l.sent_at) 
-      : !!g.invite_link?.sent_at;
+    const isOpened = Array.isArray(g.invite_link) ? g.invite_link.some(l => l.opened_at) : !!g.invite_link?.opened_at;
+    const isSent = Array.isArray(g.invite_link) ? g.invite_link.some(l => l.sent_at) : !!g.invite_link?.sent_at;
+    const hasResponded = g.rsvp?.status === 'attending' || g.rsvp?.status === 'declined';
+    
+    let matchesStatus = true;
+    if (sentFilter === 'sent') {
+      matchesStatus = isSent || isOpened || hasResponded;
+    } else if (sentFilter === 'not_sent') {
+      matchesStatus = !isSent && !isOpened && !hasResponded;
+    }
       
     return (
       (g.name.toLowerCase().includes(s) || (g.phone && g.phone.includes(s)) || (g.email && g.email.toLowerCase().includes(s)) || (g.notes && g.notes.toLowerCase().includes(s))) &&
       (sideFilter === 'all' || g.side === sideFilter) &&
       (relFilter === 'all' || g.relationship === relFilter) &&
-      (sentFilter === 'all' || (sentFilter === 'sent' ? hasSentLink : !hasSentLink))
+      matchesStatus
     );
   });
 
@@ -596,7 +626,18 @@ export default function GuestsPage() {
             <TextField
               size="small" fullWidth placeholder="Search name, phone, email, or comments..." value={search}
               onChange={e => setSearch(e.target.value)}
-              slotProps={{ input: { startAdornment: <InputAdornment position="start"><Search size={16} /></InputAdornment> } }}
+              slotProps={{ 
+                input: { 
+                  startAdornment: <InputAdornment position="start"><Search size={16} /></InputAdornment>,
+                  endAdornment: search ? (
+                    <InputAdornment position="end">
+                      <IconButton size="small" onClick={() => setSearch('')} edge="end">
+                        <X size={16} />
+                      </IconButton>
+                    </InputAdornment>
+                  ) : null
+                } 
+              }}
             />
           </Grid>
           <Grid size={{ xs: 6, sm: 6, md: 3 }}>

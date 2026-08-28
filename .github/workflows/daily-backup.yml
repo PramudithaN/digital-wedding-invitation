@@ -1,0 +1,44 @@
+name: Daily Supabase Database Backup
+
+on:
+  schedule:
+    # Runs every day at 2:00 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Allows you to run this workflow manually from the Actions tab
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL Client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Create Backup Directory
+        run: mkdir -p backups
+
+      - name: Dump Database
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          # Generate a timestamp for the filename
+          TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+          BACKUP_FILE="backups/wedding_db_backup_${TIMESTAMP}.sql"
+          
+          echo "Starting database backup..."
+          # Run pg_dump using the secure connection string
+          # --clean ensures the backup contains DROP statements so you can easily restore over existing data if needed
+          pg_dump "$SUPABASE_DB_URL" --clean --if-exists --format=plain --no-owner --no-privileges > "$BACKUP_FILE"
+          
+          echo "Backup completed successfully!"
+          
+      - name: Upload Backup Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-db-backup
+          path: backups/*.sql
+          retention-days: 90 # GitHub will store this safely for 90 days for free

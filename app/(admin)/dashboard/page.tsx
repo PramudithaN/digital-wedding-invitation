@@ -30,6 +30,35 @@ import Avatar from '@mui/material/Avatar';
 
 
 
+function getInvitedCount(g: GuestWithDetails): number {
+  const po = g.rsvp?.plus_one;
+  if (typeof po === 'number') return Math.max(1, po);
+  if (typeof po === 'boolean') return po ? 2 : 1;
+  return 1;
+}
+
+function getAttendingCount(g: GuestWithDetails): number {
+  if (g.rsvp?.status !== 'attending') return 0;
+  const invited = getInvitedCount(g);
+  const att = g.rsvp?.attending_count;
+  if (typeof att === 'number' && att > 0) return att;
+  return invited;
+}
+
+function getDeclinedCount(g: GuestWithDetails): number {
+  if (g.rsvp?.status === 'declined') {
+    return getInvitedCount(g);
+  }
+  return 0;
+}
+
+function getPendingCount(g: GuestWithDetails): number {
+  if (!g.rsvp?.status || g.rsvp?.status === 'pending') {
+    return getInvitedCount(g);
+  }
+  return 0;
+}
+
 export default function DashboardPage() {
   const [guests, setGuests] = useState<GuestWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,32 +94,27 @@ export default function DashboardPage() {
     );
   }
 
-  const totalInvited = guests.length;
-  const attending   = guests.filter(g => g.rsvp?.status === 'attending').length;
-  const declined    = guests.filter(g => g.rsvp?.status === 'declined').length;
-  const pending     = totalInvited - attending - declined;
+  // Count every guest (party size) instead of counting just records
+  const totalInvited = guests.reduce((sum, g) => sum + getInvitedCount(g), 0);
+  const attending    = guests.reduce((sum, g) => sum + getAttendingCount(g), 0);
+  const declined     = guests.reduce((sum, g) => sum + getDeclinedCount(g), 0);
+  const pending      = guests.reduce((sum, g) => sum + getPendingCount(g), 0);
   
   const plusOnes = guests.filter(g => g.rsvp?.status === 'attending').reduce((sum, g) => {
-    const count = g.rsvp?.attending_count && g.rsvp.attending_count > 0 ? g.rsvp.attending_count : (g.rsvp?.plus_one || 1);
-    return sum + (count > 0 ? count - 1 : 0);
+    const count = getAttendingCount(g);
+    return sum + Math.max(0, count - 1);
   }, 0);
   
-  const totalSeats = attending + plusOnes;
+  const totalSeats = attending;
 
-  const brideTotal     = guests.filter(g => g.side?.startsWith('bride')).length;
-  const groomTotal     = guests.filter(g => g.side?.startsWith('groom')).length;
-  const brideAttending = guests.filter(g => g.side?.startsWith('bride') && g.rsvp?.status === 'attending').length;
-  const groomAttending = guests.filter(g => g.side?.startsWith('groom') && g.rsvp?.status === 'attending').length;
-  const bridePlusOnes  = guests.filter(g => g.side?.startsWith('bride') && g.rsvp?.status === 'attending').reduce((sum, g) => {
-    const count = g.rsvp?.attending_count && g.rsvp.attending_count > 0 ? g.rsvp.attending_count : (g.rsvp?.plus_one || 1);
-    return sum + (count > 0 ? count - 1 : 0);
-  }, 0);
-  const groomPlusOnes  = guests.filter(g => g.side?.startsWith('groom') && g.rsvp?.status === 'attending').reduce((sum, g) => {
-    const count = g.rsvp?.attending_count && g.rsvp.attending_count > 0 ? g.rsvp.attending_count : (g.rsvp?.plus_one || 1);
-    return sum + (count > 0 ? count - 1 : 0);
-  }, 0);
-  const brideSeats     = brideAttending + bridePlusOnes;
-  const groomSeats     = groomAttending + groomPlusOnes;
+  const brideTotal     = guests.filter(g => g.side?.startsWith('bride')).reduce((sum, g) => sum + getInvitedCount(g), 0);
+  const groomTotal     = guests.filter(g => g.side?.startsWith('groom')).reduce((sum, g) => sum + getInvitedCount(g), 0);
+  const brideAttending = guests.filter(g => g.side?.startsWith('bride')).reduce((sum, g) => sum + getAttendingCount(g), 0);
+  const groomAttending = guests.filter(g => g.side?.startsWith('groom')).reduce((sum, g) => sum + getAttendingCount(g), 0);
+  const bridePlusOnes  = guests.filter(g => g.side?.startsWith('bride')).reduce((sum, g) => sum + Math.max(0, getAttendingCount(g) - 1), 0);
+  const groomPlusOnes  = guests.filter(g => g.side?.startsWith('groom')).reduce((sum, g) => sum + Math.max(0, getAttendingCount(g) - 1), 0);
+  const brideSeats     = brideAttending;
+  const groomSeats     = groomAttending;
 
   const attendingPct = totalInvited > 0 ? (attending / totalInvited) * 100 : 0;
   const declinedPct  = totalInvited > 0 ? (declined  / totalInvited) * 100 : 0;
@@ -136,9 +160,9 @@ export default function DashboardPage() {
                   <Typography variant="h4" sx={{ color, lineHeight: 1, fontWeight: 800, fontSize: { xs: '1.25rem', sm: '2.125rem' } }}>
                     {statValues[key]}
                   </Typography>
-                  {key === 'attend' && (
+                  {key === 'attend' && statValues.plus > 0 && (
                     <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, fontSize: { xs: '0.6rem', sm: '0.75rem' } }}>
-                      + {statValues.plus}
+                      (incl. {statValues.plus} plus ones)
                     </Typography>
                   )}
                 </Box>

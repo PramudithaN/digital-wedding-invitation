@@ -691,6 +691,7 @@ export default function GuestsPage() {
             <Table>
               <TableHead>
                 <TableRow>
+                  <TableCell sx={{ width: 50, fontWeight: 700, color: 'text.secondary' }}>#</TableCell>
                   <TableCell>Guest Name</TableCell>
                   <TableCell>Side</TableCell>
                   <TableCell>Relationship</TableCell>
@@ -701,8 +702,9 @@ export default function GuestsPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filtered.map(g => (
+                {filtered.map((g, idx) => (
                   <TableRow key={g.id} hover sx={{ cursor: 'pointer' }} onClick={() => setSelectedGuest(g)}>
+                    <TableCell sx={{ width: 50, fontWeight: 600, color: 'text.secondary' }}>{idx + 1}</TableCell>
                     <TableCell>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>{g.name}</Typography>
                       {g.notes && <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 220, display: 'block' }}>{g.notes}</Typography>}
@@ -802,7 +804,7 @@ export default function GuestsPage() {
 
           {/* Mobile Cards */}
           <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 1.5 }}>
-            {filtered.map(g => (
+            {filtered.map((g, idx) => (
               <Card 
                 key={g.id} 
                 elevation={1} 
@@ -815,7 +817,10 @@ export default function GuestsPage() {
                 <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                     <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>{g.name}</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', fontSize: '0.75rem' }}>#{idx + 1}</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>{g.name}</Typography>
+                      </Box>
                       <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
                         <SideChip side={g.side || 'bride'} />
                         <Chip

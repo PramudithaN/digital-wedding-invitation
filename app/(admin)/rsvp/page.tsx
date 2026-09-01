@@ -99,18 +99,47 @@ export default function RSVPTrackerPage() {
   };
 
   const handleDownloadRSVPs = () => {
-    const headers = ['Guest ID', 'Guest Name', 'Side', 'Status', 'Meal Preference', 'Alcohol Preference', 'Responded Date', 'Notes', 'Table No'];
-    const rows = filteredGuests.map(g => [
-      g.id,
-      g.name,
-      g.side || 'bride',
-      g.rsvp?.status || 'pending',
-      g.rsvp?.meal_choice || '-',
-      g.rsvp?.alcohol_choice || '-',
-      g.rsvp?.responded_at ? new Date(g.rsvp.responded_at).toISOString().split('T')[0] : '-',
-      g.notes || '',
-      g.table_no || ''
-    ]);
+    const headers = ['Guest ID', 'Guest Name', 'Side', 'Status', 'Attending Count', 'Meal Preference', 'Alcohol Preference', 'Responded Date', 'Notes', 'Table No'];
+    const rows = filteredGuests.map(g => {
+      let attendingText = '-';
+      if (g.rsvp?.plus_one) {
+        const status = g.rsvp.status || 'pending';
+        const confirmed = g.rsvp.plus_one;
+        const attending = g.rsvp.attending_count ?? confirmed;
+
+        if (status === 'attending') {
+          if (attending === confirmed) {
+            attendingText = `All ${confirmed} Attending`;
+          } else if (attending > 0) {
+            attendingText = `${attending} of ${confirmed} Coming`;
+          } else {
+            attendingText = `0 of ${confirmed} Attending`;
+          }
+        } else if (status === 'declined') {
+          attendingText = `Declined (${confirmed})`;
+        } else {
+          attendingText = `${confirmed} Seats Pending`;
+        }
+      } else {
+        const status = g.rsvp?.status || 'pending';
+        if (status === 'attending') attendingText = '1 Attending';
+        else if (status === 'declined') attendingText = 'Declined';
+        else attendingText = 'Pending';
+      }
+
+      return [
+        g.id,
+        g.name,
+        g.side || 'bride',
+        g.rsvp?.status || 'pending',
+        attendingText,
+        g.rsvp?.meal_choice || '-',
+        g.rsvp?.alcohol_choice || '-',
+        g.rsvp?.responded_at ? new Date(g.rsvp.responded_at).toISOString().split('T')[0] : '-',
+        g.notes || '',
+        g.table_no || ''
+      ];
+    });
     
     const csvContent = [
       headers.join(','),
@@ -319,6 +348,7 @@ export default function RSVPTrackerPage() {
             <Table size="small">
                <TableHead>
                 <TableRow>
+                  <TableCell sx={{ width: 50, fontWeight: 700, color: 'text.secondary' }}>#</TableCell>
                   <TableCell>Guest</TableCell>
                   <TableCell>Side</TableCell>
                   <TableCell>RSVP Status</TableCell>
@@ -329,7 +359,7 @@ export default function RSVPTrackerPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredGuests.map((guest) => {
+                {filteredGuests.map((guest, idx) => {
                   const rsvpStatus = guest.rsvp?.status || 'pending';
                   const hasPlusOne = guest.rsvp?.plus_one;
                   const plusOneName = guest.rsvp?.plus_one_name;
@@ -338,6 +368,7 @@ export default function RSVPTrackerPage() {
 
                   return (
                     <TableRow key={guest.id} hover>
+                      <TableCell sx={{ width: 50, fontWeight: 600, color: 'text.secondary' }}>{idx + 1}</TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>{guest.name}</Typography>
@@ -502,7 +533,7 @@ export default function RSVPTrackerPage() {
 
           {/* Mobile Card View */}
           <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 1.5 }}>
-            {filteredGuests.map((guest) => {
+            {filteredGuests.map((guest, idx) => {
               const rsvpStatus = guest.rsvp?.status || 'pending';
               const hasPlusOne = guest.rsvp?.plus_one;
               const plusOneName = guest.rsvp?.plus_one_name;
@@ -521,6 +552,7 @@ export default function RSVPTrackerPage() {
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
                       <Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                          <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', fontSize: '0.75rem' }}>#{idx + 1}</Typography>
                           <Typography variant="body2" sx={{ fontWeight: 700 }}>{guest.name}</Typography>
                           {guest.rsvp?.plus_one && (() => {
                             const status = guest.rsvp.status || 'pending';

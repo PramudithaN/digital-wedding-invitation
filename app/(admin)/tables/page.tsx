@@ -171,12 +171,15 @@ export default function SideBySidePage() {
                         <p className="text-xs text-gray-450 italic py-0.5">No confirmed guests here yet.</p>
                       ) : (
                         <div className="divide-y divide-gray-100">
-                          {catAttending.map((guest) => (
+                          {catAttending.map((guest, idx) => (
                             <div key={guest.id} className="py-2 flex items-center justify-between text-xs">
                               <div className="space-y-0.5">
-                                <span className="font-medium text-gray-900">{guest.name}</span>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-semibold text-gray-400 text-[10px]">{idx + 1}.</span>
+                                  <span className="font-medium text-gray-900">{guest.name}</span>
+                                </div>
                                 {guest.rsvp?.plus_one && (
-                                  <span className="block text-[9px] text-gray-450">
+                                  <span className="block text-[9px] text-gray-450 ml-4">
                                     +1: <span className="text-gray-500 font-semibold">{guest.rsvp.plus_one_name || 'Yes'}</span>
                                   </span>
                                 )}

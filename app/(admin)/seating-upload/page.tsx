@@ -204,16 +204,43 @@ export default function SeatingUploadPage() {
   };
 
   const handleDownloadSeating = () => {
-    const headers = ['Guest ID', 'Guest Name', 'Side', 'RSVP Status', 'Table No'];
+    const headers = ['Guest ID', 'Guest Name', 'Side', 'RSVP Status', 'Attending Count', 'Table No'];
     const rows = guests
       .filter(g => g.rsvp?.status === 'attending') // only confirmed attendees
-      .map(g => [
-        g.id,
-        g.name,
-        g.side || 'bride',
-        g.rsvp?.status || 'pending',
-        g.table_no || ''
-      ]);
+      .map(g => {
+        let attendingText = '-';
+        const status = g.rsvp?.status || 'pending';
+        if (g.rsvp?.plus_one) {
+          const confirmed = g.rsvp.plus_one;
+          const attending = g.rsvp.attending_count ?? confirmed;
+          if (status === 'attending') {
+            if (attending === confirmed) {
+              attendingText = `All ${confirmed} Attending`;
+            } else if (attending > 0) {
+              attendingText = `${attending} of ${confirmed} Coming`;
+            } else {
+              attendingText = `0 of ${confirmed} Attending`;
+            }
+          } else if (status === 'declined') {
+            attendingText = `Declined (${confirmed})`;
+          } else {
+            attendingText = `${confirmed} Seats Pending`;
+          }
+        } else {
+          if (status === 'attending') attendingText = '1 Attending';
+          else if (status === 'declined') attendingText = 'Declined';
+          else attendingText = 'Pending';
+        }
+
+        return [
+          g.id,
+          g.name,
+          g.side || 'bride',
+          g.rsvp?.status || 'pending',
+          attendingText,
+          g.table_no || ''
+        ];
+      });
     
     const csvContent = [
       headers.join(','),
@@ -696,6 +723,7 @@ export default function SeatingUploadPage() {
             <Table>
               <TableHead>
                 <TableRow>
+                  <TableCell sx={{ width: 50, fontWeight: 700, color: 'text.secondary' }}>#</TableCell>
                   <TableCell>Guest Name</TableCell>
                   <TableCell>Side</TableCell>
                   <TableCell>RSVP Status</TableCell>
@@ -703,10 +731,62 @@ export default function SeatingUploadPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredGuests.map((guest) => (
+                {filteredGuests.map((guest, idx) => (
                   <TableRow key={guest.id} hover>
+                    <TableCell sx={{ width: 50, fontWeight: 600, color: 'text.secondary' }}>{idx + 1}</TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{guest.name}</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{guest.name}</Typography>
+                        {guest.rsvp?.plus_one && (() => {
+                          const status = guest.rsvp.status || 'pending';
+                          const confirmed = guest.rsvp.plus_one;
+                          const attending = guest.rsvp.attending_count ?? confirmed;
+
+                          if (status === 'attending') {
+                            if (attending === confirmed) {
+                              return (
+                                <Chip
+                                  size="small"
+                                  label={`All ${confirmed} Attending`}
+                                  sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: '#E8F5E9', color: '#2E7D32' }}
+                                />
+                              );
+                            } else if (attending > 0) {
+                              return (
+                                <Chip
+                                  size="small"
+                                  label={`${attending} of ${confirmed} Coming`}
+                                  sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: '#FFF3E0', color: '#E65100' }}
+                                />
+                              );
+                            } else {
+                              return (
+                                <Chip
+                                  size="small"
+                                  label={`0 of ${confirmed} Attending`}
+                                  sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: '#FFEBEE', color: '#C62828' }}
+                                />
+                              );
+                            }
+                          } else if (status === 'declined') {
+                            return (
+                              <Chip
+                                size="small"
+                                label={`Declined (${confirmed})`}
+                                sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: '#FFEBEE', color: '#C62828' }}
+                              />
+                            );
+                          } else {
+                            return (
+                              <Chip
+                                size="small"
+                                label={`${confirmed} Seats Pending`}
+                                sx={{ height: 16, fontSize: '0.6rem', fontWeight: 500, bgcolor: '#F5F5F5', color: '#616161' }}
+                              />
+                            );
+                          }
+                        })()}
+                      </Box>
                     </TableCell>
                     <TableCell><SideChip side={guest.side || 'bride'} /></TableCell>
                     <TableCell><StatusChip guest={guest} /></TableCell>

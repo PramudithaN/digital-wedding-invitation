@@ -104,6 +104,7 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [hasSwiped, setHasSwiped] = useState(false);
   const galleryScrollRef = useRef<HTMLDivElement>(null);
+  const [showRsvpFab, setShowRsvpFab] = useState(false);
 
   const handleGalleryScroll = () => {
     if (galleryScrollRef.current) {
@@ -134,6 +135,26 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
   const timelineRef = useRef<HTMLDivElement>(null);
   const rsvpRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (envelopeState === 'open' && guest.name !== 'general') {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          setShowRsvpFab(!entry.isIntersecting);
+        },
+        { threshold: 0.1 }
+      );
+      if (rsvpRef.current) {
+        observer.observe(rsvpRef.current);
+      }
+      return () => {
+        if (rsvpRef.current) {
+          observer.unobserve(rsvpRef.current);
+        }
+      };
+    } else {
+      setShowRsvpFab(false);
+    }
+  }, [envelopeState, guest.name]);
 
   // Initialize countdown
   useEffect(() => {
@@ -1337,6 +1358,21 @@ export default function InviteCardClient({ guest, weddingDetails, galleryImages 
         {/* <p className="text-[8px] text-gray-650">Digital Invite created by Pramuditha Nadun.</p> */}
       </footer>
       </div> 
+      </div>
+
+      {/* Floating RSVP Button */}
+      <div 
+        className={`fixed bottom-6 right-6 z-50 transition-all duration-700 ease-in-out ${
+          showRsvpFab ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'
+        }`}
+      >
+        <button
+          onClick={() => rsvpRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          className="bg-[#D38A99] hover:bg-[#c78c97] text-white px-5 py-3 rounded-full shadow-lg text-xs font-semibold uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95"
+        >
+          <CheckCircle2 className="w-4 h-4" />
+          RSVP Now
+        </button>
       </div>
 
       {/* Photo Lightbox */}

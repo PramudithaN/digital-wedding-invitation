@@ -208,36 +208,17 @@ export default function SeatingUploadPage() {
     const rows = guests
       .filter(g => g.rsvp?.status === 'attending') // only confirmed attendees
       .map(g => {
-        let attendingText = '-';
-        const status = g.rsvp?.status || 'pending';
-        if (g.rsvp?.plus_one) {
-          const confirmed = g.rsvp.plus_one;
-          const attending = g.rsvp.attending_count ?? confirmed;
-          if (status === 'attending') {
-            if (attending === confirmed) {
-              attendingText = `All ${confirmed} Attending`;
-            } else if (attending > 0) {
-              attendingText = `${attending} of ${confirmed} Coming`;
-            } else {
-              attendingText = `0 of ${confirmed} Attending`;
-            }
-          } else if (status === 'declined') {
-            attendingText = `Declined (${confirmed})`;
-          } else {
-            attendingText = `${confirmed} Seats Pending`;
-          }
-        } else {
-          if (status === 'attending') attendingText = '1 Attending';
-          else if (status === 'declined') attendingText = 'Declined';
-          else attendingText = 'Pending';
-        }
+        const allocatedSeats = typeof g.rsvp?.plus_one === 'number' && g.rsvp.plus_one > 0 ? g.rsvp.plus_one : 1;
+        const attendingCount = typeof g.rsvp?.attending_count === 'number' && g.rsvp.attending_count > 0 
+          ? g.rsvp.attending_count 
+          : allocatedSeats;
 
         return [
           g.id,
           g.name,
           g.side || 'bride',
-          g.rsvp?.status || 'pending',
-          attendingText,
+          'Attending',
+          attendingCount,
           g.table_no || ''
         ];
       });

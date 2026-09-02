@@ -101,38 +101,18 @@ export default function RSVPTrackerPage() {
   const handleDownloadRSVPs = () => {
     const headers = ['Guest ID', 'Guest Name', 'Side', 'Status', 'Attending Count', 'Meal Preference', 'Alcohol Preference', 'Responded Date', 'Notes', 'Table No'];
     const rows = filteredGuests.map(g => {
-      let attendingText = '-';
-      if (g.rsvp?.plus_one) {
-        const status = g.rsvp.status || 'pending';
-        const confirmed = g.rsvp.plus_one;
-        const attending = g.rsvp.attending_count ?? confirmed;
-
-        if (status === 'attending') {
-          if (attending === confirmed) {
-            attendingText = `All ${confirmed} Attending`;
-          } else if (attending > 0) {
-            attendingText = `${attending} of ${confirmed} Coming`;
-          } else {
-            attendingText = `0 of ${confirmed} Attending`;
-          }
-        } else if (status === 'declined') {
-          attendingText = `Declined (${confirmed})`;
-        } else {
-          attendingText = `${confirmed} Seats Pending`;
-        }
-      } else {
-        const status = g.rsvp?.status || 'pending';
-        if (status === 'attending') attendingText = '1 Attending';
-        else if (status === 'declined') attendingText = 'Declined';
-        else attendingText = 'Pending';
-      }
+      const status = g.rsvp?.status || 'pending';
+      const allocatedSeats = typeof g.rsvp?.plus_one === 'number' && g.rsvp.plus_one > 0 ? g.rsvp.plus_one : 1;
+      const attendingCount = status === 'attending'
+        ? (typeof g.rsvp?.attending_count === 'number' && g.rsvp.attending_count > 0 ? g.rsvp.attending_count : allocatedSeats)
+        : 0;
 
       return [
         g.id,
         g.name,
         g.side || 'bride',
-        g.rsvp?.status || 'pending',
-        attendingText,
+        status,
+        attendingCount,
         g.rsvp?.meal_choice || '-',
         g.rsvp?.alcohol_choice || '-',
         g.rsvp?.responded_at ? new Date(g.rsvp.responded_at).toISOString().split('T')[0] : '-',

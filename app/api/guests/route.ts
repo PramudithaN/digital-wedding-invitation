@@ -3,15 +3,13 @@ import { getGuests, addGuest, clearAllGuests } from '@/lib/db';
 import { normalizePhoneNumber } from '@/lib/whatsapp';
 import { checkIsAuthenticated } from '@/lib/auth';
 
-/** Maps extended UI side values down to those the DB constraint allows. */
-function normalizeSide(side: string | undefined | null): string | null {
-  const valid = ['bride', 'groom', 'bride_mother', 'bride_father', 'groom_mother', 'groom_father'];
-  if (!side) return null;
-  if (valid.includes(side)) return side;
+function normalizeSide(side: string | undefined | null): 'bride' | 'groom' | 'groom_mother' | 'groom_father' | undefined {
+  if (!side) return undefined;
+  if (side === 'groom_mother' || side === 'groom_father' || side === 'groom' || side === 'bride') return side;
   // Fallback: collapse unknowns to bride/groom prefix match
   if (side.startsWith('bride')) return 'bride';
   if (side.startsWith('groom')) return 'groom';
-  return null;
+  return undefined;
 }
 
 export async function GET(request: NextRequest) {

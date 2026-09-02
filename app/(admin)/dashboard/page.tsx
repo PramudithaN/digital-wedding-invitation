@@ -147,7 +147,7 @@ export default function DashboardPage() {
           { key: 'pending',  label: 'Pending',       color: '#D97706', bg: '#FFFBEB', Icon: Clock },
           { key: 'seats',    label: 'Total Seats',   color: '#0284C7', bg: '#F0F9FF', Icon: Armchair }
         ].map(({ key, label, color, bg, Icon }) => (
-          <Grid size={{ xs: true }} key={key} sx={{ flex: 1, minWidth: 0 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2.4 }} key={key} sx={{ flex: 1, minWidth: 0 }}>
             <Card elevation={1} sx={{ height: '100%', borderTop: `3px solid ${color}`, bgcolor: bg }}>
               <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, mb: 1 }}>

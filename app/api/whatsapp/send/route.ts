@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 
       const baseUrl = getRequestBaseUrl(request) || 'https://digital-wedding-invitation-beige.vercel.app';
       const payload = targets.map(g => {
-        let phoneClean = g.phone.replace(/[^\d]/g, '');
+        let phoneClean = (g.phone || '').replace(/[^\d]/g, '');
         if (phoneClean.startsWith('0')) {
           phoneClean = '94' + phoneClean.slice(1);
         }

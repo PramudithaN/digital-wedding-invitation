@@ -191,7 +191,7 @@ export async function startBulkSend(targetFilter: 'pending' | 'all') {
           }
         };
 
-        let phoneClean = guest.phone.replace(/[^\d]/g, '');
+        let phoneClean = (guest.phone || '').replace(/[^\d]/g, '');
         if (phoneClean.startsWith('0')) {
           phoneClean = '94' + phoneClean.slice(1);
         }

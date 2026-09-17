@@ -66,9 +66,6 @@ function LoginContent() {
                   disabled={isPending}
                 />
               </div>
-              <p className="text-xs text-gray-450 mt-2">
-                Hint: Default is <code className="bg-gray-100 px-1.5 py-0.5 rounded text-blue-600 font-mono">admin123</code>
-              </p>
             </div>
 
             {state?.error && (

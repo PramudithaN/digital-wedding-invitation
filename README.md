@@ -7,38 +7,39 @@
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 
-> A premium, responsive Next.js wedding administration portal featuring real-time guest registries, RSVP monitors, interactive seating table assignments, and automated WhatsApp invitation link generation.
+> A modern wedding administration portal and guest management platform featuring real-time guest registries, RSVP tracking, interactive seating table assignments, and automated WhatsApp invitation link generation.
 
 ---
 
-## 📸 Preview
+## Preview
 
-**Invitation Card Mobile Landing**
+**Invitation Card Mobile View**
 ![Preview](public/ok31.webp)
 
 ---
 
-## 📖 About This Project
+## Overview
 
-This application acts as a comprehensive manager for wedding arrangements. Administrators can coordinate guest details (like category, side of the wedding, private notes, and seat requirements), trigger WhatsApp reminders with localized phone number formatting, and manually override response statuses. The public-facing invitation card is rendered with warm aesthetics, customized invite parameters, countdown timers, calendar additions, and map venues.
-
----
-
-## ✨ Features
-
-- 🚀 **Silent Data Fetching** - Guest additions and status updates load silently in the background, updating views instantly without full-screen spinners.
-- 📱 **Mobile Touch Optimization** - Action buttons are sized to medium tap targets with distinct gap spacing to prevent mistaps on smaller screens.
-- 🎨 **Visual Brand Accent Mapping** - Cards display side-specific border lines (purple for the Bride, blue for the Groom) for clear guest identification.
-- 💬 **WhatsApp E.164 Normalization** - Automatically cleans up local input numbers and formats them to international standard `+94` codes to launch whatsapp messaging templates.
-- 🔒 **Cookie-Based Route Protection** - Restricts administrator dashboards and trackers using Next.js middleware checking.
-- 📆 **Integrated Schedule & Mapping** - Synchronizes dates, times, countdown counters, Google Maps venue shortcuts, and downloadable `.ics` calendar events.
+This application serves as a centralized management platform for wedding coordination. Administrators can manage guest profiles (categorization, wedding side affiliation, private notes, and seat quotas), dispatch WhatsApp invitations with localized phone number formatting, and manage RSVP responses. The public-facing invitation card features customized guest parameters, countdown timers, calendar integrations, and venue map locations.
 
 ---
 
-## 🛠️ Tech Stack
+## Key Features
+
+- **Real-Time Data Management**: Guest creation and status updates synchronize seamlessly in the background without disruptive full-screen loading states.
+- **Mobile-Optimized Interface**: Clean touch targets and responsive layouts tailored for mobile and tablet devices.
+- **Guest Affiliation Mapping**: Visual accent indicators provide clear guest categorization between Bride and Groom sides.
+- **WhatsApp E.164 Phone Normalization**: Automatically validates and formats local phone numbers to the international `+94` standard for direct messaging integration.
+- **Route Protection & Access Control**: Next.js Proxy/Middleware safeguards administrator routes while routing unauthenticated guests to public lookup pages.
+- **Schedule & Location Integration**: Synchronized event countdowns, Google Maps navigation links, and downloadable `.ics` calendar files.
+- **Seating Arrangement Lookup**: Public table lookup enabling attending guests to find their assigned tables quickly.
+
+---
+
+## Technology Stack
 
 | Layer | Technology |
-|-------|-----------|
+|---|---|
 | Framework | [Next.js v16.2.9](https://nextjs.org/) |
 | UI Components | [Material UI v9.1.2](https://mui.com/) |
 | Styling | [TailwindCSS v4.0](https://tailwindcss.com/) |
@@ -48,7 +49,7 @@ This application acts as a comprehensive manager for wedding arrangements. Admin
 
 ---
 
-## 📋 Prerequisites
+## Prerequisites
 
 - [Node.js](https://nodejs.org/) **v20.0 or higher**
 - [npm](https://www.npmjs.com/) **v10.0 or higher**
@@ -56,7 +57,7 @@ This application acts as a comprehensive manager for wedding arrangements. Admin
 
 ---
 
-## ⚙️ Getting Started
+## Getting Started
 
 ### 1. Clone the repository
 
@@ -71,60 +72,65 @@ cd digital-wedding-invitation
 npm install
 ```
 
-### 3. Set up environment variables
+### 3. Configure environment variables
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root directory:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=Your Supabase project URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY=Your Supabase anonymous public API key
-SUPABASE_SERVICE_ROLE_KEY=Your Supabase database service role key
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+ADMIN_PASSWORD=your_admin_password
 ```
 
-### 4. Start the development server
+### 4. Run the development server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+The application will be accessible at [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## 📦 Available Scripts
+## Available Scripts
 
 | Command | Description |
-|---------|-------------|
-| `npm run dev` | Starts the Next.js development server in Turbopack mode |
-| `npm run build` | Compiles the production-ready optimized build |
+|---|---|
+| `npm run dev` | Starts the Next.js development server |
+| `npm run build` | Compiles and optimizes the application for production |
 | `npm run start` | Runs the compiled production build locally |
-| `npm run lint` | Performs code syntax verification checks with ESLint |
+| `npm run lint` | Runs ESLint for code analysis and syntax checks |
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 digital-wedding-invitation/
-├── app/                        # Next.js app router files
-│   ├── (admin)/                # Admin tracker dashboards and settings
-│   ├── api/                    # Server side endpoints for guests, RSVPs, and SMS
-│   └── invite/                 # Public wedding invitation cards for guests
-├── components/                 # Shared UI layouts and widgets
-├── lib/                        # Type declarations, constant arrays, and DB connections
-├── public/                     # Static mandala templates and backgrounds
-├── tsconfig.json               # TypeScript compiler options
-└── package.json                # Project dependencies and custom scripts
+├── app/                        # Next.js App Router
+│   ├── (admin)/                # Protected administrative dashboards and tools
+│   ├── api/                    # Server-side API endpoints
+│   ├── find-table/             # Public seating arrangement lookup
+│   ├── invite/                 # Public invitation landing pages
+│   ├── login/                  # Administrator authentication
+│   └── page.tsx                # Root routing handler
+├── components/                 # Reusable UI components
+├── lib/                        # Database clients, utilities, and type definitions
+├── public/                     # Static media and background assets
+├── proxy.ts                    # Edge route protection and access control
+├── tsconfig.json               # TypeScript configuration
+└── package.json                # Project dependencies and metadata
 ```
 
 ---
 
-## 🙋‍♂️ Connect with Me
+## Contact & Author
 
-- **GitHub**: [github.com/PramudithaN](https://github.com/PramudithaN)
-- **LinkedIn**: [linkedin.com/in/pramuditha-nadun-612b1b204](https://linkedin.com/in/pramuditha-nadun-612b1b204)
+- **GitHub**: [PramudithaN](https://github.com/PramudithaN)
+- **LinkedIn**: [Pramuditha Nadun](https://linkedin.com/in/pramuditha-nadun-612b1b204)
 - **Email**: pramudithanadun@gmail.com
 
 ---
 
-*Developed with ❤️ by Pramuditha Nadun.*
+Developed by Pramuditha Nadun.

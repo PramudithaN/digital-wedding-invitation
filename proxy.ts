@@ -12,6 +12,7 @@ export function proxy(request: NextRequest) {
     '/rsvp',
     '/tables',
     '/categories',
+    '/seating-upload',
     '/analytics',
     '/settings'
   ];
@@ -31,8 +32,13 @@ export function proxy(request: NextRequest) {
     if (adminSession) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     } else {
-      return NextResponse.redirect(new URL('/login', request.url));
+      return NextResponse.redirect(new URL('/find-table', request.url));
     }
+  }
+
+  // If already authenticated and visiting /login, redirect to /dashboard
+  if (path === '/login' && adminSession) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCategories, addCategory } from '@/lib/db';
+import { checkIsAuthenticated } from '@/lib/auth';
 
 export async function GET() {
   try {
@@ -12,13 +13,18 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
-    if (!body.name || !body.colour) {
+    if (!body.name || !body.colour || typeof body.name !== 'string' || typeof body.colour !== 'string') {
       return NextResponse.json({ error: 'Name and colour are required' }, { status: 400 });
     }
     const category = await addCategory({
-      name: body.name,
-      colour: body.colour
+      name: body.name.trim().slice(0, 100),
+      colour: body.colour.trim().slice(0, 50)
     });
     return NextResponse.json(category);
   } catch (error: any) {

@@ -59,6 +59,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: Request) {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     if (Array.isArray(body)) {
       const results = [];
@@ -104,6 +109,11 @@ export async function POST(request: Request) {
 
 export async function DELETE() {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     await clearAllGuests();
     return NextResponse.json({ success: true });
   } catch (error: any) {

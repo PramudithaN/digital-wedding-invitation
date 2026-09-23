@@ -21,7 +21,9 @@ export function proxy(request: NextRequest) {
     path === prefix || path.startsWith(prefix + '/')
   );
 
-  if (isProtected && !adminSession) {
+  const isAuthenticated = adminSession?.value === 'authenticated';
+
+  if (isProtected && !isAuthenticated) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('callbackUrl', path);
     return NextResponse.redirect(loginUrl);
@@ -29,7 +31,7 @@ export function proxy(request: NextRequest) {
 
   // Handle root route '/'
   if (path === '/') {
-    if (adminSession) {
+    if (isAuthenticated) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     } else {
       return NextResponse.redirect(new URL('/find-table', request.url));
@@ -37,7 +39,7 @@ export function proxy(request: NextRequest) {
   }
 
   // If already authenticated and visiting /login, redirect to /dashboard
-  if (path === '/login' && adminSession) {
+  if (path === '/login' && isAuthenticated) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 

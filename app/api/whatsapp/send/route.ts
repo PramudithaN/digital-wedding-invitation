@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { startBulkSend } from '@/lib/whatsapp-manager';
 import { getGuests, getWeddingDetails } from '@/lib/db';
 import { DEFAULT_WHATSAPP_TEMPLATE } from '@/lib/constants';
+import { checkIsAuthenticated } from '@/lib/auth';
 
 function getRequestBaseUrl(request: Request): string | undefined {
   if (process.env.NEXT_PUBLIC_HOSTED_URL) {
@@ -15,6 +16,11 @@ function getRequestBaseUrl(request: Request): string | undefined {
 
 export async function POST(request: Request) {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json().catch(() => ({}));
     const { filter, session } = body; // 'pending' | 'all', 'bride' | 'groom'
 

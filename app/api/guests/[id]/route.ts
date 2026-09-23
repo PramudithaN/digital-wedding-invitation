@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getGuest, updateGuest, deleteGuest } from '@/lib/db';
 import { normalizePhoneNumber } from '@/lib/whatsapp';
+import { checkIsAuthenticated } from '@/lib/auth';
 
 /** Maps extended UI side values down to those the DB constraint allows. */
 function normalizeSide(side: string | undefined | null): string | null {
@@ -18,6 +19,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
     const guest = await getGuest(id);
     if (!guest) {
@@ -34,6 +40,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
     const body = await request.json();
     const guest = await updateGuest(id, {
@@ -52,6 +63,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
     await deleteGuest(id);
     return NextResponse.json({ success: true });

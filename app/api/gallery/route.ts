@@ -7,10 +7,22 @@ import {
   supabase,
   updateGalleryImagesOrder
 } from '@/lib/db';
+import { checkIsAuthenticated } from '@/lib/auth';
 import fs from 'fs';
 import path from 'path';
 
 export const dynamic = 'force-dynamic';
+
+const ALLOWED_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/avif',
+  'image/jpg'
+];
+
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'];
 
 export async function GET() {
   try {
@@ -23,24 +35,43 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const formData = await request.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get('file') as File | null;
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
+    // Validate file size (max 10 MB)
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: 'Image size exceeds maximum limit of 10MB' }, { status: 400 });
+    }
+
+    // Validate MIME type
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())) {
+      return NextResponse.json({ error: 'Invalid file type. Only JPEG, PNG, WEBP, AVIF, and GIF images are allowed.' }, { status: 400 });
+    }
+
+    const fileExt = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (!ALLOWED_EXTENSIONS.includes(fileExt)) {
+      return NextResponse.json({ error: 'Invalid file extension.' }, { status: 400 });
+    }
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const fileExt = file.name.split('.').pop() || 'jpg';
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
 
     let imageUrl = '';
 
     if (isSupabaseConfigured) {
       // 1. Upload to Supabase Storage
-      const { data, error } = await supabase!.storage
+      const { error } = await supabase!.storage
         .from('gallery')
         .upload(fileName, buffer, {
           contentType: file.type,
@@ -75,12 +106,17 @@ export async function POST(request: Request) {
     return NextResponse.json(newImage);
   } catch (error: any) {
     console.error('Error uploading gallery image:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'An error occurred during image upload' }, { status: 500 });
   }
 }
 
 export async function DELETE(request: Request) {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     const url = searchParams.get('url');
@@ -123,12 +159,17 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Error deleting gallery image:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'An error occurred while deleting image' }, { status: 500 });
   }
 }
 
 export async function PUT(request: Request) {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { orderedIds } = await request.json();
     if (!orderedIds || !Array.isArray(orderedIds)) {
       return NextResponse.json({ error: 'orderedIds array is required' }, { status: 400 });
@@ -138,6 +179,6 @@ export async function PUT(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Error updating gallery order:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'An error occurred while reordering images' }, { status: 500 });
   }
 }

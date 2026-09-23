@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getGuest, logInviteSent, getWeddingDetails } from '@/lib/db';
 import { buildWhatsAppLink, sendWhatsAppInviteViaTwilio } from '@/lib/whatsapp';
+import { checkIsAuthenticated } from '@/lib/auth';
 
 function getRequestBaseUrl(request: Request): string | undefined {
   if (process.env.NEXT_PUBLIC_HOSTED_URL) {
@@ -19,6 +20,11 @@ function getRequestBaseUrl(request: Request): string | undefined {
 
 export async function POST(request: Request) {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { guestId, guestIds, method } = body; // method: 'manual' | 'twilio'
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getGuests, updateGuest } from '@/lib/db';
 import { normalizePhoneNumber } from '@/lib/whatsapp';
+import { checkIsAuthenticated } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -92,11 +93,21 @@ function splitCSVLine(line: string): string[] {
 
 export async function POST(request: Request) {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     
     if (!file) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+    }
+
+    // Enforce max 5MB file size
+    if (file.size > 5 * 1024 * 1024) {
+      return NextResponse.json({ error: 'File size exceeds maximum limit of 5MB' }, { status: 400 });
     }
     
     const text = await file.text();
@@ -163,7 +174,7 @@ export async function POST(request: Request) {
       if (matchedGuest) {
         // Only update if the table number has actually changed
         if ((matchedGuest.table_no || '') !== tableNoValue) {
-          await updateGuest(matchedGuest.id, { table_no: tableNoValue });
+          await updateGuest(matchedGuest.id, { table_no: tableNoValue.slice(0, 50) });
           updateCount++;
         }
       } else {
@@ -187,6 +198,11 @@ export async function POST(request: Request) {
 
 export async function DELETE() {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const guests = await getGuests();
     let resetCount = 0;
     for (const guest of guests) {

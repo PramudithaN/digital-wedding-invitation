@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { initializeWhatsApp, disconnectWhatsApp } from '@/lib/whatsapp-manager';
+import { checkIsAuthenticated } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json().catch(() => ({}));
     const { action } = body;
 
@@ -31,6 +37,11 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const isAuthenticated = await checkIsAuthenticated();
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const session = searchParams.get('session') || 'bride';
     const gatewayUrl = process.env.WHATSAPP_GATEWAY_URL;
